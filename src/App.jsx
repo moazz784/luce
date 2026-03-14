@@ -214,7 +214,7 @@ const App = () => {
                 ))}
               </ul>
             </div>
-            <img src="https://i.ibb.co/LhqXzYx/card-sampl" className="w-full lg:w-[400px] rounded-2xl shadow-2xl" alt="Card" />
+            <img src={image5} className="w-full lg:w-[400px] rounded-2xl shadow-2xl" alt="Card" />
           </div>
 
           {/* Email Service (تمت إعادته) */}
