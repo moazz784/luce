@@ -8,7 +8,13 @@ import image2 from "./assets/100.jpg";
 import image3 from "./assets/200.jpg";
 import image4 from "./assets/300.png";
 import image5 from "./assets/400.png";
-
+import image6 from "./assets/zaz.jpg";
+import image7 from "./assets/zaza.jpeg";
+import image8 from "./assets/zoza.jpg";
+import image9 from "./assets/zoz.jpg";
+import image11 from "./assets/111.jpeg";
+import image22 from "./assets/222.jpg";
+import image33 from "./assets/333.jpg";
 // استيراد ستايلات Swiper الأساسية
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -30,7 +36,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight, 
-  ArrowUpRight 
+  ArrowUpRight,
+  User, Calendar, Clock 
 } from 'lucide-react';
 
 const App = () => {
@@ -38,7 +45,32 @@ const App = () => {
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
 
   // --- البيانات (Data) ---
-  
+  const newsData = [
+  {
+    id: 1,
+    image: image11, // استبدلها بصورة البروتوكول
+    author: 'Code95 Admin',
+    date: 'January 23, 2023',
+    time: 'January 23, 2023',
+    title: 'The Official Signing of a Collaboration Protocol between Ege Üniversitesi in Turkey and Misr University for Science and Technology'
+  },
+  {
+    id: 2,
+    image: image22, // استبدلها بصورة الندوة
+    author: 'Code95 Admin',
+    date: 'January 23, 2024',
+    time: 'January 23, 2024',
+    title: 'The First Scientific Day at The British Council Egypt for The Orientation of The Masters of Implantology in collaboration with Huddersfield University'
+  },
+  {
+    id: 3,
+    image:image33, // استبدلها بصورة المنتدى
+    author: 'Habiba',
+    date: 'March 23, 2025',
+    time: 'March 23, 2025',
+    title: 'The Fourth Forum for Students and Graduates of the College'
+  }
+];
   const alumni = [
     {
       id: 1,
@@ -56,9 +88,16 @@ const App = () => {
     },
     {
       id: 3,
-      name: "Samer Wagdy & Mostafa Zaza",
+      name: "Samer Wagdy ",
       image: image4,
-      description: "Samer Wagdy and Mostafa Zaza , 2014 Information Technology and Artificial Intelligence graduates...",
+      description: "Samer Wagdy  , 2014 Information Technology and Artificial Intelligence graduates...",
+      fullBio: "Samer Wagdy  , 2014 Information Technology and Artificial Intelligence graduates, transformed their graduation project into GBarena, a startup that became a leading gaming and esports platform in the region, after winning first place at Microsoft's Imagine Cup.\n\nThese two passionate entrepreneurs went from classmates to co-founders, showing how the right education, ambition, and friendship can spark global success.\n\nToday, with investors from KSA, the UAE, and Egypt, they continue to innovate and expand, proving that the opportunities at MUST extend far beyond graduation!"
+    },
+    {
+      id: 4,
+      name: "Mostafa Zaza",
+      image: image6,
+      description: " Mostafa Zaza , 2014 Information Technology and Artificial Intelligence graduates...",
       fullBio: "Samer Wagdy  , 2014 Information Technology and Artificial Intelligence graduates, transformed their graduation project into GBarena, a startup that became a leading gaming and esports platform in the region, after winning first place at Microsoft's Imagine Cup.\n\nThese two passionate entrepreneurs went from classmates to co-founders, showing how the right education, ambition, and friendship can spark global success.\n\nToday, with investors from KSA, the UAE, and Egypt, they continue to innovate and expand, proving that the opportunities at MUST extend far beyond graduation!"
     }
   ];
@@ -110,6 +149,48 @@ const App = () => {
       image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000",
     }
   ];
+  const events = [
+  {
+    id: 1,
+    image: image,
+    date: { day: '06', month: 'Nov' },
+    location: 'Conference Hall',
+    time: '11:00 am - 5:00 pm',
+    title: 'College of Information Technology conference entitle...',
+    description: 'The College of Information Technology at Misr University...',
+    color: 'bg-[#3b4b81]' // اللون الأزرق الداكن
+  },
+  {
+    id: 2,
+    image: image7,
+    date: { day: '11', month: 'Feb' },
+    location: 'Conference Hall',
+    time: '10:00 am - 3:00 pm',
+    title: 'International Day for Women and Girls...',
+    description: 'The College of Medicine is celebrating the International...',
+    color: 'bg-[#3b4b81]'
+  },
+  {
+    id: 3,
+    image: image8,
+    date: { day: '11', month: 'Dec' },
+    location: 'MUST Golf Garden',
+    time: '10:00 am - 7:00 pm',
+    title: 'MUST Winter Festival',
+    description: 'Ready to revive cozy winter nights? How\'s that...',
+    color: 'bg-[#3b4b81]'
+  },
+  {
+    id: 4,
+    image: image9,
+    date: { day: '23', month: 'Feb' },
+    location: 'Conference Hall',
+    time: '10:00 am - 5:00 pm',
+    title: 'MUST Cultural Day',
+    description: 'meet us on Sunday, 23rd of February 2025,...',
+    color: 'bg-[#00a651]' // اللون الأخضر المميز لآخر كارت
+  }
+];
 
   return (
     <div className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
@@ -127,10 +208,25 @@ const App = () => {
         </div>
 
         <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold">
-          {['The University', 'Academics', 'Admission', 'MUST BUZZ', 'Centers', 'Life At MUST', 'SDGs'].map((item) => (
-            <li key={item} className="cursor-pointer transition-all duration-300 hover:text-green-400 list-none">{item}</li>
-          ))}
-        </ul>
+  {[
+    { name: 'The University', id: 'brief' },
+    { name: 'Academics', id: 'academics' },
+    { name: 'Events', id: '1000' },
+    { name: 'NEWS', id: '2000' },
+    { name: 'Awards', id: '4000' },
+    { name: 'CONTACT-US', id: '3000' },
+    { name: 'Awards', id: 'awards' }
+  ].map((item) => (
+    <li key={item.id} className="list-none">
+      <a 
+        href={`#${item.id}`} 
+        className="cursor-pointer transition-all duration-300 hover:text-green-400"
+      >
+        {item.name}
+      </a>
+    </li>
+  ))}
+</ul>
 
         <div className="flex items-center gap-5 border-l border-white/20 pl-5">
           <Sun size={19} className="cursor-pointer hover:rotate-45 transition-transform" />
@@ -173,7 +269,7 @@ const App = () => {
         {/* Social Sidebar */}
         <div className="fixed right-5 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-40">
           <button className="p-3 bg-green-500 rounded-full text-white shadow-lg hover:scale-110 transition-all"><Search size={20} /></button>
-          {[Linkedin, Facebook, Instagram, Twitter].map((Icon, idx) => (
+          {[Facebook, Instagram, Twitter].map((Icon, idx) => (
             <button key={idx} className="p-3 bg-white rounded-full shadow-xl hover:-translate-x-2 transition-all duration-300">
               <Icon size={20} className="text-[#1a2b56]" />
             </button>
@@ -182,62 +278,92 @@ const App = () => {
       </section>
 
       {/* --- 3. Brief Section --- */}
-      <section className="bg-white py-20 px-6 text-center">
-        <h3 className="text-4xl font-bold text-[#00a651] mb-2">Brief</h3>
-        <div className="h-1 w-16 bg-[#1a2b56] mx-auto mb-8"></div>
-        <p className="text-gray-700 text-xl md:text-2xl italic max-w-4xl mx-auto leading-relaxed">
-          "Our goal is to prepare a distinguished graduate with the competitive ability and morals to meet the challenges of his time."
-        </p>
-      </section>
-
-      {/* --- 4. Alumni Services --- */}
-      <section className="w-full py-16 bg-gray-50">
-        <div className="container mx-auto px-6 lg:px-12">
-          <h2 className="text-3xl font-bold text-[#00a651] mb-2">Alumni Services</h2>
-          <div className="h-1 w-20 bg-[#1a2b56] mb-12"></div>
-          
-          {/* Card Service */}
-          <div className="flex flex-col lg:flex-row gap-12 items-start mb-20">
-            <div className="flex-1 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#1a2b56] rounded-lg text-white"><GraduationCap size={28} /></div>
-                <h3 className="text-2xl font-bold text-[#1a2b56]">Alumni excellence card</h3>
-              </div>
-              <p className="text-gray-700 font-semibold leading-relaxed">
-                University graduates can receive it immediately. Do not bring a photo, we issue it for you right away!
-              </p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["Library & Stadium Access", "Course Discounts", "Event Access", "Special Concessions"].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-600">
-                    <CheckCircle2 size={18} className="text-[#00a651]" /> {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <img src={image5} className="w-full lg:w-[400px] rounded-2xl shadow-2xl" alt="Card" />
-          </div>
-
-          {/* Email Service (تمت إعادته) */}
-          <div className="bg-[#1a2b56] rounded-3xl p-8 lg:p-12 text-white relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <Mail size={32} className="text-green-400" />
-                <h3 className="text-3xl font-bold">Email Service</h3>
-              </div>
-              <p className="text-blue-100 mb-8 font-medium">Free Microsoft Office 365 for all alumni!</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {["Office 365 Apps", "1 TB OneDrive", "5 Devices Access"].map((feat, i) => (
-                  <div key={i} className="bg-white/10 p-5 rounded-xl border border-white/10 text-sm backdrop-blur-sm">
-                    <span className="text-green-400 font-bold mr-2">0{i+1}.</span> {feat}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* زخرفة خلفية بسيطة */}
-            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-          </div>
+     <div className="bg-white font-sans text-left" dir="ltr">
+      {/* --- 1. Brief Section --- */}
+      <section className="py-12 px-6 text-center">
+        <h2 className="text-3xl font-bold text-[#00a651] mb-6">Brief</h2>
+        <div className="max-w-5xl mx-auto space-y-4">
+          <p className="text-gray-700 text-lg font-medium">
+            Our goal is to prepare a distinguished graduate with the competitive ability and morals to meet the challenges of his time."
+          </p>
+          <p className="text-gray-700 text-lg font-medium">
+            Let us all work together in harmony and remain united with the vision of a better tomorrow for all.
+          </p>
         </div>
       </section>
+
+      {/* --- 2. Alumni Services Section --- */}
+      <section className="py-12 px-6 lg:px-20">
+        <h2 className="text-3xl font-bold text-[#00a651] mb-12">Alumni Services</h2>
+
+        {/* Card Service */}
+        <div className="flex flex-col lg:flex-row gap-10 items-start mb-16">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <GraduationCap size={32} className="text-[#1a2b56]" />
+              <h3 className="text-2xl font-bold text-[#1a2b56]">Alumni excellence card</h3>
+            </div>
+            
+            <div className="space-y-4 text-[15px] leading-relaxed">
+              <p className="text-black font-bold">
+                University graduates can receive it for a sum in Egyptian pounds and expires every two years. 
+                Payment is made in cash or at one of the university's banks. Do not bring a photo with you, 
+                as we will take a photo of you and issue a graduate ID immediately.
+              </p>
+
+              <p className="text-[#00a651] font-bold text-lg">
+                Graduates will enjoy some benefits such as:
+              </p>
+
+              <ol className="list-decimal ml-5 space-y-2 text-gray-700 font-medium">
+                <li>Using the university library using free stadiums</li>
+                <li>Get a discount on university training courses</li>
+                <li>Participating in events organized by the university, including attending conferences, meetings, seminars, exhibitions, workshops, and meetings.</li>
+                <li>A range of discounts and concessions are being contracted</li>
+              </ol>
+
+              {/* Activation Note Box */}
+              <div className="bg-[#f0fff4] border border-[#dcfce7] p-4 rounded-md mt-6">
+                <p className="text-[#00a651] font-bold italic">
+                  Note the Card activation is currently on hold. It will be announced to all alumni once it is finalize
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Image */}
+          <div className="w-full lg:w-[380px] shrink-0">
+            <img 
+              src={image5}
+              alt="Alumni Card" 
+              className="w-full rounded-[40px] shadow-xl"
+            />
+          </div>
+        </div>
+
+        {/* Email Service Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Mail size={32} className="text-[#1a2b56]" />
+            <h3 className="text-2xl font-bold text-[#1a2b56]">Email Service</h3>
+          </div>
+          
+          <p className="text-black font-bold">
+            In cooperation with the Education Technology Department, The free Microsoft Office 365 will be launched to all alumni as a new service.
+          </p>
+          
+          <p className="text-black font-extrabold text-lg">
+            It Has Many Features Such As:
+          </p>
+
+          <ol className="list-decimal ml-5 space-y-2 text-gray-700 font-medium italic">
+            <li>Download the latest office 365 versions that include Word, Excel , Powerpoint, Outlook and OneNote.</li>
+            <li>1 TB of OneDrive Storage.</li>
+            <li>Install Office on up to 5 PCS or Macs and on other mobile devices, including Android, iPad and windows tablets</li>
+          </ol>
+        </div>
+      </section>
+    </div>
 
       {/* --- 5. Notable Alumni (Centered Version) --- */}
       <section className="py-20 bg-[#1a2b56] relative overflow-hidden">
@@ -310,7 +436,7 @@ const App = () => {
         )}
       </section>
       {/* --- Awards & Certificates Section --- */}
-<section className="py-24 bg-white overflow-hidden">
+<section id="4000" className="py-24 bg-white overflow-hidden">
   <div className="container mx-auto px-6 lg:px-20">
     {/* Title Section */}
     <div className="text-center mb-16">
@@ -370,6 +496,107 @@ const App = () => {
     </Swiper>
   </div>
 </section>
+
+<section id="1000" className="py-12 px-4 bg-white font-sans text-right" dir="ltr">
+      <h2 className="text-3xl font-bold text-[#00a651] text-center mb-10">Related Events</h2>
+      
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {events.map((event) => (
+          <div key={event.id} className="flex flex-col group cursor-pointer">
+            {/* Image Container */}
+            <div className="relative h-64 overflow-hidden rounded-t-sm">
+              <img 
+                src={event.image} 
+                alt={event.title}
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110"
+              />
+              {/* Date Badge */}
+              <div className={`absolute bottom-0 left-4 ${event.color} text-white p-2 w-16 text-center rounded-t-md`}>
+                <div className="text-2xl font-bold leading-none">{event.date.day}</div>
+                <div className="text-sm uppercase leading-none mt-1">{event.date.month}</div>
+              </div>
+            </div>
+
+            {/* Info Section */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center text-xs text-gray-500 gap-4">
+                <span className="flex items-center gap-1">
+                  <span className="text-[#00a651]">📍</span> {event.location}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="text-[#00a651]">🕒</span> {event.time}
+                </span>
+              </div>
+              
+              <h3 className={`font-bold text-sm ${event.id === 4 ? 'text-[#00a651]' : 'text-[#3b4b81]'} hover:underline`}>
+                {event.title}
+              </h3>
+              
+              <p className="text-xs text-gray-600 line-clamp-2">
+                {event.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-center mt-12">
+        <button className="bg-[#00a651] hover:bg-[#008d44] text-white hover:bg-blue-600 font-bold py-3 px-10 rounded-full transition-colors">
+          See All Events
+        </button>
+      </div>
+    </section>
+    <section id="2000" className="py-16 px-6 bg-white font-sans" dir="ltr">
+      {/* Title */}
+      <h2 className="text-4xl font-bold text-[#00a651] text-center mb-12">News</h2>
+
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {newsData.map((news) => (
+          <div key={news.id} className="flex flex-col group">
+            {/* Image Container */}
+            <div className="overflow-hidden rounded-sm mb-4 aspect-video">
+              <img 
+                src={news.image} 
+                alt="news" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+
+            {/* Metadata Section */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-y-2 text-[13px] text-gray-500">
+                <span className="flex items-center gap-1.5 mr-4">
+                  <User size={14} className="text-[#00a651] opacity-70" />
+                  By {news.author}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock size={14} className="text-[#00a651] opacity-70" />
+                  {news.time}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
+                <Calendar size={14} className="text-[#00a651] opacity-70" />
+                {news.date}
+              </div>
+
+              {/* Title */}
+              <h3 className="text-[#1a2b56] font-bold text-lg leading-snug hover:text-[#00a651] cursor-pointer transition-colors line-clamp-3">
+                {news.title}
+              </h3>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Button */}
+      <div className="text-center mt-12">
+        <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-12 rounded-full transition-all shadow-md active:scale-95">
+          See All News
+        </button>
+      </div>
+    </section>
+
 <section className="relative min-h-[500px] flex items-center py-20 bg-[#1a2b56]">
       {/* صورة الخلفية مع الـ Overlay */}
       <div 
@@ -377,11 +604,11 @@ const App = () => {
         style={{ backgroundImage: `url('https://images.unsplash.com/photo-1557426272-fc759fbbad95?q=80&w=2000')` }}
       ></div>
       
-      <div className="container mx-auto px-6 lg:px-20 relative z-10 flex flex-col lg:flex-row justify-between items-center gap-12">
+      <div id="3000" className="container mx-auto px-6 lg:px-20 relative z-10 flex flex-col lg:flex-row justify-between items-center gap-12">
         
         {/* نصوص التواصل الجانبية */}
         <div className="text-white max-w-lg">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
             Reach us on any time.
           </h2>
           <div className="space-y-2">
