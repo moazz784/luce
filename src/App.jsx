@@ -15,11 +15,21 @@ import image9 from "./assets/zoz.jpg";
 import image11 from "./assets/111.jpeg";
 import image111 from "./assets/ege.jpeg";
 import image1111 from "./assets/ssss.jpeg";
+import m11 from "./assets/m11.jpeg";
+import m22 from "./assets/m22.jpeg";
+import m33 from "./assets/m33.jpeg";
+import m44 from "./assets/m44.jpeg";
+import m55 from "./assets/m55.jpeg";
+import z11 from "./assets/z11.jpeg";
+import z22 from "./assets/z22.jpeg";
+import z33 from "./assets/z33.jpeg";
+import z44 from "./assets/z44.jpeg";
 import image22 from "./assets/222.jpg";
 import image33 from "./assets/333.jpg";
 import sasa from "./assets/1000.png";
 import sas from "./assets/2000.png";
 import sass from "./assets/3000.png";
+import logos from "./assets/logos.png";
 import sasss from "./assets/4000.png";
 import back from "./assets/back.png";
 import backs from "./assets/back22.jpg";
@@ -55,31 +65,32 @@ const App = () => {
 
   // --- البيانات (Data) ---
   
-  const newsData = [
+const newsData = [
   {
     id: 1,
-    image: image11, // استبدلها بصورة البروتوكول
-    author: 'Code95 Admin',
-    date: 'January 23, 2023',
-    time: 'January 23, 2023',
+    image: m11, 
     title: 'The Official Signing of a Collaboration Protocol between Ege Üniversitesi in Turkey and Misr University for Science and Technology'
   },
   {
     id: 2,
-    image: image22, // استبدلها بصورة الندوة
-    author: 'Code95 Admin',
-    date: 'January 23, 2024',
-    time: 'January 23, 2024',
+    image: m22, 
     title: 'The First Scientific Day at The British Council Egypt for The Orientation of The Masters of Implantology in collaboration with Huddersfield University'
   },
   {
     id: 3,
-    image:image33, // استبدلها بصورة المنتدى
-    author: 'Habiba',
-    date: 'March 23, 2025',
-    time: 'March 23, 2025',
+    image: m33, 
     title: 'The Fourth Forum for Students and Graduates of the College'
-  }
+  },
+  {
+    id: 4,
+    image: m44, 
+    title: '"Empowering the next generation of athletes. The Misr University for Science & Technology (MUST) Women’s Football Team stands proud with their coaching staff after a rigorous training session. The university continues to foster a culture of excellence, balancing academic brilliance with athletic prowess."'
+  },
+  {
+    id: 5,
+    image: m55, 
+    title: 'The First football Day at The staduim of misr university of Egypt for The Orientation of The Masters of Implantology in collaboration with Huddersfield University'
+  },
 ];
 
   const alumni = [
@@ -179,145 +190,195 @@ const syndicateData = [
   const events = [
   {
     id: 1,
-    image: image,
-    date: { day: '06', month: 'Nov' },
-    location: 'Conference Hall',
-    time: '11:00 am - 5:00 pm',
-    title: 'College of Information Technology conference entitle...',
-    description: 'The College of Information Technology at Misr University...',
+    image: z11,
+    // date: { day: '06', month: 'Nov' },
+    // location: 'Conference Hall',
+    // time: '11:00 am - 5:00 pm',
+    // title: 'College of Information Technology conference entitle...',
+    description: 'As inspirational as it gets! We couldn’t be more proud of our MUSTians sharing their success stories on the MUST stage.',
     color: 'bg-[#3b4b81]' // اللون الأزرق الداكن
   },
   {
     id: 2,
-    image: image7,
-    date: { day: '11', month: 'Feb' },
-    location: 'Conference Hall',
-    time: '10:00 am - 3:00 pm',
-    title: 'International Day for Women and Girls...',
-    description: 'The College of Medicine is celebrating the International...',
+    image:z22,
+    // date: { day: '11', month: 'Feb' },
+    // location: 'Conference Hall',
+    // time: '10:00 am - 3:00 pm',
+    // title: 'International Day for Women and Girls...',
+    description: 'Get ready to take in all the business slang and principles from the best in the field in the  “BUSINESS 101” panel discussion!',
     color: 'bg-[#3b4b81]'
   },
   {
     id: 3,
-    image: image8,
-    date: { day: '11', month: 'Dec' },
-    location: 'MUST Golf Garden',
-    time: '10:00 am - 7:00 pm',
-    title: 'MUST Winter Festival',
-    description: 'Ready to revive cozy winter nights? How\'s that...',
+    image: z33,
+    // date: { day: '11', month: 'Dec' },
+    // location: 'MUST Golf Garden',
+    // time: '10:00 am - 7:00 pm',
+    // title: 'MUST Winter Festival',
+    description: 'Ready to revive cozy winter nights? How\'s that...slang and principles from the best in the field in the songs',
     color: 'bg-[#3b4b81]'
   },
   {
     id: 4,
-    image: image9,
-    date: { day: '23', month: 'Feb' },
-    location: 'Conference Hall',
-    time: '10:00 am - 5:00 pm',
-    title: 'MUST Cultural Day',
-    description: 'meet us on Sunday, 23rd of February 2025,...',
+    image: z44,
+    // date: { day: '23', month: 'Feb' },
+    // location: 'Conference Hall',
+    // time: '10:00 am - 5:00 pm',
+    // title: 'MUST Cultural Day',
+    description: 'Snippets from the “AI and Digital Transformation” panel, as industry leaders discuss how AI is reshaping the landscape of digital transformation and its impact on business strategies.',
     color: 'bg-[#00a651]' // اللون الأخضر المميز لآخر كارت
   }
 ];
 const navLinks = [
-    { 
-      name: 'The University', 
-      id: 'brief',
-      subItems: [
-        { name: 'About MUST', link: '#' },
-        { name: 'Sectors', link: '#' },
-        { name: 'Reports', link: '#' },
-        { name: 'Policies', link: '#' },
-        { name: 'University Council Minutes', link: '#' },
-        { name: 'Quality Assurance and Accreditation Sector', link: '#' },
-        { name: 'Accreditation & Partnerships', link: '#' },
-        { name: 'Contact Us', link: '#' },
-      ]
-    },
-    { 
-      name: 'Academics', 
-      id: 'academics',
-      subItems: [
-        { name: 'Undergraduate Studies', link: '#' },
-        { name: 'Post-Graduate Program', link: '#' },
-        { name: 'Academic Calendar', link: '#' },
-        { name: 'International Students Affairs Sector', link: '#' },
-      ]
-    },
-    { name: 'Admission', id: '1000' },
-    { 
-      name: 'MUST BUZZ', 
-      id: '2000',
-      subItems: [
-        { name: 'MUST Events', link: '#' },
-        { name: 'MUST News', link: '#' },
-        { name: 'MUST Blogs', link: '#' },
-        { name: 'Announcements', link: '#' },
-      ]
-    },
-    { 
-      name: 'Centers', 
-      id: '4000',
-      subItems: [
-        { name: 'Centers', link: '#' },
-        { name: 'Units', link: '#' },
-        { name: 'Research Center for Public Opinion and Societal Issues Monitoring', link: '#' },
-      ]
-    },
-    { 
-      name: 'Life At MUST', 
-      id: '3000',
-      subItems: [
-        { name: 'MUST Life', link: '#' },
-        { name: 'MUST Stars', link: '#' },
-        { name: 'MUST Clubs', link: '#' },
-        { name: 'Facilities', link: '#' },
-      ]
-    },
-    { name: 'SDGs', id: 'awards' }
-  ];
+  {
+    name: 'The University',
+    id: 'brief',
+    subItems: [
+      {
+        name: 'About MUST',
+        link: '#',
+        nestedItems: [
+          { name: 'Board of Trustees', link: '#' },
+          { name: 'President', link: '#' },
+          { name: 'Vision & Mission', link: '#' },
+          { name: 'MUST Values & Principles', link: '#' },
+          { name: 'History', link: '#' },
+        ]
+      },
+      { 
+        name: 'Sectors', 
+        link: '#',
+        nestedItems: [
+          { name: 'Environmental And Community Service Sector', link: '#' },
+          { name: 'Sustainability Sector', link: '#' },
+        ]
+      },
+      { 
+        name: 'Reports', 
+        link: '#',
+        nestedItems: [
+          { name: 'Interdisciplinary Subjects', link: '#' },
+          { name: 'Financial Report', link: '#' },
+        ]
+      },
+      { name: 'Policies', link: '#' },
+      { name: 'University Council Minutes', link: '#' },
+      { name: 'Quality Assurance and Accreditation Sector', link: '#' },
+      { name: 'Accreditation & Partnerships', link: '#' },
+      { name: 'Contact Us', link: '#' },
+      { 
+        name: 'Resources', 
+        link: '#' ,
+        nestedItems: [
+            { name: 'Smart E-Learning', link: '#' }
+        ]
+      },
+    ]
+  },
+  { 
+    name: 'Academics', 
+    id: 'academics',
+    subItems: [
+      { name: 'Undergraduate Studies', link: '#' },
+      { name: 'Post-Graduate Program', link: '#' },
+      { name: 'Academic Calendar', link: '#' },
+      { name: 'International Students Affairs Sector', link: '#' },
+    ]
+  },
+  { name: 'Admission', id: '1000' },
+  { 
+    name: 'MUST BUZZ', 
+    id: '2000',
+    subItems: [
+      { name: 'MUST Events', link: '#' },
+      { name: 'MUST News', link: '#' },
+      { name: 'MUST Blogs', link: '#' },
+      { name: 'Announcements', link: '#' },
+    ]
+  },
+  {
+    name: 'Centers',
+    id: '4000',
+    subItems: [
+      { name: 'Centers', link: '#' },
+      { name: 'Units', link: '#' },
+      { name: 'Research Center...', link: '#' },
+    ]
+  },
+  {
+    name: 'Life At MUST',
+    id: '3000',
+    subItems: [
+      { name: 'MUST Life', link: '#' },
+      { name: 'MUST Stars', link: '#' },
+      { name: 'MUST Clubs', link: '#' },
+      { name: 'Facilities', link: '#' },
+    ]
+  },
+  { name: 'SDGs', id: 'awards' }
+];
   
   return (
     <div id='100' className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
       
       {/* --- 1. Navbar --- */}
-      <nav className="bg-[#1a2b56] text-white px-4 md:px-8 py-0 flex items-center justify-between sticky top-0 z-[100] shadow-xl">
+      <nav className="bg-[#1a2b56] text-white px-4 md:px-8 py-0 flex items-center justify-between sticky top-0 z-[100] shadow-xl font-sans h-[80px]">
       
       {/* 1. Logo Section (يسار) */}
-      <div className="flex items-center gap-3 py-5">
-        <div className="w-13 h-13 rounded-full flex items-center justify-center p-1 shadow-inner">
-          <img src={image} alt="Logo" className="object-cover" />
+      <div className="flex items-center gap-3 h-full">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center p-1 bg-white shadow-md">
+          <img src={logos} alt="Logo" className="w-full h-full object-contain rounded-full" />
         </div>
-        <div className="hidden sm:block border-l border-white/20 pl-3">
+        <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
           <h1 className="text-[11px] font-bold leading-tight tracking-wider uppercase">Misr University</h1>
           <p className="text-[9px] opacity-70 tracking-tighter uppercase font-medium">For Science & Technology</p>
         </div>
       </div>
 
-      {/* 2. Navigation Links (منتصف - تظهر في الشاشات الكبيرة فقط) */}
+      {/* 2. Navigation Links (منتصف) */}
       <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
         {navLinks.map((item) => (
-          <li key={item.id} className="relative group list-none h-full py-7">
+          <li key={item.id} className="relative group list-none h-full flex items-center">
             <a 
               href={`#${item.id}`} 
-              className="cursor-pointer transition-all duration-300 hover:text-green-400 flex items-center gap-1 uppercase"
+              className="cursor-pointer transition-all duration-300 hover:text-green-400 flex items-center gap-1 uppercase py-7"
             >
               {item.name}
               {item.subItems && <ChevronDown size={14} className="opacity-50 group-hover:rotate-180 transition-transform" />}
             </a>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu (المستوى الثاني) */}
             {item.subItems && (
               <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl 
                              invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 
-                             transition-all duration-300 ease-in-out z-50">
+                             transition-all duration-300 ease-in-out z-50 py-1">
                 {item.subItems.map((sub, idx) => (
-                  <li key={idx} className="border-b border-white/5 last:border-none">
+                  <li key={idx} className="relative group/nested border-b border-white/5 last:border-none">
                     <a 
                       href={sub.link} 
-                      className="block px-5 py-3 hover:bg-[#243b6b] hover:text-green-400 transition-colors text-[12px] font-semibold"
+                      className="flex items-center justify-between px-5 py-3 hover:bg-[#243b6b] hover:text-green-400 transition-colors text-[12px] font-semibold"
                     >
                       {sub.name}
+                      {sub.nestedItems && <ChevronRight size={14} className="opacity-50" />}
                     </a>
+
+                    {/* Nested Menu (المستوى الثالث) */}
+                    {sub.nestedItems && (
+                      <ul className="absolute left-full top-0 w-64 bg-[#1a2b4b] border-l-2 border-green-500 shadow-2xl
+                                     invisible opacity-0 translate-x-2 group-hover/nested:visible group-hover/nested:opacity-100 group-hover/nested:translate-x-0
+                                     transition-all duration-300 ease-in-out z-[60] py-1">
+                        {sub.nestedItems.map((nested, nIdx) => (
+                          <li key={nIdx} className="border-b border-white/5 last:border-none">
+                            <a 
+                              href={nested.link}
+                              className="block px-5 py-3 hover:bg-[#243b6b] hover:text-green-400 transition-colors text-[12px] font-semibold"
+                            >
+                              {nested.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -326,18 +387,24 @@ const navLinks = [
         ))}
       </ul>
 
-      {/* 3. Right Icons (يمين - أيقونة الشمس، اللغة، والمنيو) */}
-      <div className="flex items-center gap-5 border-l border-white/20 pl-5 py-5">
+      {/* 3. Right Icons (يمين - تشمل الشمس، البحث، اللغة، والمنيو) */}
+      <div className="flex items-center gap-4 border-l border-white/20 pl-5 h-full py-5">
+        
+        {/* أيقونة البحث (اختياري حسب الفيديو) */}
+        {/* <button className="text-white hover:text-green-400 transition-colors p-1">
+          <Search size={18} />
+        </button> */}
+
         {/* أيقونة الدارك مود */}
-        <button className="text-white hover:text-green-400 transition-colors">
-          <Sun size={20} className="cursor-pointer hover:rotate-45 transition-transform duration-500" />
+        <button className="text-white hover:text-green-400 transition-colors p-1">
+          <Sun size={20} className="hover:rotate-45 transition-transform duration-500" />
         </button>
-
-        {/* أيقونة اللغة */}
-        <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
-
-        {/* أيقونة المنيو (تظهر غالباً في الموبايل أو كإضافة) */}
-        <button className="text-white hover:text-green-400 transition-colors">
+        
+        {/* اللغة */}
+        <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors px-1">ع</span>
+        
+        {/* أيقونة المنيو (التي كانت ناقصة) */}
+        <button className="text-white hover:text-green-400 transition-all p-1 border border-white/10 rounded hover:border-green-400/50">
           <Menu size={24} className="cursor-pointer" />
         </button>
       </div>
@@ -657,8 +724,8 @@ const navLinks = [
               />
               {/* Date Badge */}
               <div className={`absolute bottom-0 left-4 ${event.color} text-white p-2 w-16 text-center rounded-t-md`}>
-                <div className="text-2xl font-bold leading-none">{event.date.day}</div>
-                <div className="text-sm uppercase leading-none mt-1">{event.date.month}</div>
+                {/* <div className="text-2xl font-bold leading-none">{event.date.day}</div> */}
+                {/* <div className="text-sm uppercase leading-none mt-1">{event.date.month}</div> */}
               </div>
             </div>
 
@@ -666,18 +733,18 @@ const navLinks = [
             <div className="mt-4 space-y-2">
               <div className="flex items-center text-xs text-gray-500 gap-4">
                 <span className="flex items-center gap-1">
-                  <span className="text-[#00a651]">📍</span> {event.location}
+                  {/* <span className="text-[#00a651]">📍</span> {event.location} */}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="text-[#00a651]">🕒</span> {event.time}
+                  {/* <span className="text-[#00a651]">🕒</span> {event.time} */}
                 </span>
               </div>
               
-              <h3 className={`font-bold text-sm ${event.id === 4 ? 'text-[#00a651]' : 'text-[#3b4b81]'} hover:underline`}>
+              {/* <h3 className={`font-bold text-sm ${event.id === 4 ? 'text-[#00a651]' : 'text-[#3b4b81]'} hover:underline`}>
                 {event.title}
-              </h3>
+              </h3> */}
               
-              <p className="text-xs text-gray-600 line-clamp-2">
+              <p className="text-[20px] font-bold text-gray-600 line-clamp-2">
                 {event.description}
               </p>
             </div>
@@ -691,52 +758,79 @@ const navLinks = [
         </button>
       </div>
     </section>
-    <section id="2000" className="py-16 px-6 bg-white font-sans" dir="ltr">
-      {/* Title */}
-      <h2 className="text-4xl font-bold text-[#00a651] text-center mb-12">News</h2>
+   <section id="2000" className="py-16 px-6 bg-white font-sans" dir="ltr">
+      {/* العنوان */}
+      <h2 className="text-4xl font-bold text-[#00a651] text-center mb-12 uppercase tracking-wide">
+        Latest News
+      </h2>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {newsData.map((news) => (
-          <div key={news.id} className="flex flex-col group">
-            {/* Image Container */}
-            <div className="overflow-hidden rounded-sm mb-4 aspect-video">
-              <img 
-                src={news.image} 
-                alt="news" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
+      <div className="max-w-7xl mx-auto relative group">
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation]}
+          spaceBetween={30}
+          slidesPerView={1}
+          loop={true}
+          autoplay={{
+            delay: 3500,
+            disableOnInteraction: false,
+          }}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          navigation={{
+            nextEl: '.swiper-button-next-custom',
+            prevEl: '.swiper-button-prev-custom',
+          }}
+          breakpoints={{
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          className="pb-14"
+        >
+          {newsData.map((news) => (
+            <SwiperSlide key={news.id}>
+              <div className="flex flex-col group/card cursor-pointer bg-white rounded-md overflow-hidden h-full border border-transparent hover:border-gray-100 transition-all">
+                {/* Container الصورة */}
+                <div className="overflow-hidden aspect-video relative">
+                  <img
+                    src={news.image}
+                    alt="news"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+                  />
+                  {/* Overlay خفيف عند الهوفر */}
+                  <div className="absolute inset-0 bg-black/5 group-hover/card:bg-transparent transition-all"></div>
+                </div>
 
-            {/* Metadata Section */}
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-y-2 text-[13px] text-gray-500">
-                <span className="flex items-center gap-1.5 mr-4">
-                  <User size={14} className="text-[#00a651] opacity-70" />
-                  By {news.author}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock size={14} className="text-[#00a651] opacity-70" />
-                  {news.time}
-                </span>
+                {/* التفاصيل */}
+                <div className="py-5 px-1 space-y-3">
+                  <div className="flex items-center gap-1.5 text-[#00a651]">
+                    <Calendar size={16} className="opacity-80" />
+                    <span className="w-8 h-[1px] bg-gray-200"></span>
+                  </div>
+                  
+                  <h3 className="text-[#1a2b56] font-bold text-[18px] leading-[1.4] group-hover/card:text-[#00a651] transition-colors line-clamp-2">
+                    {news.title}
+                  </h3>
+                </div>
               </div>
-              
-              <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
-                <Calendar size={14} className="text-[#00a651] opacity-70" />
-                {news.date}
-              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-              {/* Title */}
-              <h3 className="text-[#1a2b56] font-bold text-lg leading-snug hover:text-[#00a651] cursor-pointer transition-colors line-clamp-3">
-                {news.title}
-              </h3>
-            </div>
-          </div>
-        ))}
+        {/* أسهم التحكم (تظهر عند الهوفر على السلايدر) */}
+        <button className="swiper-button-prev-custom absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
+          <ChevronLeft size={24} />
+        </button>
+        <button className="swiper-button-next-custom absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
+          <ChevronRight size={24} />
+        </button>
       </div>
 
-      {/* Button */}
-      <div className="text-center mt-12">
-        <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-12 rounded-full transition-all shadow-md active:scale-95">
+      {/* زر "كل الأخبار" */}
+      <div className="text-center mt-8">
+        <button className="border-2 border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-sm transform active:scale-95">
           See All News
         </button>
       </div>
@@ -795,7 +889,7 @@ const navLinks = [
         
       </div>
     </section>
-<section className="relative w-full h-[500px] lg:h-[600px]  overflow-hidden">
+<section id="3000" className="relative w-full h-[500px] lg:h-[600px]  overflow-hidden">
       
       {/* 2. الصورة الخلفية تأخذ العرض والارتفاع الكاملين */}
       <img 
@@ -850,7 +944,7 @@ const navLinks = [
         {/* Logo */}
         <div className="flex justify-center mb-16">
           <div className="bg-white p-4 rounded-full w-24 h-24 flex items-center justify-center">
-            <img src={image} alt="MUST Logo" className="w-16" />
+            <img src={logos} alt="MUST Logo" className="w-16" />
           </div>
         </div>
 
