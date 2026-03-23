@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 
 // استيراد الصور المحلية
-import image from "./assets/logo.webp";
+import image from "./assets/logos.jpg";
 import image2 from "./assets/100.jpg";
 import image3 from "./assets/200.jpg";
 import image4 from "./assets/300.png";
@@ -13,8 +13,16 @@ import image7 from "./assets/zaza.jpeg";
 import image8 from "./assets/zoza.jpg";
 import image9 from "./assets/zoz.jpg";
 import image11 from "./assets/111.jpeg";
+import image111 from "./assets/ege.jpeg";
+import image1111 from "./assets/ssss.jpeg";
 import image22 from "./assets/222.jpg";
 import image33 from "./assets/333.jpg";
+import sasa from "./assets/1000.png";
+import sas from "./assets/2000.png";
+import sass from "./assets/3000.png";
+import sasss from "./assets/4000.png";
+import back from "./assets/back.png";
+import backs from "./assets/back22.jpg";
 // استيراد ستايلات Swiper الأساسية
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -32,6 +40,7 @@ import {
   Sun, 
   GraduationCap, 
   Mail, 
+  ChevronDown,
   CheckCircle2,
   X,
   ChevronLeft,
@@ -45,6 +54,7 @@ const App = () => {
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
 
   // --- البيانات (Data) ---
+  
   const newsData = [
   {
     id: 1,
@@ -71,6 +81,7 @@ const App = () => {
     title: 'The Fourth Forum for Students and Graduates of the College'
   }
 ];
+
   const alumni = [
     {
       id: 1,
@@ -103,50 +114,66 @@ const App = () => {
   ];
 
   const slides = [
-    { id: 1, image: "https://images.unsplash.com/photo-1523050853063-9158946122a2?q=80&w=2000" },
-    { id: 2, image: "https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=2000" },
-    { id: 3, image: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2000" }
-  ];
+  { id: 1, image: backs },
+  { id: 2, image: backs },
+  { id: 3, image: backs }
+];
+const syndicateData = [
+  { 
+    id: 1, 
+    title: "الشعار الرسمي", 
+    image: image111, 
+    link: "https://www.facebook.com/EsspEgypt",
+    btnText: "صفحة الفيسبوك"
+  },
+  { 
+    id: 2, 
+    title: "جدول الاشتراكات", 
+    image: image1111, 
+    link: "https://www.hugedomains.com/domain_profile.cfm?d=esspegypt.com&sfnsn=scwspwa",
+    btnText: "الموقع الرسمي"
+  }
+];
   const awards = [
     {
       id: 1,
-      title: "MUST Is A Pioneer In Getting Awards In All Fields",
-      subtitle: "Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      name: "Kerolos Mousa",
-      content: "Agaypi Was An Undergraduate Student At The College Of Biotechnology At Misr University For Science And Technology In Egypt. He Was Offered To Join A Group Of Researchers At The Harvard School Of Engineering And Applied Sciences...",
-      image: "https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=1000", // صورة تعبيرية لهارفارد
+      title: "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
+      subtitle: "Kerolos Mousa",
+      name: " Agaypi Was An Undergraduate Student At The College Of Biotechnology At The Misr University For Science And Technology In Egypt.",
+      content: "",
+      image:sasa, // صورة تعبيرية لهارفارد
     },
     {
       id: 2,
-      title: "Global Innovation Award 2025",
-      subtitle: "Recognizing Excellence in Engineering and Technology.",
-      name: "Sarah Ahmed",
-      content: "Sarah represented MUST in the International Engineering Competition and secured the first place for her innovative water purification system design...",
-      image: "https://images.unsplash.com/photo-1523240715632-d984bb4b970e?q=80&w=1000",
+      title: "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
+      subtitle: "Mostafa",
+      name: "Born In 1983, Graduated From The Faculty Of Mass Communication – Misr University For The Science And Technology In 2006, He Worked In Montages In Several Places, Including قناة مزيكا، القاهرة والناس, ON TV, CBC, MI7 Advertising Corporate. – He Participated In Several Plays During His Time At The College, Including  By Ali Salem.",
+      // content: "Sarah represented MUST in the International Engineering Competition and secured the first place for her innovative water purification system design...",
+      image: sas,
     },
     {
       id: 3,
-      title: "Medical Research Excellence",
-      subtitle: "Pushing the boundaries of modern medicine.",
-      name: "Dr. Omar Ali",
-      content: "A graduate of the Faculty of Medicine who published a groundbreaking research paper on AI in early cancer detection in a world-renowned medical journal...",
-      image: "https://images.unsplash.com/photo-1576091160550-2173dad9998e?q=80&w=1000",
+      title: "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
+      // subtitle: "Pushing the boundaries of modern medicine.",
+      // name: "Dr. Omar Ali",
+      content: "An Alumnus Of College Of Biotechnology, 2009 Yasser Morsy Is A Bioinformatics Scientist In The Gastroenterology And Hepatology Department At The University Hospital Zurich University (USZ). Yasser Is The Main Bioinformatician In The Department Responsible For Omics Data Analysis, Including Genomic Variants, RNA Sequencing, Metagenomics, And Metabolomics. Before Joining The USZ, He Was A Lab Manager In The National Biolab Company With The Responsibility To Establish The Molecular Biology Laboratory For Services And Kits Production. Yasser Also Has Experience In Teaching Several Courses In Undergraduate And Postgraduate Programs In Different Universities, Including Misr University For Science And Technology And Ain Shams Universities. Career Highlights",
+      image:sass,
     },
     {
       id: 4,
-      title: "Leading Entrepreneurship Hub",
-      subtitle: "Empowering the next generation of business leaders.",
-      name: "Mona Hassan",
-      content: "Founder of a Green-Tech startup that received funding from major investors in the MENA region, starting from the MUST incubation center...",
-      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000",
+       title: "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
+      // subtitle: "Empowering the next generation of business leaders.",
+      // name: "Mona Hassan",
+      content: "An Alumnus Of College Of Biotechnology, 2009 Amin Abdellatif Is A Professional With Almost 10 Years Of Experience And A Proven Successful Track Record In Sales, Project Management, And Technical Support. The Key To This Is A Thorough Understanding Of The Customer's Need And How This Need Can Be Fulfilled. In 2009 He Got His BSc In Biotechnology From The Faculty Of Biotechnology, Misr University Of Science And Technology. Followed By A Master's Degree In Science From United Arab Emirates University.",
+      image: sasss,
     },
     {
       id: 5,
       title: "Social Impact Recognition",
       subtitle: "Commitment to Sustainable Development Goals.",
-      name: "Youssef Zayed",
+      // name: "Youssef Zayed",
       content: "Leading a volunteer initiative that provided educational resources to over 10,000 children, recognized by the United Nations...",
-      image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000",
+      // image: sassss,
     }
   ];
   const events = [
@@ -191,50 +218,131 @@ const App = () => {
     color: 'bg-[#00a651]' // اللون الأخضر المميز لآخر كارت
   }
 ];
-
+const navLinks = [
+    { 
+      name: 'The University', 
+      id: 'brief',
+      subItems: [
+        { name: 'About MUST', link: '#' },
+        { name: 'Sectors', link: '#' },
+        { name: 'Reports', link: '#' },
+        { name: 'Policies', link: '#' },
+        { name: 'University Council Minutes', link: '#' },
+        { name: 'Quality Assurance and Accreditation Sector', link: '#' },
+        { name: 'Accreditation & Partnerships', link: '#' },
+        { name: 'Contact Us', link: '#' },
+      ]
+    },
+    { 
+      name: 'Academics', 
+      id: 'academics',
+      subItems: [
+        { name: 'Undergraduate Studies', link: '#' },
+        { name: 'Post-Graduate Program', link: '#' },
+        { name: 'Academic Calendar', link: '#' },
+        { name: 'International Students Affairs Sector', link: '#' },
+      ]
+    },
+    { name: 'Admission', id: '1000' },
+    { 
+      name: 'MUST BUZZ', 
+      id: '2000',
+      subItems: [
+        { name: 'MUST Events', link: '#' },
+        { name: 'MUST News', link: '#' },
+        { name: 'MUST Blogs', link: '#' },
+        { name: 'Announcements', link: '#' },
+      ]
+    },
+    { 
+      name: 'Centers', 
+      id: '4000',
+      subItems: [
+        { name: 'Centers', link: '#' },
+        { name: 'Units', link: '#' },
+        { name: 'Research Center for Public Opinion and Societal Issues Monitoring', link: '#' },
+      ]
+    },
+    { 
+      name: 'Life At MUST', 
+      id: '3000',
+      subItems: [
+        { name: 'MUST Life', link: '#' },
+        { name: 'MUST Stars', link: '#' },
+        { name: 'MUST Clubs', link: '#' },
+        { name: 'Facilities', link: '#' },
+      ]
+    },
+    { name: 'SDGs', id: 'awards' }
+  ];
+  
   return (
-    <div className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
+    <div id='100' className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
       
       {/* --- 1. Navbar --- */}
-      <nav className="bg-[#1a2b56] text-white px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-[100] shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 shadow-inner">
-            <img src={image} alt="Logo" className="object-cover" />
-          </div>
-          <div className="hidden sm:block border-l border-white/20 pl-3">
-            <h1 className="text-[11px] font-bold leading-tight tracking-wider uppercase">Misr University</h1>
-            <p className="text-[9px] opacity-70 tracking-tighter uppercase font-medium">For Science & Technology</p>
-          </div>
+      <nav className="bg-[#1a2b56] text-white px-4 md:px-8 py-0 flex items-center justify-between sticky top-0 z-[100] shadow-xl">
+      
+      {/* 1. Logo Section (يسار) */}
+      <div className="flex items-center gap-3 py-5">
+        <div className="w-13 h-13 rounded-full flex items-center justify-center p-1 shadow-inner">
+          <img src={image} alt="Logo" className="object-cover" />
         </div>
+        <div className="hidden sm:block border-l border-white/20 pl-3">
+          <h1 className="text-[11px] font-bold leading-tight tracking-wider uppercase">Misr University</h1>
+          <p className="text-[9px] opacity-70 tracking-tighter uppercase font-medium">For Science & Technology</p>
+        </div>
+      </div>
 
-        <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold">
-  {[
-    { name: 'The University', id: 'brief' },
-    { name: 'Academics', id: 'academics' },
-    { name: 'Events', id: '1000' },
-    { name: 'NEWS', id: '2000' },
-    { name: 'Awards', id: '4000' },
-    { name: 'CONTACT-US', id: '3000' },
-    { name: 'Awards', id: 'awards' }
-  ].map((item) => (
-    <li key={item.id} className="list-none">
-      <a 
-        href={`#${item.id}`} 
-        className="cursor-pointer transition-all duration-300 hover:text-green-400"
-      >
-        {item.name}
-      </a>
-    </li>
-  ))}
-</ul>
+      {/* 2. Navigation Links (منتصف - تظهر في الشاشات الكبيرة فقط) */}
+      <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
+        {navLinks.map((item) => (
+          <li key={item.id} className="relative group list-none h-full py-7">
+            <a 
+              href={`#${item.id}`} 
+              className="cursor-pointer transition-all duration-300 hover:text-green-400 flex items-center gap-1 uppercase"
+            >
+              {item.name}
+              {item.subItems && <ChevronDown size={14} className="opacity-50 group-hover:rotate-180 transition-transform" />}
+            </a>
 
-        <div className="flex items-center gap-5 border-l border-white/20 pl-5">
-          <Sun size={19} className="cursor-pointer hover:rotate-45 transition-transform" />
-          <span className="cursor-pointer font-bold text-sm hover:text-green-400">ع</span>
+            {/* Dropdown Menu */}
+            {item.subItems && (
+              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl 
+                             invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 
+                             transition-all duration-300 ease-in-out z-50">
+                {item.subItems.map((sub, idx) => (
+                  <li key={idx} className="border-b border-white/5 last:border-none">
+                    <a 
+                      href={sub.link} 
+                      className="block px-5 py-3 hover:bg-[#243b6b] hover:text-green-400 transition-colors text-[12px] font-semibold"
+                    >
+                      {sub.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {/* 3. Right Icons (يمين - أيقونة الشمس، اللغة، والمنيو) */}
+      <div className="flex items-center gap-5 border-l border-white/20 pl-5 py-5">
+        {/* أيقونة الدارك مود */}
+        <button className="text-white hover:text-green-400 transition-colors">
+          <Sun size={20} className="cursor-pointer hover:rotate-45 transition-transform duration-500" />
+        </button>
+
+        {/* أيقونة اللغة */}
+        <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
+
+        {/* أيقونة المنيو (تظهر غالباً في الموبايل أو كإضافة) */}
+        <button className="text-white hover:text-green-400 transition-colors">
           <Menu size={24} className="cursor-pointer" />
-        </div>
-      </nav>
-
+        </button>
+      </div>
+      
+    </nav>
       {/* --- 2. Hero Slider --- */}
       <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
         <Swiper
@@ -248,7 +356,7 @@ const App = () => {
         >
           {slides.map((slide) => (
             <SwiperSlide key={slide.id}>
-              <div className="relative h-full w-full bg-cover bg-center" style={{ backgroundImage: `url('${slide.image}')` }}>
+              <div className="relative h-full w-full bg-cover bg-center bg-bottom" style={{ backgroundImage: `url('${slide.image}')` }}>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#1a2b56]/80 to-[#1a2b56]/40"></div>
               </div>
             </SwiperSlide>
@@ -257,30 +365,67 @@ const App = () => {
 
         <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
           <div className="text-center px-4 max-w-4xl pointer-events-auto">
-             <h2 className="text-5xl md:text-7xl font-extrabold mb-6 text-white drop-shadow-2xl">Alumni</h2>
-             <div className="flex items-center justify-center gap-3 text-sm md:text-base font-medium bg-black/30 backdrop-blur-md py-2 px-6 rounded-full border border-white/10 w-fit mx-auto text-white">
-              <span>Home</span> <span className="text-green-500">→</span>
-              <span>Academics</span> <span className="text-green-500">→</span>
-              <span className="font-bold">Resources & Degrees Awards</span>
-            </div>
+             <h2 className="text-5xl md:text-7xl font-extrabold mb-6 text-white drop-shadow-2xl">Alumni sociaty</h2>
+             <div className="flex flex-wrap items-center justify-center gap-3 text-sm md:text-base font-medium bg-black/30 backdrop-blur-md py-2 px-6 rounded-full border border-white/10 w-fit mx-auto text-white">
+  {[
+    { name: 'Home', target: 'home' },
+    { name: 'Services', target: '6000' },
+    { name: 'Notable', target: '5000' },
+    { name: 'Awards', target: '4000' },
+    { name: 'Events', target: '1000' },
+    { name: 'News', target: '2000' },
+    { name: 'the union', target: 'moazz' },
+    { name: 'contact-us', target: '3000' },
+  ].map((item, index, array) => (
+    <React.Fragment key={index}>
+      <a 
+        href={`#${item.target}`} // هنا بنربط بالـ ID
+        className="hover:text-amber-600 cursor-pointer transition-colors"
+      >
+        {item.name}
+      </a>
+      {index !== array.length - 1 && <span className="text-green-500">→</span>}
+    </React.Fragment>
+  ))}
+</div>
           </div>
         </div>
 
         {/* Social Sidebar */}
         <div className="fixed right-5 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-40">
-          <button className="p-3 bg-green-500 rounded-full text-white shadow-lg hover:scale-110 transition-all"><Search size={20} /></button>
-          {[Facebook, Instagram, Twitter].map((Icon, idx) => (
-            <button key={idx} className="p-3 bg-white rounded-full shadow-xl hover:-translate-x-2 transition-all duration-300">
-              <Icon size={20} className="text-[#1a2b56]" />
-            </button>
-          ))}
-        </div>
+  {/* زر البحث - لو عاوزه يفتح صفحة بحث مثلاً */}
+  <a 
+    href="/search" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="p-3 bg-green-500 rounded-full text-white shadow-lg hover:scale-110 transition-all flex items-center justify-center"
+  >
+    <Search size={20} />
+  </a>
+
+  {/* أزرار السوشيال ميديا */}
+  {[
+    { Icon: Facebook, url: 'https://www.facebook.com/groups/766796172340576/?rdid=9vBY3ZfHeBBchugY&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2Fg%2F16DrxesbH8%2F#' },
+    { Icon: Instagram, url: 'https://www.instagram.com/accounts/login/?next=%2Fmustuni&source=omni_redirect' },
+    { Icon: Twitter, url: 'https://x.com/must_university' }
+  ].map((item, idx) => (
+    <a 
+      key={idx} 
+      href={item.url}
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="p-3 bg-white rounded-full shadow-xl hover:-translate-x-2 transition-all duration-300 flex items-center justify-center"
+    >
+      <item.Icon size={20} className="text-[#1a2b56]" />
+    </a>
+  ))}
+</div>
       </section>
 
       {/* --- 3. Brief Section --- */}
      <div className="bg-white font-sans text-left" dir="ltr">
       {/* --- 1. Brief Section --- */}
-      <section className="py-12 px-6 text-center">
+      <section id="6000"  className="py-12 px-6 text-center">
         <h2 className="text-3xl font-bold text-[#00a651] mb-6">Brief</h2>
         <div className="max-w-5xl mx-auto space-y-4">
           <p className="text-gray-700 text-lg font-medium">
@@ -366,7 +511,7 @@ const App = () => {
     </div>
 
       {/* --- 5. Notable Alumni (Centered Version) --- */}
-      <section className="py-20 bg-[#1a2b56] relative overflow-hidden">
+      <section id="5000" className="py-20 bg-[#1a2b56] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="flex justify-between items-end mb-12">
@@ -485,7 +630,7 @@ const App = () => {
               <img 
                 src={award.image} 
                 alt={award.name} 
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain"
               />
               {/* Overlay shadow for depth */}
               <div className="absolute inset-0 bg-gradient-to-l from-black/10 to-transparent hidden lg:block"></div>
@@ -596,83 +741,109 @@ const App = () => {
         </button>
       </div>
     </section>
-
-<section className="relative min-h-[500px] flex items-center py-20 bg-[#1a2b56]">
-      {/* صورة الخلفية مع الـ Overlay */}
-      <div 
-        className="absolute inset-0 opacity-40 bg-cover bg-center z-0" 
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1557426272-fc759fbbad95?q=80&w=2000')` }}
-      ></div>
-      
-      <div id="3000" className="container mx-auto px-6 lg:px-20 relative z-10 flex flex-col lg:flex-row justify-between items-center gap-12">
+  <section id="moazz" className="py-16 bg-gray-50 font-sans" dir="rtl">
+      <div className="container mx-auto px-4">
         
-        {/* نصوص التواصل الجانبية */}
-        <div className="text-white max-w-lg">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            Reach us on any time.
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">
+            نقابة المهن العلمية <span className="text-blue-600">(ESSP)</span>
           </h2>
-          <div className="space-y-2">
-            <p className="text-xl md:text-2xl font-medium">Or contact us by email</p>
-            <a 
-              href="mailto:info.alumni@must.edu.eg" 
-              className="text-[#00a651] font-bold text-xl md:text-2xl hover:underline block transition-all"
-            >
-              info.alumni@must.edu.eg
-            </a>
-          </div>
+          <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* نموذج ترك الرسالة (Form) */}
-        <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-2xl w-full max-w-md border border-white/20 backdrop-blur-sm">
-          <h3 className="text-2xl font-bold text-[#1a2b56] mb-8">Leave a message</h3>
-          
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div className="flex gap-4">
-              <input 
-                type="text" 
-                placeholder="Name" 
-                className="w-1/2 p-4 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/20 transition-all" 
-              />
-              <input 
-                type="email" 
-                placeholder="Email" 
-                className="w-1/2 p-4 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/20 transition-all" 
-              />
-            </div>
-            
-            <input 
-              type="text" 
-              placeholder="Phone" 
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/20 transition-all" 
-            />
-            
-            <textarea 
-              placeholder="Say Something" 
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-xl h-32 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/20 transition-all resize-none"
-            ></textarea>
-            
-            {/* CAPTCHA Placeholder */}
-            <div className="bg-gray-50 p-4 rounded-xl flex items-center justify-between border border-gray-100">
-              <div className="flex items-center gap-3">
-                <input type="checkbox" id="robot" className="w-5 h-5 accent-[#00a651]" />
-                <label htmlFor="robot" className="text-sm text-gray-600 font-medium">I'm not a robot</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {syndicateData.map((item) => (
+            <div key={item.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 overflow-hidden flex flex-col">
+              
+              {/* الصورة الآن أصبحت رابطاً (Link) */}
+              <a 
+                href={item.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="relative h-80 bg-white p-6 overflow-hidden flex items-center justify-center border-b border-slate-50 cursor-pointer"
+              >
+                <img 
+                  src={item.image} 
+                  alt={item.title} 
+                  className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                />
+                {/* طبقة شفافة تظهر عند التمرير بالماوس */}
+                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <span className="bg-white/90 text-slate-800 px-4 py-2 rounded-lg font-bold shadow-lg">اضغط لزيارة الرابط</span>
+                </div>
+              </a>
+
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-bold text-slate-700 mb-6 uppercase tracking-wide">
+                  {item.title}
+                </h3>
+                
+                {/* الزرار أيضاً مربوط بنفس اللينك */}
+                <a 
+                  href={item.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`inline-block w-full py-3 px-6 text-white font-bold rounded-xl shadow-md transition-all duration-200 transform active:scale-95 ${item.color} hover:brightness-110`}
+                >
+                  {item.btnText}
+                </a>
               </div>
-              <img 
-                src="https://www.gstatic.com/recaptcha/api2/logo_48.png" 
-                alt="reCAPTCHA" 
-                className="w-8 opacity-70"
-              />
+            </div>
+          ))}
+        </div>
+
+        
+      </div>
+    </section>
+<section className="relative w-full h-[500px] lg:h-[600px]  overflow-hidden">
+      
+      {/* 2. الصورة الخلفية تأخذ العرض والارتفاع الكاملين */}
+      <img 
+        src={back} 
+        alt="Background" 
+        className="absolute inset-0 w-full h-[450px] object-cover bg-bottom-left opacity-60" 
+      />
+
+      {/* 3. النص الموجود على اليسار (اختياري حسب التصميم) */}
+      <div className="absolute inset-0 flex items-center px-10 lg:px-20">
+        <div className="max-w-xl text-white">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4">Reach us on any time.</h2>
+          <p className="text-xl font-semibold mb-2">Or contact us by email</p>
+          
+        </div>
+      </div>
+
+      {/* 4. كونتينر الـ Contact (الفورم) - موجود "فوق" على "اليمين" */}
+      <div className="absolute right-10 lg:right-20 top-1/2 -translate-y-1/2 z-20 w-full max-w-[450px] hidden md:block">
+        <div className="bg-white shadow-2xl p-8 rounded-sm border-t-4 border-green-500">
+          <h3 className="text-[#1a2b56] text-3xl font-bold mb-6">Leave a message</h3>
+          
+          <form className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <input type="text" placeholder="Name" className="p-3 bg-gray-100 outline-none focus:ring-1 focus:ring-green-500 text-sm" />
+              <input type="email" placeholder="Email" className="p-3 bg-gray-100 outline-none focus:ring-1 focus:ring-green-500 text-sm" />
+            </div>
+            <input type="text" placeholder="Phone" className="w-full p-3 bg-gray-100 outline-none focus:ring-1 focus:ring-green-500 text-sm" />
+            <textarea placeholder="Say Something" rows="3" className="w-full p-3 bg-gray-100 outline-none focus:ring-1 focus:ring-green-500 text-sm resize-none"></textarea>
+            
+            {/* كابتشا مبسطة */}
+            <div className="border p-3 flex justify-between items-center text-xs text-gray-500">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" /> <span>I'm not a robot</span>
+              </div>
+              <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" className="w-6 opacity-50" alt="recap" />
             </div>
 
-            <button 
-              type="submit"
-              className="w-full bg-[#00a651] text-white py-4 rounded-xl font-bold text-lg hover:bg-green-600 hover:shadow-lg hover:shadow-green-500/30 transition-all active:scale-95"
-            >
+            <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-full transition-all">
               Send Message
             </button>
           </form>
         </div>
       </div>
+
+      {/* 5. أيقونات السوشيال ميديا الجانبية (ثابتة في أقصى اليمين) */}
+      
+
     </section>
     <footer className="bg-[#1a2b56] text-white pt-20 pb-10 border-t-4 border-white/10">
       <div className="container mx-auto px-6">
