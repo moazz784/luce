@@ -9,10 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "formik": "^2.4.9",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.471.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "swiper": "^11.2.10"
+    "react-router-dom": "^7.13.2",
+    "swiper": "^11.2.10",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
