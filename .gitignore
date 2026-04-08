@@ -21,4 +21,8 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
+!backend/**/*.sln
+backend/**/bin/
+backend/**/obj/
+backend/publish/
 *.sw?

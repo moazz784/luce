@@ -1,0 +1,6 @@
+@Luce.Api_HostAddress = http://localhost:5009
+
+GET {{Luce.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
