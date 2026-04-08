@@ -48,6 +48,7 @@ const App = () => {
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [newsData, setNewsData] = useState([]);
   const [slides, setSlides] = useState([]);
@@ -295,7 +296,9 @@ const App = () => {
         };
 
   useEffect(() => {
-    setIsAdmin(hasAdminRole(localStorage.getItem("token")));
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+    setIsAdmin(hasAdminRole(token));
   }, []);
 
   useEffect(() => {
@@ -416,25 +419,22 @@ const App = () => {
           ع
         </span>
 
-        {/* Conditional UI */}
-        {isAdmin ? (
-          <>
-            {/* Dashboard */}
-            <button
-              onClick={() => navigate("/AdminDashboard")}
-              className="p-2 border border-white/20 rounded hover:border-green-400 transition"
-            >
-              Dashboard
-            </button>
-
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold"
-            >
-              Logout
-            </button>
-          </>
+        {/* Admins: Dashboard. Any logged-in user: Logout (User role is not admin). */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate("/AdminDashboard")}
+            className="p-2 border border-white/20 rounded hover:border-green-400 transition"
+          >
+            Dashboard
+          </button>
+        )}
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold"
+          >
+            Logout
+          </button>
         ) : (
           <button
             onClick={() => navigate("/login")}
