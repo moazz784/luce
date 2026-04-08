@@ -123,3 +123,6 @@ Then use relative URLs like `/api/public/home-bundle` and omit `VITE_API_BASE_UR
 ---
 
 See [DEPLOY_MONSTERASP.md](DEPLOY_MONSTERASP.md) for hosting the API and database on MonsterASP.NET.
+
+AdminEmail: admin@localhost,
+    AdminPassword": ChangeMe!123
