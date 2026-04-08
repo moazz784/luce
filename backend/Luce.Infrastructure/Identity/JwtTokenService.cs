@@ -48,7 +48,8 @@ public class JwtTokenService : IJwtTokenService
             AccessToken = jwt,
             ExpiresAt = expires,
             Email = email,
-            UserName = userName
+            UserName = userName,
+            Roles = roles.ToList()
         };
     }
 }

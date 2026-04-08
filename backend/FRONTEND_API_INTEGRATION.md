@@ -15,15 +15,18 @@ This document is for the React (Vite) app in the repository root. **Do not chang
 
 The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luce.Api/appsettings.json). Add your production SPA origin (for example `https://your-site.com`) in hosting configuration or environment variables so browsers are not blocked.
 
-## Authentication (JWT)
+## Authentication (HttpOnly cookie + JWT)
+
+The API issues a JWT in an **HttpOnly** cookie named **`access_token`** on successful **login** and **register**. The browser sends it automatically on same-site requests. For **cross-origin** SPAs (for example Vercel → Azure), configure `Cors:AllowedOrigins` with your exact SPA origin and use **HTTPS** in production so the cookie can use `SameSite=None; Secure`.
 
 - **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default). **Redeploy the API** after pulling this route; if the endpoint is missing (404), the SPA assumes registration is allowed and relies on `POST /api/auth/register` to enforce the flag.
-- **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`.
+- **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`. Response JSON still includes `accessToken` (and `roles`) for compatibility, but the SPA should rely on the cookie for API calls.
 - **Register (optional, often disabled in production):** `POST /api/auth/register` with `{ "userName", "email", "password" }`. New accounts get the **`User`** role only (not **Admin**). When `Auth:AllowRegister` is `false`, the API returns **403** with a problem details body.
-- **Response:** `{ "accessToken", "expiresAt", "email", "userName" }`. Store `accessToken` (for example in `localStorage` or `sessionStorage`). JWT includes role claims (`ClaimTypes.Role`); the SPA uses [src/jwtUtils.js](../src/jwtUtils.js) to detect **Admin** for `/AdminDashboard`.
-- **Admin requests:** send header `Authorization: Bearer <accessToken>` for all `/api/admin/*` routes; the API requires **`Admin`** role.
-- **Logout:** clear the token client-side; call no endpoint unless you add one later.
-- **Protect `/AdminDashboard`:** redirect to `/login` if no token; redirect to `/` if the token does not include the **Admin** role.
+- **Response:** `{ "accessToken", "expiresAt", "email", "userName", "roles" }`. The SPA stores **`roles`** in **sessionStorage** (key `luce_roles`) for UI checks; it does **not** read the JWT from JavaScript.
+- **Current user:** `GET /api/auth/me` (requires auth) returns `{ "email", "userName", "roles" }`. Use this after navigation or on the home page to refresh session state. All `fetch` calls use **`credentials: "include"`** (see [src/Api.js](../src/Api.js)).
+- **Admin and authenticated requests:** send cookies with `credentials: "include"`. The API reads the JWT from the cookie or from `Authorization: Bearer` if present.
+- **Logout:** `POST /api/auth/logout` (no body) clears the cookie; the client also clears session storage via [src/authService.js](../src/authService.js).
+- **Protect `/AdminDashboard`:** [src/ProtectedRoute.jsx](../src/ProtectedRoute.jsx) calls `GET /api/auth/me` and redirects to `/login` if unauthenticated or to `/` if the user is not **Admin**.
 
 ### Default seeded admin (development)
 
@@ -46,7 +49,7 @@ Use **`home-bundle`** in [Home.jsx](../src/Home.jsx) to replace multiple hardcod
 
 ## Admin CRUD (requires `Admin` role)
 
-All routes require `Authorization: Bearer`.
+All routes require an authenticated **Admin** user (JWT from **`access_token`** cookie with `credentials: "include"`, or `Authorization: Bearer` if you send a token manually).
 
 | Section | Base path |
 |---------|-----------|

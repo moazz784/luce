@@ -1,4 +1,5 @@
 using System.Text;
+using Luce.Api.Controllers;
 using Luce.Application;
 using Luce.Infrastructure;
 using Luce.Infrastructure.Identity;
@@ -29,6 +30,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (string.IsNullOrEmpty(context.Token) &&
+                    context.Request.Cookies.TryGetValue(AuthController.AuthCookieName, out var cookieToken))
+                    context.Token = cookieToken;
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -39,7 +50,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         if (origins.Length > 0)
-            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
         else
             policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });

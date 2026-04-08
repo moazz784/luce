@@ -64,18 +64,12 @@ export default function Auth() {
       try {
         if (isLogin) {
           await login(values.email, values.password);
-          const token = localStorage.getItem("token");
-          navigate(
-            hasAdminRole(token) ? "/AdminDashboard" : "/",
-            { replace: true },
-          );
+          navigate(hasAdminRole() ? "/AdminDashboard" : "/", { replace: true });
         } else {
           await register(values.name, values.email, values.password);
-          
-          // بعد التسجيل، بنحوله لوضع اللوجين ونصفر الفورم
-          setIsLogin(true);
           formik.resetForm();
-          alert("تم إنشاء الحساب بنجاح، يمكنك تسجيل الدخول الآن");
+          alert("تم إنشاء الحساب بنجاح");
+          navigate("/", { replace: true });
         }
       } catch (err) {
         // هنا الـ err.message هي اللي جاية من الـ Api.js (زي "كلمة السر خطأ")

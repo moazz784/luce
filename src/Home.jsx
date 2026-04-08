@@ -1,14 +1,14 @@
 import React, { useState,useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import lo from "./assets/lo.png";
 import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
 import { logout } from "./authService";
-import { hasAdminRole } from "./jwtUtils";
+import { clearAuthSession, saveRolesToSession } from "./jwtUtils";
 import {
   resolveContentImage,
   localImageSets,
@@ -45,6 +45,7 @@ import {
 const App = () => {
   const { isDark, setIsDark } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -167,8 +168,8 @@ const App = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleContactSubmit = async (e) => {
@@ -296,10 +297,25 @@ const App = () => {
         };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-    setIsAdmin(hasAdminRole(token));
-  }, []);
+    let cancelled = false;
+    api("/api/auth/me", { method: "GET" })
+      .then((me) => {
+        if (cancelled) return;
+        const roles = me.roles ?? [];
+        saveRolesToSession(roles);
+        setIsLoggedIn(true);
+        setIsAdmin(roles.includes("Admin"));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        clearAuthSession();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     if (awards.length === 0) return;

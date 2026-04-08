@@ -1,16 +1,31 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { hasAdminRole } from "./jwtUtils";
+import { api } from "./Api";
+import { saveRolesToSession } from "./jwtUtils";
 
 export default function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const [state, setState] = useState("loading");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    let cancelled = false;
+    api("/api/auth/me", { method: "GET" })
+      .then((me) => {
+        if (cancelled) return;
+        const roles = me.roles ?? [];
+        saveRolesToSession(roles);
+        if (roles.includes("Admin")) setState("admin");
+        else setState("user");
+      })
+      .catch(() => {
+        if (!cancelled) setState("unauth");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  if (!hasAdminRole(token)) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (state === "loading") return null;
+  if (state === "unauth") return <Navigate to="/login" replace />;
+  if (state === "user") return <Navigate to="/" replace />;
   return children;
 }

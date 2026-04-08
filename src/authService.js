@@ -1,49 +1,78 @@
 import { api } from "./Api";
+import {
+  clearAuthSession,
+  loadRolesFromSession,
+  saveRolesToSession,
+} from "./jwtUtils";
+
+function pickAccessToken(data) {
+  return data?.accessToken ?? data?.AccessToken ?? "";
+}
+
+function pickRoles(data) {
+  const r = data?.roles ?? data?.Roles;
+  return Array.isArray(r) ? r.map(String) : [];
+}
 
 export const login = async (email, password) => {
+  const data = await api("/api/auth/login", {
+    method: "POST",
+    body: { email, password },
+  });
+
+  const roles = pickRoles(data);
+  saveRolesToSession(roles);
+  if (data.userName != null)
+    sessionStorage.setItem("userName", data.userName);
+  if (data.email != null) sessionStorage.setItem("email", data.email);
+
+  // Legacy cleanup; JWT is HttpOnly cookie now.
   try {
-    const data = await api("/api/auth/login", {
-      method: "POST",
-      body: { email, password }, // بنبعته كـ Object والـ Api.js هيحوله لـ string
-    });
-
-    // حفظ البيانات المهمة في الـ localStorage
-    if (data.accessToken) {
-      localStorage.setItem("token", data.accessToken);
-      localStorage.setItem("userName", data.userName);
-      localStorage.setItem("email", data.email);
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
+    localStorage.removeItem("token");
+  } catch {
+    /* ignore */
   }
+
+  if (!pickAccessToken(data) && roles.length === 0) {
+    console.warn("Login response missing token body and roles (cookie may still be set).");
+  }
+
+  return data;
 };
 
 export const register = async (name, email, password) => {
+  const data = await api("/api/auth/register", {
+    method: "POST",
+    body: {
+      userName: name,
+      email,
+      password,
+    },
+  });
+
+  const roles = pickRoles(data);
+  saveRolesToSession(roles);
+  if (data.userName != null)
+    sessionStorage.setItem("userName", data.userName);
+  if (data.email != null) sessionStorage.setItem("email", data.email);
+
   try {
-    return await api("/api/auth/register", {
-      method: "POST",
-      body: {
-        userName: name,
-        email,
-        password,
-      },
-    });
-  } catch (error) {
-    throw error;
+    localStorage.removeItem("token");
+  } catch {
+    /* ignore */
   }
+
+  return data;
 };
 
-export const logout = () => {
-  // مسح كل البيانات المسجلة للخروج
-  localStorage.removeItem("token");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("email");
-  window.location.href = "/login"; // تحويل المستخدم لصفحة اللوجين
+export const logout = async () => {
+  try {
+    await api("/api/auth/logout", { method: "POST" });
+  } catch {
+    /* still clear client state */
+  }
+  clearAuthSession();
+  window.location.href = "/login";
 };
 
-export const isAuthenticated = () => {
-  // دالة سريعة للتأكد هل المستخدم مسجل دخول ولا لأ
-  return !!localStorage.getItem("token");
-};
+export const isAuthenticated = () => loadRolesFromSession().length > 0;
