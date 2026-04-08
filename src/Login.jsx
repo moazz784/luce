@@ -1,14 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { login, register } from "./authService";
+import { api } from "./Api";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [registerAllowed, setRegisterAllowed] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    api("/api/auth/registration-status", { method: "GET" })
+      .then((d) => {
+        if (!cancelled) setRegisterAllowed(!!d?.allowRegister);
+      })
+      .catch(() => {
+        if (!cancelled) setRegisterAllowed(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (registerAllowed === false && !isLogin) setIsLogin(true);
+  }, [registerAllowed, isLogin]);
 
   const validationSchema = Yup.object({
     name: isLogin
@@ -149,18 +169,24 @@ export default function Auth() {
           </button>
         </form>
 
-        <p className="text-gray-300 text-sm mt-4">
-          {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
-          <span
-            className="text-green-400 cursor-pointer hover:underline"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError("");
-              formik.resetForm();
-            }}
-          >
-            {isLogin ? "Register" : "Login"}
-          </span>
+        <p className="text-gray-300 text-sm mt-4 min-h-[1.25rem]">
+          {registerAllowed === null ? null : registerAllowed ? (
+            <>
+              {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
+              <span
+                className="text-green-400 cursor-pointer hover:underline"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError("");
+                  formik.resetForm();
+                }}
+              >
+                {isLogin ? "Register" : "Login"}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-400">New accounts are disabled. Contact an administrator.</span>
+          )}
         </p>
       </div>
     </div>

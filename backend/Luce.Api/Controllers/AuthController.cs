@@ -1,6 +1,8 @@
 using Luce.Application.Abstractions.Auth;
+using Luce.Infrastructure.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Luce.Api.Controllers;
 
@@ -9,8 +11,20 @@ namespace Luce.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
+    private readonly AuthOptions _authOptions;
 
-    public AuthController(IAuthService auth) => _auth = auth;
+    public AuthController(IAuthService auth, IOptions<AuthOptions> authOptions)
+    {
+        _auth = auth;
+        _authOptions = authOptions.Value;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("registration-status")]
+    public ActionResult<RegistrationStatusResponse> RegistrationStatus()
+    {
+        return Ok(new RegistrationStatusResponse(_authOptions.AllowRegister));
+    }
 
     [AllowAnonymous]
     [HttpPost("login")]
@@ -50,3 +64,5 @@ public class AuthController : ControllerBase
         }
     }
 }
+
+public sealed record RegistrationStatusResponse(bool AllowRegister);
