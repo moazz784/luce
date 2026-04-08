@@ -19,7 +19,8 @@ export default function Auth() {
         if (!cancelled) setRegisterAllowed(!!d?.allowRegister);
       })
       .catch(() => {
-        if (!cancelled) setRegisterAllowed(false);
+        // Older deployments without this route return 404 — still show Register; POST /register enforces Auth:AllowRegister.
+        if (!cancelled) setRegisterAllowed(true);
       });
     return () => {
       cancelled = true;
@@ -84,7 +85,7 @@ export default function Auth() {
   });
 
   return (
-    <div className="min-h-screen bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1')] bg-cover bg-center flex items-center justify-center relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#0c2138] via-[#0f2a44] to-[#152f4a] flex items-center justify-center relative">
       {/* Overlay */}
       <div className="absolute inset-0 bg-[#0f2a44]/80"></div>
 
@@ -170,11 +171,11 @@ export default function Auth() {
         </form>
 
         <p className="text-gray-300 text-sm mt-4 min-h-[1.25rem]">
-          {registerAllowed === null ? null : registerAllowed ? (
+          {registerAllowed !== false ? (
             <>
               {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
               <span
-                className="text-green-400 cursor-pointer hover:underline"
+                className="text-green-400 cursor-pointer hover:underline font-medium"
                 onClick={() => {
                   setIsLogin(!isLogin);
                   setError("");
@@ -185,7 +186,9 @@ export default function Auth() {
               </span>
             </>
           ) : (
-            <span className="text-gray-400">New accounts are disabled. Contact an administrator.</span>
+            <span className="text-gray-400">
+              New accounts are disabled. Contact an administrator.
+            </span>
           )}
         </p>
       </div>

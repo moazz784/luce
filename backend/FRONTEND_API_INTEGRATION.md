@@ -17,7 +17,7 @@ The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luc
 
 ## Authentication (JWT)
 
-- **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default).
+- **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default). **Redeploy the API** after pulling this route; if the endpoint is missing (404), the SPA assumes registration is allowed and relies on `POST /api/auth/register` to enforce the flag.
 - **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`.
 - **Register (optional, often disabled in production):** `POST /api/auth/register` with `{ "userName", "email", "password" }`. When `Auth:AllowRegister` is `false`, the API returns **403** with a problem details body.
 - **Response:** `{ "accessToken", "expiresAt", "email", "userName" }`. Store `accessToken` (for example in `localStorage` or `sessionStorage`).
