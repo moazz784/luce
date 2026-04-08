@@ -81,7 +81,7 @@ const App = () => {
   const navigate = useNavigate();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
-
+ const [isAdmin, setIsAdmin] = useState(false);
   // --- البيانات (Data) - سيبتها لك زي ما هي بالظبط ---
   const newsData = [
     {
@@ -329,7 +329,15 @@ const App = () => {
 
   // --- 💡 التعديل هنا: تعريف المتغير والـ Effect داخل الفانكشن ---
   const currentAward = awards[awardIndex];
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
+  if (token) {
+    setIsAdmin(true);
+  } else {
+    setIsAdmin(false);
+  }
+}, []);
  useEffect(() => {
   const timer = setInterval(() => { 
     setAwardIndex((prev) => (prev + 1) % awards.length);
@@ -343,127 +351,132 @@ const App = () => {
     <div id='100' className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
       
       {/* --- 1. Navbar --- */}
-      <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px]">
+   <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px]">
 
-  {/* Logo */}
-  <div className="flex items-center gap-3 h-full">
+      {/* Logo */}
+      <div className="flex items-center gap-3 h-full">
+        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1">
+          <img src={lo} alt="Logo" className="w-full h-full object-contain rounded-full" />
+        </div>
 
-    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1">
-      <img src={lo} alt="Logo" className="w-full h-full object-contain rounded-full" />
-    </div>
+        <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
+          <h1 className="text-[11px] font-bold uppercase">
+            Misr University
+          </h1>
+          <p className="text-[9px] opacity-70 uppercase">
+            For Science & Technology
+          </p>
+        </div>
+      </div>
 
-    <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
-      <h1 className="text-[11px] font-bold uppercase">
-        Misr University
-      </h1>
-      <p className="text-[9px] opacity-70 uppercase">
-        For Science & Technology
-      </p>
-    </div>
+      {/* Links */}
+      <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
+        {navLinks.map((item) => (
+          <li key={item.id} className="relative group flex items-center h-full">
 
-  </div>
+            <a
+              href={`#${item.id}`}
+              className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
+            >
+              {item.name}
 
-  {/* Links */}
-  <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
+              {item.subItems && (
+                <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />
+              )}
+            </a>
 
-    {navLinks.map((item) => (
-      <li key={item.id} className="relative group flex items-center h-full">
+            {/* Dropdown */}
+            {item.subItems && (
+              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
 
-        <a
-          href={`#${item.id}`}
-          className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
+                {item.subItems.map((sub, idx) => (
+                  <li key={idx} className="relative group/nested border-b border-white/5">
+
+                    <a
+                      href={sub.link}
+                      className="flex justify-between px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
+                    >
+                      {sub.name}
+                      {sub.nestedItems && <ChevronRight size={14} />}
+                    </a>
+
+                    {/* Nested */}
+                    {sub.nestedItems && (
+                      <ul className="absolute left-full top-0 w-64 bg-[#1a2b4b] border-l-2 border-green-500 shadow-2xl opacity-0 invisible translate-x-2 group-hover/nested:visible group-hover/nested:opacity-100 group-hover/nested:translate-x-0 transition-all duration-300 z-[60]">
+
+                        {sub.nestedItems.map((nested, nIdx) => (
+                          <li key={nIdx}>
+                            <a
+                              href={nested.link}
+                              className="block px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
+                            >
+                              {nested.name}
+                            </a>
+                          </li>
+                        ))}
+
+                      </ul>
+                    )}
+                  </li>
+                ))}
+
+              </ul>
+            )}
+
+          </li>
+        ))}
+      </ul>
+
+      {/* Right */}
+      <div className="flex items-center gap-4 border-l border-white/20 pl-4 h-full">
+
+        {/* Dark Mode */}
+        <button
+          onClick={() => setIsDark(!isDark)}
+          className="hover:text-green-400 transition p-1"
         >
-          {item.name}
-
-          {item.subItems && (
-            <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />
+          {isDark ? (
+            <Sun size={20} className="text-yellow-400" />
+          ) : (
+            <Moon size={20} />
           )}
+        </button>
 
-        </a>
+        {/* Language */}
+        <span className="cursor-pointer font-bold text-sm hover:text-green-400">
+          ع
+        </span>
 
-        {/* Dropdown */}
-        {item.subItems && (
-          <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
+        {/* Conditional UI */}
+        {isAdmin ? (
+          <>
+            {/* Dashboard */}
+            <button
+              onClick={() => navigate("/AdminDashboard")}
+              className="p-2 border border-white/20 rounded hover:border-green-400 transition"
+            >
+              Dashboard
+            </button>
 
-            {item.subItems.map((sub, idx) => (
-              <li key={idx} className="relative group/nested border-b border-white/5">
-
-                <a
-                  href={sub.link}
-                  className="flex justify-between px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
-                >
-                  {sub.name}
-                  {sub.nestedItems && <ChevronRight size={14} />}
-                </a>
-
-                {/* Nested */}
-                {sub.nestedItems && (
-                  <ul className="absolute left-full top-0 w-64 bg-[#1a2b4b] border-l-2 border-green-500 shadow-2xl opacity-0 invisible translate-x-2 group-hover/nested:visible group-hover/nested:opacity-100 group-hover/nested:translate-x-0 transition-all duration-300 z-[60]">
-
-                    {sub.nestedItems.map((nested, nIdx) => (
-                      <li key={nIdx}>
-                        <a
-                          href={nested.link}
-                          className="block px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
-                        >
-                          {nested.name}
-                        </a>
-                      </li>
-                    ))}
-
-                  </ul>
-                )}
-
-              </li>
-            ))}
-
-          </ul>
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-green-500 hover:bg-cyan-500 transition px-4 py-1.5 rounded-full font-bold"
+          >
+            Login
+          </button>
         )}
 
-      </li>
-    ))}
-
-  </ul>
-
-  {/* Right */}
-  <div className="flex items-center gap-4 border-l border-white/20 pl-4 h-full">
-
-    {/* Dark Mode */}
-    <button
-      onClick={() => setIsDark(!isDark)}
-      className="hover:text-green-400 transition p-1"
-    >
-      {isDark ? (
-        <Sun size={20} className="text-yellow-400" />
-      ) : (
-        <Moon size={20} />
-      )}
-    </button>
-
-    {/* Language */}
-    <span className="cursor-pointer font-bold text-sm hover:text-green-400">
-      ع
-    </span>
-
-    {/* Menu */}
-    <button
-      onClick={() => navigate("/AdminDashboard")}
-      className="p-2 border border-white/20 rounded hover:border-green-400 transition"
-    >
-      <Menu size={22} />
-    </button>
-
-    {/* Login */}
-    <button
-      onClick={() => navigate("/login")}
-      className="bg-green-500 hover:bg-cyan-500 transition px-4 py-1.5 rounded-full font-bold"
-    >
-      Login
-    </button>
-
-  </div>
-
-</nav>
+      </div>
+    </nav>
 <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
 
   {/* Slider */}
