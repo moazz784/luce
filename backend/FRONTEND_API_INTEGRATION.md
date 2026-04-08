@@ -8,7 +8,8 @@ This document is for the React (Vite) app in the repository root. **Do not chang
 - Example production: `VITE_API_BASE_URL=https://luce.runasp.net` (must match a TLS endpoint your host exposes).
 - In code, prefix every request: `` `${import.meta.env.VITE_API_BASE_URL}/api/...` ``.
 - For local development with the API on `http://localhost:5009`, set `VITE_API_BASE_URL=http://localhost:5009` in `.env.local`.
-- The app default in [src/Api.js](../src/Api.js) is `https://luce.runasp.net` when `VITE_API_BASE_URL` is unset.
+- The app default in [src/Api.js](../src/Api.js) is `https://luce.runasp.net` when `VITE_API_BASE_URL` is unset (production builds).
+- **Local dev:** With `npm run dev`, leave `VITE_API_BASE_URL` unset so requests go to `/api/...` on the Vite port; [vite.config.js](../vite.config.js) proxies `/api` to `http://localhost:5009`. Run the API (`dotnet run` in `Luce.Api`) on port **5009**. Do **not** set `VITE_API_BASE_URL` to the Vite URL (e.g. `http://localhost:3000`) or `/api` will 404.
 
 ## CORS
 
