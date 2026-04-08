@@ -1,4 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://luce.runasp.net";
+// HTTPS required when the SPA is served over HTTPS (e.g. Vercel); http:// is blocked as mixed content.
+// Override in .env.local or Vercel: VITE_API_BASE_URL=http://localhost:5009 for local API on HTTP.
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://luce.runasp.net";
 
 export const api = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");

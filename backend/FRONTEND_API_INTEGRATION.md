@@ -4,9 +4,11 @@ This document is for the React (Vite) app in the repository root. **Do not chang
 
 ## Base URL
 
-- Add an environment variable, for example `VITE_API_BASE_URL=http://luce.runasp.net` (no trailing slash).
+- Add an environment variable (no trailing slash). **Production sites on HTTPS (e.g. Vercel) must use an `https://` API URL**; calling `http://` from an HTTPS page is blocked as mixed content.
+- Example production: `VITE_API_BASE_URL=https://luce.runasp.net` (must match a TLS endpoint your host exposes).
 - In code, prefix every request: `` `${import.meta.env.VITE_API_BASE_URL}/api/...` ``.
 - For local development with the API on `http://localhost:5009`, set `VITE_API_BASE_URL=http://localhost:5009` in `.env.local`.
+- The app default in [src/Api.js](../src/Api.js) is `https://luce.runasp.net` when `VITE_API_BASE_URL` is unset.
 
 ## CORS
 
@@ -113,7 +115,7 @@ To avoid CORS during local dev, you can proxy `/api` to the backend in `vite.con
 ```js
 server: {
   proxy: {
-    '/api': { target: 'http://localhost:5009', changeOrigin: true },
+    '/api': { target: 'https://localhost:5009', changeOrigin: true },
   },
 },
 ```

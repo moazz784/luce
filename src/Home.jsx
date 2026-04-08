@@ -3,12 +3,16 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import backs from "./assets/back22.jpg";
 import lo from "./assets/lo.png";
 import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
 import { logout } from "./authService";
+import {
+  resolveContentImage,
+  localImageSets,
+  staticFallbackBundle,
+} from "./homeStaticFallback";
 // استيراد ستايلات Swiper الأساسية
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -74,71 +78,82 @@ const App = () => {
         const bundle = await api("/api/public/home-bundle", { method: "GET" });
         if (cancelled) return;
 
+        const newsList = (bundle.news || []).map((n, i) => ({
+          id: n.id,
+          title: n.title,
+          image: resolveContentImage(n.imageUrl, localImageSets.news, i),
+        }));
         setNewsData(
-          (bundle.news || []).map((n) => ({
-            id: n.id,
-            title: n.title,
-            image: n.imageUrl,
-          }))
+          newsList.length ? newsList : staticFallbackBundle.newsData
         );
 
-        const heroSlides = (bundle.heroSlides || []).map((h) => ({
+        const heroSlides = (bundle.heroSlides || []).map((h, i) => ({
           id: h.id,
-          image: h.imageUrl,
+          image: resolveContentImage(h.imageUrl, localImageSets.hero, i),
         }));
         setSlides(
-          heroSlides.length ? heroSlides : [{ id: 0, image: backs }]
+          heroSlides.length ? heroSlides : staticFallbackBundle.slides
         );
 
+        const syndList = (bundle.syndicates || []).map((s, i) => ({
+          id: s.id,
+          title: s.title,
+          image: resolveContentImage(s.imageUrl, localImageSets.syndicate, i),
+          link: s.link,
+          btnText: s.buttonText,
+          color: "bg-blue-600",
+        }));
         setSyndicateData(
-          (bundle.syndicates || []).map((s) => ({
-            id: s.id,
-            title: s.title,
-            image: s.imageUrl,
-            link: s.link,
-            btnText: s.buttonText,
-            color: "bg-blue-600",
-          }))
+          syndList.length ? syndList : staticFallbackBundle.syndicateData
         );
 
+        const awardsList = (bundle.awards || []).map((a, i) => ({
+          id: a.id,
+          title: a.title || "",
+          subtitle: a.subtitle || "",
+          name:
+            (a.content || a.winnerName || "").trim() ||
+            a.title ||
+            "",
+          content: a.content || "",
+          image: resolveContentImage(a.imageUrl, localImageSets.awards, i),
+        }));
         setAwards(
-          (bundle.awards || []).map((a) => ({
-            id: a.id,
-            title: a.title || "",
-            subtitle: a.subtitle || "",
-            name:
-              (a.content || a.winnerName || "").trim() ||
-              a.title ||
-              "",
-            content: a.content || "",
-            image: a.imageUrl,
-          }))
+          awardsList.length ? awardsList : staticFallbackBundle.awards
         );
 
+        const eventsList = (bundle.events || []).map((e, i) => ({
+          id: e.id,
+          image: resolveContentImage(e.imageUrl, localImageSets.events, i),
+          date: e.date || { day: "", month: "" },
+          location: e.location || "",
+          time: e.timeRange || "",
+          title: e.title,
+          description: e.description || "",
+          color: e.accentColor || "#3b4b81",
+        }));
         setEvents(
-          (bundle.events || []).map((e) => ({
-            id: e.id,
-            image: e.imageUrl,
-            date: e.date || { day: "", month: "" },
-            location: e.location || "",
-            time: e.timeRange || "",
-            title: e.title,
-            description: e.description || "",
-            color: e.accentColor || "#3b4b81",
-          }))
+          eventsList.length ? eventsList : staticFallbackBundle.events
         );
 
+        const alumniList = (bundle.alumni || []).map((a, i) => ({
+          id: a.id,
+          name: a.name,
+          image: resolveContentImage(a.imageUrl, localImageSets.alumni, i),
+          description: a.shortDescription || "",
+          fullBio: a.fullBio || "",
+        }));
         setAlumni(
-          (bundle.alumni || []).map((a) => ({
-            id: a.id,
-            name: a.name,
-            image: a.imageUrl,
-            description: a.shortDescription || "",
-            fullBio: a.fullBio || "",
-          }))
+          alumniList.length ? alumniList : staticFallbackBundle.alumni
         );
       } catch (err) {
         if (!cancelled) {
+          setNewsData(staticFallbackBundle.newsData);
+          setSlides(staticFallbackBundle.slides);
+          setSyndicateData(staticFallbackBundle.syndicateData);
+          setAwards(staticFallbackBundle.awards);
+          setEvents(staticFallbackBundle.events);
+          setAlumni(staticFallbackBundle.alumni);
           setBundleError(err.message || "تعذر تحميل المحتوى");
         }
       } finally {
