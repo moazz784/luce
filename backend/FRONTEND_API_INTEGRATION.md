@@ -19,11 +19,11 @@ The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luc
 
 - **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default). **Redeploy the API** after pulling this route; if the endpoint is missing (404), the SPA assumes registration is allowed and relies on `POST /api/auth/register` to enforce the flag.
 - **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`.
-- **Register (optional, often disabled in production):** `POST /api/auth/register` with `{ "userName", "email", "password" }`. When `Auth:AllowRegister` is `false`, the API returns **403** with a problem details body.
-- **Response:** `{ "accessToken", "expiresAt", "email", "userName" }`. Store `accessToken` (for example in `localStorage` or `sessionStorage`).
-- **Admin requests:** send header `Authorization: Bearer <accessToken>` for all `/api/admin/*` routes.
+- **Register (optional, often disabled in production):** `POST /api/auth/register` with `{ "userName", "email", "password" }`. New accounts get the **`User`** role only (not **Admin**). When `Auth:AllowRegister` is `false`, the API returns **403** with a problem details body.
+- **Response:** `{ "accessToken", "expiresAt", "email", "userName" }`. Store `accessToken` (for example in `localStorage` or `sessionStorage`). JWT includes role claims (`ClaimTypes.Role`); the SPA uses [src/jwtUtils.js](../src/jwtUtils.js) to detect **Admin** for `/AdminDashboard`.
+- **Admin requests:** send header `Authorization: Bearer <accessToken>` for all `/api/admin/*` routes; the API requires **`Admin`** role.
 - **Logout:** clear the token client-side; call no endpoint unless you add one later.
-- **Protect `/AdminDashboard`:** if there is no token (or optional expiry check), redirect to `/login`.
+- **Protect `/AdminDashboard`:** redirect to `/login` if no token; redirect to `/` if the token does not include the **Admin** role.
 
 ### Default seeded admin (development)
 

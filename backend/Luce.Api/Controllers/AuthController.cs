@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _auth.RegisterAdminAsync(request, cancellationToken);
+            var result = await _auth.RegisterUserAsync(request, cancellationToken);
             if (result is null)
                 return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails { Title = "Registration is disabled." });
 

@@ -38,7 +38,7 @@ public class AuthService : IAuthService
         return _jwt.CreateToken(user.Id, user.Email ?? request.Email, user.UserName ?? user.Email ?? request.Email, roleNames.ToList());
     }
 
-    public async Task<AuthResponse?> RegisterAdminAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthResponse?> RegisterUserAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
         if (!_authOptions.AllowRegister)
             return null;
@@ -57,11 +57,11 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
             throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-        const string adminRole = "Admin";
-        if (!await _roles.RoleExistsAsync(adminRole))
-            await _roles.CreateAsync(new IdentityRole(adminRole));
+        const string userRole = "User";
+        if (!await _roles.RoleExistsAsync(userRole))
+            await _roles.CreateAsync(new IdentityRole(userRole));
 
-        await _users.AddToRoleAsync(user, adminRole);
+        await _users.AddToRoleAsync(user, userRole);
 
         var roles = await _users.GetRolesAsync(user);
         return _jwt.CreateToken(user.Id, user.Email ?? request.Email, user.UserName ?? request.Email, roles.ToList());

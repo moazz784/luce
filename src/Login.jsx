@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { login, register } from "./authService";
 import { api } from "./Api";
+import { hasAdminRole } from "./jwtUtils";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -62,11 +63,12 @@ export default function Auth() {
 
       try {
         if (isLogin) {
-          // بنادي الـ login اللي في الـ authService وهو هيتكفل بحفظ الـ Token
           await login(values.email, values.password);
-          
-          // التوجيه للوحة التحكم بعد النجاح
-          navigate("/AdminDashboard", { replace: true });
+          const token = localStorage.getItem("token");
+          navigate(
+            hasAdminRole(token) ? "/AdminDashboard" : "/",
+            { replace: true },
+          );
         } else {
           await register(values.name, values.email, values.password);
           

@@ -17,6 +17,10 @@ public static class DatabaseSeeder
         if (!await roleManager.RoleExistsAsync(adminRole))
             await roleManager.CreateAsync(new IdentityRole(adminRole));
 
+        const string userRole = "User";
+        if (!await roleManager.RoleExistsAsync(userRole))
+            await roleManager.CreateAsync(new IdentityRole(userRole));
+
         var existing = await userManager.FindByEmailAsync(seed.AdminEmail);
         if (existing is not null)
             return;

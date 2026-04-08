@@ -8,6 +8,7 @@ import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
 import { logout } from "./authService";
+import { hasAdminRole } from "./jwtUtils";
 import {
   resolveContentImage,
   localImageSets,
@@ -294,7 +295,7 @@ const App = () => {
         };
 
   useEffect(() => {
-    setIsAdmin(!!localStorage.getItem("token"));
+    setIsAdmin(hasAdminRole(localStorage.getItem("token")));
   }, []);
 
   useEffect(() => {
