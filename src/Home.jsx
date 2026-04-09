@@ -527,33 +527,36 @@ const App = () => {
       </h2>
 
       {/* Quick Links */}
-      <div className="flex flex-wrap justify-center gap-3 text-sm md:text-base font-medium bg-black/40 backdrop-blur-lg px-6 py-3 rounded-full border border-white/10 text-white">
-
-        {[
-          { name: "Home", target: "home" },
-          { name: "Services", target: "6000" },
-          { name: "Notable", target: "5000" },
-          { name: "Awards", target: "awards" },
-          { name: "Events", target: "1000" },
-          { name: "News", target: "2000" },
-          { name: "Syndicates", target: "moazz" },
-          { name: "Contact Us", target: "3000" },
-        ].map((item, i, arr) => (
-          <React.Fragment key={i}>
-            <a
-              href={`#${item.target}`}
-              className="hover:text-green-400 transition-colors duration-300"
-            >
-              {item.name}
-            </a>
-
-            {i !== arr.length - 1 && (
-              <span className="text-green-400 opacity-70">→</span>
-            )}
-          </React.Fragment>
-        ))}
-
-      </div>
+<div className="flex flex-wrap justify-center gap-3 text-sm md:text-base font-medium">
+  {[
+    { name: "Home", target: "home" },
+    { name: "Services", target: "6000" },
+    { name: "Notable", target: "5000" },
+    { name: "Awards", target: "awards" },
+    { name: "Events", target: "1000" },
+    { name: "News", target: "2000" },
+    { name: "Syndicates", target: "moazz" },
+    { name: "Contact Us", target: "3000" },
+  ].map((item, i) => (
+    <a
+      key={i}
+      href={`#${item.target}`}
+      className="
+        px-5 py-2
+        rounded-full
+        bg-white/10
+        backdrop-blur-md
+        border border-white/20
+        text-white
+        hover:bg-white/20
+        hover:scale-105
+        transition-all duration-300
+      "
+    >
+      {item.name}
+    </a>
+  ))}
+</div>
 
     </div>
 
@@ -586,6 +589,10 @@ const App = () => {
         Icon: Twitter,
         url: "https://x.com/must_university",
       },
+      {
+  Icon:Linkedin,
+  url: "https://www.linkedin.com/"
+}
     ].map((item, idx) => (
       <a
         key={idx}
