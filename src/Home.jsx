@@ -339,68 +339,127 @@ const App = () => {
       )}
       
       {/* --- 1. Navbar --- */}
-<nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px]">
-      
-      {/* Logo Section */}
+   <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px]">
+
+      {/* Logo */}
       <div className="flex items-center gap-3 h-full">
-        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1">
           <img src={lo} alt="Logo" className="w-full h-full object-contain rounded-full" />
         </div>
+
         <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
-          <h1 className="text-[11px] font-bold uppercase">Misr University</h1>
-          <p className="text-[9px] opacity-70 uppercase">For Science & Technology</p>
+          <h1 className="text-[11px] font-bold uppercase">
+            Misr University
+          </h1>
+          <p className="text-[9px] opacity-70 uppercase">
+            For Science & Technology
+          </p>
         </div>
       </div>
 
-      {/* Links (كما هي) */}
+      {/* Links */}
       <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
-        {/* ... NavLinks Map ... */}
+        {navLinks.map((item) => (
+          <li key={item.id} className="relative group flex items-center h-full">
+
+            <a
+              href={`#${item.id}`}
+              className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
+            >
+              {item.name}
+
+              {item.subItems && (
+                <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />
+              )}
+            </a>
+
+            {/* Dropdown */}
+            {item.subItems && (
+              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
+
+                {item.subItems.map((sub, idx) => (
+                  <li key={idx} className="relative group/nested border-b border-white/5">
+
+                    <a
+                      href={sub.link}
+                      className="flex justify-between px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
+                    >
+                      {sub.name}
+                      {sub.nestedItems && <ChevronRight size={14} />}
+                    </a>
+
+                    {/* Nested */}
+                    {sub.nestedItems && (
+                      <ul className="absolute left-full top-0 w-64 bg-[#1a2b4b] border-l-2 border-green-500 shadow-2xl opacity-0 invisible translate-x-2 group-hover/nested:visible group-hover/nested:opacity-100 group-hover/nested:translate-x-0 transition-all duration-300 z-[60]">
+
+                        {sub.nestedItems.map((nested, nIdx) => (
+                          <li key={nIdx}>
+                            <a
+                              href={nested.link}
+                              className="block px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
+                            >
+                              {nested.name}
+                            </a>
+                          </li>
+                        ))}
+
+                      </ul>
+                    )}
+                  </li>
+                ))}
+
+              </ul>
+            )}
+
+          </li>
+        ))}
       </ul>
 
-      {/* Right Section - الجزء اللي فيه التعديل */}
+      {/* Right */}
       <div className="flex items-center gap-4 border-l border-white/20 pl-4 h-full">
-        
-        {/* Dark Mode Toggle */}
-        <button onClick={() => setIsDark(!isDark)} className="hover:text-green-400 transition p-1">
-          {isDark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
+
+        {/* Dark Mode */}
+        <button
+          onClick={() => setIsDark(!isDark)}
+          className="hover:text-green-400 transition p-1"
+        >
+          {isDark ? (
+            <Sun size={20} className="text-yellow-400" />
+          ) : (
+            <Moon size={20} />
+          )}
         </button>
 
-        <span className="cursor-pointer font-bold text-sm hover:text-green-400">ع</span>
+        {/* Language */}
+        <span className="cursor-pointer font-bold text-sm hover:text-green-400">
+          ع
+        </span>
 
-        {/* منطق تبديل Login باسم المستخدم */}
+        {/* Admins: Dashboard. Any logged-in user: Logout (User role is not admin). */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate("/AdminDashboard")}
+            className="p-2 border border-white/20 rounded hover:border-green-400 transition"
+          >
+            Dashboard
+          </button>
+        )}
         {isLoggedIn ? (
-          <div className="flex items-center gap-4">
-            {/* عرض اسم اليوزر من الباك إيند */}
-            <div className="flex flex-col items-end">
-              <span className="text-[12px] font-bold text-green-400">
-                Hi, {user?.userName} 
-              </span>
-              {/* لو أدمن يظهر له زرار الداشبورد */}
-              {user?.roles?.includes("Admin") && (
-                <span 
-                  onClick={() => navigate("/AdminDashboard")}
-                  className="text-[9px] bg-white/10 px-1 rounded cursor-pointer hover:bg-green-500 transition"
-                >
-                  Dashboard
-                </span>
-              )}
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold text-[11px]"
-            >
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold"
+          >
+            Logout
+          </button>
         ) : (
           <button
             onClick={() => navigate("/login")}
-            className="bg-green-500 hover:bg-cyan-500 transition px-6 py-1.5 rounded-full font-bold text-[13px]"
+            className="bg-green-500 hover:bg-cyan-500 transition px-4 py-1.5 rounded-full font-bold"
           >
             Login
           </button>
         )}
+
       </div>
     </nav>
 <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
@@ -859,47 +918,50 @@ const App = () => {
       className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
       dir="ltr"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative">
         
-        {/* الهيدر بنفس شكل الصورة اللي بعتها (العنوان والأسهم جنب بعض) */}
+        {/* Header with Title and Custom Arrows */}
         <div className="flex justify-between items-center mb-10">
-          <h2 className="text-3xl font-bold text-[#00a651]">
+          <h2 className="text-3xl font-bold text-[#00a651] text-left">
             Related Events
           </h2>
           
-          {/* أسهم التقليب المخصصة */}
-          <div className="flex gap-2">
-            <button className="prev-arrow w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-white hover:bg-[#00a651] hover:text-white transition-all">
+          {/* Custom Navigation Buttons (Arrows) - Styled like the alumni section */}
+          <div className="flex gap-3">
+            <button className="swiper-prev-btn w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#00a651] hover:text-white hover:border-[#00a651] transition-all">
               <ChevronLeft size={20} />
             </button>
-            <button className="next-arrow w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-white hover:bg-[#00a651] hover:text-white transition-all">
+            <button className="swiper-next-btn w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#00a651] hover:text-white hover:border-[#00a651] transition-all">
               <ChevronRight size={20} />
             </button>
           </div>
         </div>
 
-        {/* السلايدر */}
+        {/* Swiper Container replacing the Grid */}
         <Swiper
           modules={[Navigation]}
-          spaceBetween={24}
-          slidesPerView={1}
+          spaceBetween={24} // المسافة بين الكاردات
+          slidesPerView={1}  // عدد الكاردات الافتراضي (للموبايل الصغير جداً)
           navigation={{
-            nextEl: '.next-arrow',
-            prevEl: '.prev-arrow',
+            nextEl: '.swiper-next-btn',
+            prevEl: '.swiper-prev-btn',
           }}
           breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 },
+            // التجاوب: كم كارد يظهر حسب عرض الشاشة
+            640: { slidesPerView: 2 },  // شاشات متوسطة (تابلت)
+            1024: { slidesPerView: 3 }, // شاشات لابتوب
+            1280: { slidesPerView: 4 }, // شاشات سطح مكتب كبيرة
           }}
+          className="events-swiper" // كلاس مخصص إذا احتجت ستايل معين
         >
           {events.map((event) => (
-            <SwiperSlide key={event.id}>
-              {/* الكارد بتاعك بنفس الـ Layout والـ CSS بالظبط */}
-              <div className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2">
-                
+            <SwiperSlide key={event.id} className="h-auto">
+              {/* --- نفس الـ Layout الكارد الأصلي الخاص بك --- */}
+              <div
+                className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2 h-full bg-white dark:bg-gray-800 rounded-sm shadow-md overflow-hidden"
+              >
                 {/* Image */}
-                <div className="relative h-74 overflow-hidden rounded-sm">
+                <div className="relative h-64 overflow-hidden">
                   <img
                     src={event.image}
                     alt={event.title}
@@ -909,16 +971,17 @@ const App = () => {
                   {/* Date Badge */}
                   <div className="absolute bottom-4 left-4 bg-[#1a3668] text-white w-14 h-16 flex flex-col items-center justify-center rounded-md shadow-lg">
                     <div className="text-2xl font-bold leading-none">
-                      {event.date?.day}
+                      {event.date.day}
                     </div>
                     <div className="text-xs uppercase font-medium mt-1">
-                      {event.date?.month}
+                      {event.date.month}
                     </div>
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="mt-4 space-y-2 px-1">
+                <div className="mt-4 space-y-2 px-4 pb-5">
+                  
                   {/* Location & Time */}
                   <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
                     <span className="flex items-center gap-1">
@@ -940,21 +1003,22 @@ const App = () => {
                   </h3>
 
                   {/* Description */}
-                  <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-5">
+                  <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-3">
                     {event.description}
                   </p>
                 </div>
               </div>
+              {/* --- نهاية الـ Layout الأصلي --- */}
             </SwiperSlide>
           ))}
         </Swiper>
+      </div>
 
-        {/* زرار See All Events */}
-        <div className="text-center mt-12">
-          <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
-            See All Events
-          </button>
-        </div>
+      {/* Button */}
+      <div className="text-center mt-12">
+        <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
+          See All Events
+        </button>
       </div>
     </section>
 <section
