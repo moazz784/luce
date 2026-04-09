@@ -23,7 +23,7 @@ Set these application settings (names may vary by panel; use environment variabl
 | `Jwt__AccessTokenMinutes` | Access token lifetime |
 | `Auth__AllowRegister` | Set `false` in production unless you intentionally allow admin self-registration |
 | `Seed__AdminEmail` / `Seed__AdminPassword` | Only for first deploy; change password after login |
-| `Cors__AllowedOrigins__0` … | Your production SPA origin(s), e.g. `https://www.yoursite.com` |
+| `Cors__AllowedOrigins__0` … | Production SPA: `https://luce-six.vercel.app` (add more indexes for preview URLs if needed) |
 
 ## 3. Publish the API
 
@@ -60,6 +60,6 @@ Uploaded images are stored under **`wwwroot/uploads`**. Ensure the IIS app pool 
 
 ## 7. Smoke test
 
-- `GET https://your-api-host/swagger` (if Swagger is enabled for your environment).
-- `GET https://your-api-host/api/public/home-bundle` should return JSON (may be empty lists until content is added).
+- `GET https://luce.runasp.net/swagger` (if Swagger is enabled for your environment).
+- `GET https://luce.runasp.net/api/public/home-bundle` should return JSON (may be empty lists until content is added).
 - Log in with seeded admin credentials, then call an `/api/admin/*` endpoint with the bearer token.

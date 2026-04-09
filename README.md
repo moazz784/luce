@@ -1,6 +1,10 @@
-# React + Vite
+# Luce (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Production:** Frontend **[https://luce-six.vercel.app](https://luce-six.vercel.app)** · API **[https://luce.runasp.net](https://luce.runasp.net)**. Set `VITE_API_BASE_URL=https://luce.runasp.net` on Vercel (optional; [src/Api.js](src/Api.js) defaults to this for production builds). See [backend/FRONTEND_API_INTEGRATION.md](backend/FRONTEND_API_INTEGRATION.md).
+
+---
+
+This project uses Vite with HMR and ESLint.
 
 Currently, two official plugins are available:
 

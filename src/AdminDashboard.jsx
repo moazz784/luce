@@ -14,6 +14,7 @@ import {
   Save,
   UploadCloud,
   LogOut,
+  Mail,
 } from "lucide-react";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
@@ -26,6 +27,8 @@ const sectionApiPath = {
   Hero: "/api/admin/hero",
   Syndicates: "/api/admin/syndicates",
 };
+
+const CONTACT_MESSAGES_PATH = "/api/admin/contact-messages";
 
 function normalizeRows(section, rows) {
   if (!Array.isArray(rows)) return [];
@@ -109,6 +112,10 @@ const AdminDashboard = () => {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [contactMessages, setContactMessages] = useState([]);
+  const [contactLoading, setContactLoading] = useState(false);
+  const [expandedContactId, setExpandedContactId] = useState(null);
+
   const menuItems = [
     { name: "News", label: "الأخبار (News)", icon: Newspaper, color: "text-blue-500" },
     { name: "Events", label: "الفعاليات (Events)", icon: Calendar, color: "text-purple-500" },
@@ -116,9 +123,11 @@ const AdminDashboard = () => {
     { name: "Alumni", label: "الخريجين (Alumni)", icon: Users, color: "text-emerald-500" },
     { name: "Hero", label: "واجهة الموقع (Hero)", icon: ImageIcon, color: "text-rose-500" },
     { name: "Syndicates", label: "نقابة ESSP", icon: Link2, color: "text-cyan-500" },
+    { name: "Contact", label: "رسائل التواصل", icon: Mail, color: "text-amber-500" },
   ];
 
   const loadSection = useCallback(async () => {
+    if (activeSection === "Contact") return;
     const path = sectionApiPath[activeSection];
     if (!path) return;
     setListLoading(true);
@@ -136,6 +145,43 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadSection();
   }, [loadSection]);
+
+  useEffect(() => {
+    if (activeSection !== "Contact") {
+      setExpandedContactId(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setContactLoading(true);
+      try {
+        const data = await api(CONTACT_MESSAGES_PATH, { method: "GET" });
+        if (!cancelled)
+          setContactMessages(Array.isArray(data) ? data : []);
+      } catch (e) {
+        if (!cancelled) {
+          setContactMessages([]);
+          alert(e.message || "فشل تحميل الرسائل");
+        }
+      } finally {
+        if (!cancelled) setContactLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSection]);
+
+  const handleDeleteContact = async (id) => {
+    if (!window.confirm("حذف هذه الرسالة؟ لا يمكن التراجع.")) return;
+    try {
+      await api(`${CONTACT_MESSAGES_PATH}/${id}`, { method: "DELETE" });
+      setContactMessages((prev) => prev.filter((m) => m.id !== id));
+      setExpandedContactId((cur) => (cur === id ? null : cur));
+    } catch (e) {
+      alert(e.message || "فشل الحذف");
+    }
+  };
 
   const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
@@ -619,10 +665,98 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {listLoading && (
+        {(activeSection === "Contact" ? contactLoading : listLoading) && (
           <p className="text-sm text-gray-500 mb-4">جاري تحميل القائمة…</p>
         )}
 
+        {activeSection === "Contact" ? (
+        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+          <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 className="text-xl font-bold text-slate-700">
+              رسائل نموذج التواصل من الصفحة الرئيسية
+            </h3>
+            <span className="text-sm font-medium bg-amber-100 text-amber-800 px-4 py-1 rounded-full">
+              {contactMessages.length} رسالة
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-right border-collapse min-w-[720px]">
+              <thead>
+                <tr className="bg-slate-100/50 border-b border-slate-100">
+                  <th className="p-4 text-slate-600 font-bold whitespace-nowrap">التاريخ</th>
+                  <th className="p-4 text-slate-600 font-bold">الاسم</th>
+                  <th className="p-4 text-slate-600 font-bold">البريد</th>
+                  <th className="p-4 text-slate-600 font-bold">الهاتف</th>
+                  <th className="p-4 text-slate-600 font-bold">الرسالة</th>
+                  <th className="p-4 text-slate-600 font-bold text-center w-36">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {contactMessages.map((item) => (
+                  <React.Fragment key={item.id}>
+                    <tr className="hover:bg-amber-50/40 transition align-top">
+                      <td className="p-4 text-sm text-slate-500 whitespace-nowrap">
+                        {item.createdAt
+                          ? String(item.createdAt).replace("T", " ").slice(0, 19)
+                          : "—"}
+                      </td>
+                      <td className="p-4 font-medium text-slate-800">{item.name}</td>
+                      <td className="p-4 text-sm text-blue-700 break-all">{item.email}</td>
+                      <td className="p-4 text-sm text-slate-600">{item.phone || "—"}</td>
+                      <td className="p-4 text-sm text-slate-700 max-w-md">
+                        <p className="line-clamp-3 whitespace-pre-wrap break-words">
+                          {item.message}
+                        </p>
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="flex flex-col sm:flex-row justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedContactId((id) =>
+                                id === item.id ? null : item.id,
+                              )
+                            }
+                            className="text-sm text-amber-700 hover:underline"
+                          >
+                            {expandedContactId === item.id ? "إخفاء النص" : "عرض الكامل"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteContact(item.id)}
+                            className="p-2 text-red-500 hover:bg-red-100 rounded-full inline-flex justify-center"
+                            title="حذف"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedContactId === item.id && (
+                      <tr className="bg-slate-50/80">
+                        <td colSpan={6} className="p-5 border-t border-slate-100">
+                          <p className="text-xs font-semibold text-slate-500 mb-2">نص الرسالة كاملاً</p>
+                          <pre className="whitespace-pre-wrap text-sm text-slate-800 font-sans text-right">
+                            {item.message}
+                          </pre>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {contactMessages.length === 0 && !contactLoading && (
+            <div className="p-16 text-center text-gray-400 flex flex-col items-center gap-4">
+              <Mail size={48} className="opacity-40" />
+              <p className="text-lg">لا توجد رسائل بعد.</p>
+              <p className="text-sm">عند إرسال الزوار لنموذج التواصل في الموقع، ستظهر هنا.</p>
+            </div>
+          )}
+        </section>
+        ) : (
+        <>
         <section className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 mb-12 relative overflow-hidden">
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full opacity-50" />
 
@@ -817,6 +951,8 @@ const AdminDashboard = () => {
             </div>
           )}
         </section>
+        </>
+        )}
       </main>
     </div>
   );

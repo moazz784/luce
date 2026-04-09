@@ -1,4 +1,4 @@
-// - Production (Vercel): use https API (set VITE_API_BASE_URL or default below).
+// - Production: SPA https://luce-six.vercel.app → API https://luce.runasp.net (set VITE_API_BASE_URL or use default below).
 // - Local dev: leave VITE_API_BASE_URL unset to use same-origin `/api/...`; Vite proxies to ASP.NET (see vite.config.js).
 // - Or set VITE_API_BASE_URL=http://localhost:5009 to call the API directly.
 // - Auth uses HttpOnly cookie + credentials: "include" (see authService.js).

@@ -2,6 +2,8 @@
 
 ASP.NET Core 8 Web API for the Luce alumni site: SQL Server, EF Core, Identity + JWT, and public/admin content endpoints.
 
+**Production (current):** API **`https://luce.runasp.net`** · SPA on Vercel **`https://luce-six.vercel.app`**. Ensure `Cors:AllowedOrigins` on the host includes the Vercel origin exactly.
+
 ## Run locally
 
 Prerequisites: [.NET 8 SDK](https://dotnet.microsoft.com/download), SQL Server or LocalDB.

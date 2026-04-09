@@ -21,6 +21,16 @@ public class ContactCreateDto
     public string Message { get; set; } = string.Empty;
 }
 
+public class ContactMessageAdminDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public class HomeBundleDto
 {
     public IReadOnlyList<NewsPublicDto> News { get; set; } = Array.Empty<NewsPublicDto>();

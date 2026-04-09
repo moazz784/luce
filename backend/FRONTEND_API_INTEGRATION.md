@@ -13,7 +13,7 @@ This document is for the React (Vite) app in the repository root. **Do not chang
 
 ## CORS
 
-The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luce.Api/appsettings.json). Add your production SPA origin (for example `https://your-site.com`) in hosting configuration or environment variables so browsers are not blocked.
+The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luce.Api/appsettings.json). Production SPA: **`https://luce-six.vercel.app`** (must match exactly, including `https`). Add preview domains in Vercel if you test PR deployments. On MonsterASP / runasp.net, override origins via environment variables or the host app settings UI if the deployed API does not read the repo `appsettings.json`.
 
 ## Authentication (HttpOnly cookie + JWT)
 
@@ -59,12 +59,15 @@ All routes require an authenticated **Admin** user (JWT from **`access_token`** 
 | Alumni | `/api/admin/alumni` |
 | Hero | `/api/admin/hero` |
 | Syndicates | `/api/admin/syndicates` |
+| Contact inbox | `/api/admin/contact-messages` |
 
 Patterns:
 
-- `GET` list · `GET {id}` · `POST` create · `PUT {id}` update · `DELETE {id}`
+- Content sections: `GET` list · `GET {id}` · `POST` create · `PUT {id}` update · `DELETE {id}`
 
-Request/response shapes match the admin DTOs in the backend (`NewsCreateDto`, `NewsUpdateDto`, `NewsAdminDto`, etc.).
+**Contact messages** (submissions from `POST /api/public/contact`): `GET /api/admin/contact-messages` returns an array of `{ id, name, email, phone, message, createdAt }` (newest first). `DELETE /api/admin/contact-messages/{id}` removes one row. The admin UI lists these under **رسائل التواصل** in [AdminDashboard.jsx](../src/AdminDashboard.jsx).
+
+Request/response shapes for content CRUD match the admin DTOs in the backend (`NewsCreateDto`, `NewsUpdateDto`, `NewsAdminDto`, etc.).
 
 ## Media upload
 

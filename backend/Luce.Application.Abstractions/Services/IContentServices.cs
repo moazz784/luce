@@ -65,6 +65,8 @@ public interface ISyndicateService
 public interface IContactService
 {
     Task<int> SubmitAsync(ContactCreateDto dto, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ContactMessageAdminDto>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
 }
 
 public interface IHomeBundleService
