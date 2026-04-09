@@ -50,6 +50,17 @@ const App = () => {
   const [awardIndex, setAwardIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accountLabel, setAccountLabel] = useState(() => {
+    try {
+      return (
+        sessionStorage.getItem("userName") ||
+        sessionStorage.getItem("email") ||
+        ""
+      );
+    } catch {
+      return "";
+    }
+  });
 
   const [newsData, setNewsData] = useState([]);
   const [slides, setSlides] = useState([]);
@@ -301,8 +312,14 @@ const App = () => {
     api("/api/auth/me", { method: "GET" })
       .then((me) => {
         if (cancelled) return;
-        const roles = me.roles ?? [];
+        const rolesRaw = me.roles ?? [];
+        const roles = Array.isArray(rolesRaw) ? rolesRaw.map(String) : [];
         saveRolesToSession(roles);
+        const uname = me.userName ?? me.UserName ?? "";
+        const em = me.email ?? me.Email ?? "";
+        if (uname) sessionStorage.setItem("userName", uname);
+        if (em) sessionStorage.setItem("email", em);
+        setAccountLabel(uname || em || "");
         setIsLoggedIn(true);
         setIsAdmin(roles.includes("Admin"));
       })
@@ -310,6 +327,7 @@ const App = () => {
         if (cancelled) return;
         setIsLoggedIn(false);
         setIsAdmin(false);
+        setAccountLabel("");
         clearAuthSession();
       });
     return () => {
@@ -434,6 +452,16 @@ const App = () => {
         <span className="cursor-pointer font-bold text-sm hover:text-green-400">
           ع
         </span>
+
+        {isLoggedIn && accountLabel && (
+          <span
+            className="flex items-center gap-1.5 min-w-0 max-w-[min(220px,42vw)] text-green-300"
+            title={accountLabel}
+          >
+            <User size={18} className="shrink-0 opacity-90" aria-hidden />
+            <span className="truncate text-sm font-semibold">{accountLabel}</span>
+          </span>
+        )}
 
         {/* Admins: Dashboard. Any logged-in user: Logout (User role is not admin). */}
         {isAdmin && (
@@ -687,134 +715,132 @@ const App = () => {
     </div>
 
       {/* --- 5. Notable Alumni (Centered Version) --- */}
-<section
-      id="alumni"
-      className="py-20 bg-[#1a2b56] dark:bg-[#0f172a] relative overflow-hidden transition-colors duration-300"
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+     <section
+  id="5000"
+  className="py-20 bg-[#1a2b56] dark:bg-[#0f172a] relative overflow-hidden transition-colors duration-300"
+>
+  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 gap-6">
-          <div className="text-center md:text-left">
-            <span className="text-white/60 uppercase tracking-widest text-sm font-bold">
-              Notable Alumni
-            </span>
-            <h2 className="text-4xl font-bold text-green-400 mt-2">
-              What Our Alumni Say
-            </h2>
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4">
-            <button className="nav-prev p-3 border border-white/20 rounded-full text-white hover:bg-green-500 hover:border-green-500 transition-all shadow-lg">
-              <ChevronLeft size={24} />
-            </button>
-            <button className="nav-next p-3 border border-white/20 rounded-full text-white hover:bg-green-500 hover:border-green-500 transition-all shadow-lg">
-              <ChevronRight size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* Swiper Slider */}
-        <Swiper
-          modules={[Navigation, Autoplay]}
-          spaceBetween={25}
-          slidesPerView={1}
-          navigation={{ prevEl: ".nav-prev", nextEl: ".nav-next" }}
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
-          breakpoints={{
-            // الشاشات الصغيرة (موبايل عريض)
-            640: { slidesPerView: 2 },
-            // الشاشات المتوسطة (تابلت)
-            768: { slidesPerView: 3 },
-            // الشاشات الكبيرة (لابتوب)
-            1024: { slidesPerView: 4 },
-          }}
-          className="pb-12"
-        >
-          {alumni.map((person) => (
-            <SwiperSlide key={person.id} className="h-full">
-              <div className="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center h-[420px] w-full max-w-[320px] mx-auto flex flex-col items-center shadow-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-2 border border-transparent hover:border-green-400/30">
-                
-                {/* Image Container */}
-                <div className="w-28 h-28 rounded-full border-4 border-gray-100 dark:border-gray-700 overflow-hidden mb-4 group-hover:border-green-400 transition-colors shrink-0">
-                  <img
-                    src={person.imageUrl || person.image} 
-                    alt={person.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Name */}
-                <h3 className="text-lg font-bold text-[#1a2b56] dark:text-white mb-2 line-clamp-1">
-                  {person.name}
-                </h3>
-
-                {/* Short Bio / Description */}
-                <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
-                  {person.shortDescription || person.description}
-                </p>
-
-                {/* Hover Button */}
-                <button
-                  onClick={() => setSelectedAlumnus(person)}
-                  className="absolute bottom-0 left-0 right-0 bg-green-500 text-white py-4 font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-300 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]"
-                >
-                  Show More
-                </button>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+  <div className="container mx-auto px-6 relative z-10">
+    <div className="flex justify-between items-end mb-12">
+      <div>
+        <span className="text-white/60 uppercase tracking-widest text-sm font-bold">
+          Notable Alumni
+        </span>
+        <h2 className="text-4xl font-bold text-green-400 mt-2">
+          What Our Alumni Say's
+        </h2>
       </div>
 
-      {/* Biography Modal */}
-      {selectedAlumnus && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
-            onClick={() => setSelectedAlumnus(null)}
-          ></div>
+      <div className="flex gap-4">
+        <button className="nav-prev p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
+          <ChevronLeft size={24} />
+        </button>
+        <button className="nav-next p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
+          <ChevronRight size={24} />
+        </button>
+      </div>
+    </div>
 
-          <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300">
-            
-            <button
-              onClick={() => setSelectedAlumnus(null)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all z-10"
-            >
-              <X size={20} />
-            </button>
+    <Swiper
+      modules={[Navigation, Autoplay]}
+      spaceBetween={30}
+      slidesPerView={1}
+      navigation={{ prevEl: ".nav-prev", nextEl: ".nav-next" }}
+      autoplay={{ delay: 4000 }}
+      breakpoints={{
+        640: { slidesPerView: 2 },
+        1024: {
+          slidesPerView:
+            alumni.length === 0
+              ? 1
+              : alumni.length < 4
+                ? alumni.length
+                : 4,
+        },
+      }}
+      className="pb-12 !flex !justify-center"
+    >
+      {alumni.map((person) => (
+        <SwiperSlide key={person.id} className="flex justify-center">
+          <div className="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center h-[420px] w-full max-w-[320px] flex flex-col items-center shadow-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-2">
 
-            {/* Modal Left Side */}
-            <div className="md:w-1/3 bg-gray-50 dark:bg-gray-700 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-600">
+            <div className="w-30 h-30 rounded-full border-4 border-gray-100 dark:border-gray-700 overflow-hidden mb-2 group-hover:border-green-400 transition-colors">
               <img
-                src={selectedAlumnus.imageUrl || selectedAlumnus.image}
-                className="w-32 h-32 rounded-full border-4 border-green-400 mb-4 shadow-md object-cover"
-                alt={selectedAlumnus.name}
+                src={person.image}
+                alt={person.name}
+                className="w-full h-full object-cover"
               />
-              <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
-                {selectedAlumnus.name}
-              </h4>
-              <span className="text-green-600 text-xs font-bold mt-1 uppercase tracking-wider">
-                MUST Graduate
-              </span>
             </div>
 
-            {/* Modal Right Side */}
-            <div className="md:w-2/3 p-8 overflow-y-auto max-h-[70vh]">
-              <h3 className="text-xl font-bold text-[#1a2b56] dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
-                Biography
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                {selectedAlumnus.fullBio || selectedAlumnus.description}
-              </p>
-            </div>
+            <h3 className="text-lg font-bold text-[#1a2b56] dark:text-white mb-2">
+              {person.name}
+            </h3>
+
+            <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
+              {person.description}
+            </p>
+
+            <button
+              onClick={() => setSelectedAlumnus(person)}
+              className="absolute bottom-0 left-0 right-0 bg-green-500 text-white py-4 font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+            >
+              Show More
+            </button>
           </div>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+
+  {/* Modal */}
+  {selectedAlumnus && (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+
+      <div
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={() => setSelectedAlumnus(null)}
+      ></div>
+
+      <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300 transition-colors">
+
+        <button
+          onClick={() => setSelectedAlumnus(null)}
+          className="absolute top-5 right-5 p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all z-10"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Left */}
+        <div className="md:w-1/3 bg-gray-50 dark:bg-gray-700 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-600">
+          <img
+            src={selectedAlumnus.image}
+            className="w-33 h-33 rounded-full border-4 border-green-400 mb-4 shadow-md"
+            alt=""
+          />
+          <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
+            {selectedAlumnus.name}
+          </h4>
+          <span className="text-green-600 text-xs font-bold mt-1 uppercase tracking-wider">
+            MUST Graduate
+          </span>
         </div>
-      )}
-    </section>
+
+        {/* Right */}
+        <div className="md:w-2/3 p-8 overflow-y-auto max-h-[70vh]">
+          <h3 className="text-xl font-bold text-[#1a2b56] dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
+            Biography
+          </h3>
+
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+            {selectedAlumnus.fullBio}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  )}
+</section>
       {/* --- Awards & Certificates Section --- */}
 <section
   id="awards"
@@ -914,113 +940,79 @@ const App = () => {
 </section>
 
 <section
-      id="1000"
-      className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
-      dir="ltr"
-    >
-      <div className="max-w-7xl mx-auto relative">
-        
-        {/* Header with Title and Custom Arrows */}
-        <div className="flex justify-between items-center mb-10">
-          <h2 className="text-3xl font-bold text-[#00a651] text-left">
-            Related Events
-          </h2>
-          
-          {/* Custom Navigation Buttons (Arrows) - Styled like the alumni section */}
-          <div className="flex gap-3">
-            <button className="swiper-prev-btn w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#00a651] hover:text-white hover:border-[#00a651] transition-all">
-              <ChevronLeft size={20} />
-            </button>
-            <button className="swiper-next-btn w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#00a651] hover:text-white hover:border-[#00a651] transition-all">
-              <ChevronRight size={20} />
-            </button>
+  id="1000"
+  className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
+  dir="ltr"
+>
+  <h2 className="text-3xl font-bold text-[#00a651] text-center mb-10">
+    Related Events
+  </h2>
+
+  <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {events.map((event) => (
+      <div
+        key={event.id}
+        className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2"
+      >
+
+        {/* Image */}
+        <div className="relative h-74 overflow-hidden rounded-sm">
+          <img
+            src={event.image}
+            alt={event.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+
+          {/* Date Badge */}
+          <div className="absolute bottom-4 left-4 bg-[#1a3668] text-white w-14 h-16 flex flex-col items-center justify-center rounded-md shadow-lg">
+            <div className="text-2xl font-bold leading-none">
+              {event.date.day}
+            </div>
+            <div className="text-xs uppercase font-medium mt-1">
+              {event.date.month}
+            </div>
           </div>
         </div>
 
-        {/* Swiper Container replacing the Grid */}
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={24} // المسافة بين الكاردات
-          slidesPerView={1}  // عدد الكاردات الافتراضي (للموبايل الصغير جداً)
-          navigation={{
-            nextEl: '.swiper-next-btn',
-            prevEl: '.swiper-prev-btn',
-          }}
-          breakpoints={{
-            // التجاوب: كم كارد يظهر حسب عرض الشاشة
-            640: { slidesPerView: 2 },  // شاشات متوسطة (تابلت)
-            1024: { slidesPerView: 3 }, // شاشات لابتوب
-            1280: { slidesPerView: 4 }, // شاشات سطح مكتب كبيرة
-          }}
-          className="events-swiper" // كلاس مخصص إذا احتجت ستايل معين
-        >
-          {events.map((event) => (
-            <SwiperSlide key={event.id} className="h-auto">
-              {/* --- نفس الـ Layout الكارد الأصلي الخاص بك --- */}
-              <div
-                className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2 h-full bg-white dark:bg-gray-800 rounded-sm shadow-md overflow-hidden"
-              >
-                {/* Image */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
+        {/* Info */}
+        <div className="mt-4 space-y-2 px-1">
+          
+          {/* Location & Time */}
+          <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
+            <span className="flex items-center gap-1">
+              <MapPin size={14} className="text-[#8ec63f]" />
+              <span className="hover:text-[#00a651] transition-colors">
+                {event.location}
+              </span>
+            </span>
 
-                  {/* Date Badge */}
-                  <div className="absolute bottom-4 left-4 bg-[#1a3668] text-white w-14 h-16 flex flex-col items-center justify-center rounded-md shadow-lg">
-                    <div className="text-2xl font-bold leading-none">
-                      {event.date.day}
-                    </div>
-                    <div className="text-xs uppercase font-medium mt-1">
-                      {event.date.month}
-                    </div>
-                  </div>
-                </div>
+            <span className="flex items-center gap-1">
+              <span className="text-[#8ec63f] text-sm">🕒</span>
+              {event.time}
+            </span>
+          </div>
 
-                {/* Info */}
-                <div className="mt-4 space-y-2 px-4 pb-5">
-                  
-                  {/* Location & Time */}
-                  <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} className="text-[#8ec63f]" />
-                      <span className="hover:text-[#00a651] transition-colors">
-                        {event.location}
-                      </span>
-                    </span>
+          {/* Title */}
+          <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
+            {event.title}
+          </h3>
 
-                    <span className="flex items-center gap-1">
-                      <span className="text-[#8ec63f] text-sm">🕒</span>
-                      {event.time}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
-                    {event.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-3">
-                    {event.description}
-                  </p>
-                </div>
-              </div>
-              {/* --- نهاية الـ Layout الأصلي --- */}
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          {/* Description */}
+          <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-5">
+            {event.description}
+          </p>
+        </div>
       </div>
+    ))}
+  </div>
 
-      {/* Button */}
-      <div className="text-center mt-12">
-        <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
-          See All Events
-        </button>
-      </div>
-    </section>
+  {/* Button */}
+  <div className="text-center mt-12">
+    <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
+      See All Events
+    </button>
+  </div>
+</section>
 <section
   id="2000"
   className="py-16 px-6 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"

@@ -12,23 +12,7 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [registerAllowed, setRegisterAllowed] = useState(null);
   const navigate = useNavigate();
-  // داخل مكون الـ Login
-const { fetchUser } = useAuth();
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  const res = await fetch('.../api/auth/login', { 
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-    headers: { 'Content-Type': 'application/json' },
-    credentials: "include"
-  });
-
-  if (res.ok) {
-    await fetchUser(); // دي اللي هتخلي الاسم يظهر في الناف بار فوراً
-    navigate('/');
-  }
-};
   useEffect(() => {
     let cancelled = false;
     api("/api/auth/registration-status", { method: "GET" })
