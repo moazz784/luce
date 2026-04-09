@@ -23,6 +23,7 @@ Default URLs are shown in `Luce.Api/Properties/launchSettings.json` (for example
 
 - **Docs for the React app:** [FRONTEND_API_INTEGRATION.md](FRONTEND_API_INTEGRATION.md)
 - **MonsterASP.NET / IIS deploy:** [DEPLOY_MONSTERASP.md](DEPLOY_MONSTERASP.md)
+- **SQL: wipe users / re-seed admin:** [MAINTENANCE.md](MAINTENANCE.md)
 
 ## Solution layout
 

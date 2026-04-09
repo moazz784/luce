@@ -26,10 +26,24 @@ import s22 from "./assets/s22.jpeg";
 import s33 from "./assets/s33.jpeg";
 import s44 from "./assets/s44.jpeg";
 
-/** Prefer absolute http(s) URLs from the API; otherwise use bundled local files. */
+/** Same base rules as Api.js so /uploads/... resolves to the API host on Vercel. */
+function getApiBaseForAssets() {
+  const envBase = import.meta.env.VITE_API_BASE_URL;
+  if (envBase != null && envBase !== "") return String(envBase).replace(/\/$/, "");
+  if (import.meta.env.DEV) return "";
+  return "https://luce.runasp.net".replace(/\/$/, "");
+}
+
+/** Prefer absolute http(s) URLs from the API; root-relative /uploads/... → API origin; else bundled locals. */
 export function resolveContentImage(url, fallbacks, index) {
   const u = url && String(url).trim();
-  if (u && /^https?:\/\//i.test(u)) return u;
+  if (!u) return fallbacks[index % fallbacks.length];
+  if (/^https?:\/\//i.test(u)) return u;
+  if (u.startsWith("/")) {
+    const base = getApiBaseForAssets();
+    if (base) return `${base}${u}`;
+    return u;
+  }
   return fallbacks[index % fallbacks.length];
 }
 

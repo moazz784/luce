@@ -12,6 +12,7 @@ public interface IApplicationDbContext
     DbSet<HeroSlide> HeroSlides { get; }
     DbSet<SyndicateCard> SyndicateCards { get; }
     DbSet<ContactMessage> ContactMessages { get; }
+    DbSet<RegistrationOtp> RegistrationOtps { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

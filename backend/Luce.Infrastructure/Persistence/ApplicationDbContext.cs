@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<HeroSlide> HeroSlides => Set<HeroSlide>();
     public DbSet<SyndicateCard> SyndicateCards => Set<SyndicateCard>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<RegistrationOtp> RegistrationOtps => Set<RegistrationOtp>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -74,6 +75,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
             e.Property(x => x.Email).HasMaxLength(256);
             e.Property(x => x.Phone).HasMaxLength(50);
             e.Property(x => x.Message).HasMaxLength(4000);
+        });
+
+        builder.Entity<RegistrationOtp>(e =>
+        {
+            e.HasIndex(x => x.Email);
+            e.Property(x => x.Email).HasMaxLength(256);
+            e.Property(x => x.OtpHash).HasMaxLength(128);
+            e.Property(x => x.PendingUserName).HasMaxLength(256);
         });
     }
 }

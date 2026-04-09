@@ -27,6 +27,39 @@ public class LoginRequest
     public string Password { get; set; } = string.Empty;
 }
 
+/// <summary>Step 1: student numeric @must.edu.eg — sends OTP via email.</summary>
+public class RegisterStartRequest
+{
+    [Required]
+    [MaxLength(256)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(256)]
+    public string UserName { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; } = string.Empty;
+}
+
+/// <summary>Step 2: verify OTP and create account.</summary>
+public class RegisterVerifyRequest
+{
+    [Required]
+    [MaxLength(256)]
+    public string Email { get; set; } = string.Empty;
+
+    /// <summary>6-digit code from email.</summary>
+    [Required]
+    [MaxLength(16)]
+    public string Otp { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; } = string.Empty;
+}
+
 public class AuthResponse
 {
     public string AccessToken { get; set; } = string.Empty;

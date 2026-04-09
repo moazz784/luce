@@ -88,6 +88,41 @@ public class AuthController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
+    [HttpPost("register/start")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegisterStart([FromBody] RegisterStartRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _auth.StartRegistrationAsync(request, cancellationToken);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ProblemDetails { Title = "Registration failed", Detail = ex.Message });
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPost("register/verify")]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponse>> RegisterVerify([FromBody] RegisterVerifyRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _auth.CompleteRegistrationAsync(request, cancellationToken);
+            AppendAuthCookie(result);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ProblemDetails { Title = "Registration failed", Detail = ex.Message });
+        }
+    }
+
     private void AppendAuthCookie(AuthResponse auth)
     {
         var opts = new CookieOptions

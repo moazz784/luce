@@ -1,6 +1,7 @@
 using Luce.Application.Abstractions.Auth;
 using Luce.Application.Abstractions.Persistence;
 using Luce.Application.Abstractions.Storage;
+using Luce.Infrastructure.Email;
 using Luce.Infrastructure.Identity;
 using Luce.Infrastructure.Options;
 using Luce.Infrastructure.Persistence;
@@ -19,6 +20,10 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
         services.Configure<SeedOptions>(configuration.GetSection(SeedOptions.SectionName));
+        services.Configure<BrevoOptions>(configuration.GetSection(BrevoOptions.SectionName));
+        services.Configure<OtpOptions>(configuration.GetSection(OtpOptions.SectionName));
+
+        services.AddHttpClient<IBrevoEmailService, BrevoEmailService>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));

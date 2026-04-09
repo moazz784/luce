@@ -9,7 +9,7 @@ This document is for the React (Vite) app in the repository root. **Do not chang
 - In code, prefix every request: `` `${import.meta.env.VITE_API_BASE_URL}/api/...` ``.
 - For local development with the API on `http://localhost:5009`, set `VITE_API_BASE_URL=http://localhost:5009` in `.env.local`.
 - The app default in [src/Api.js](../src/Api.js) is `https://luce.runasp.net` when `VITE_API_BASE_URL` is unset (production builds).
-- **Local dev:** With `npm run dev`, leave `VITE_API_BASE_URL` unset so requests go to `/api/...` on the Vite port; [vite.config.js](../vite.config.js) proxies `/api` to `http://localhost:5009`. Run the API (`dotnet run` in `Luce.Api`) on port **5009**. Do **not** set `VITE_API_BASE_URL` to the Vite URL (e.g. `http://localhost:3000`) or `/api` will 404.
+- **Local dev:** With `npm run dev`, leave `VITE_API_BASE_URL` unset so requests go to `/api/...` on the Vite port; [vite.config.js](../vite.config.js) proxies `/api` and **`/uploads`** to `http://localhost:5009`. Run the API (`dotnet run` in `Luce.Api`) on port **5009**. Do **not** set `VITE_API_BASE_URL` to the Vite URL (e.g. `http://localhost:3000`) or `/api` will 404.
 
 ## CORS
 
@@ -19,9 +19,9 @@ The API allows origins listed in `Cors:AllowedOrigins` in [appsettings.json](Luc
 
 The API issues a JWT in an **HttpOnly** cookie named **`access_token`** on successful **login** and **register**. The browser sends it automatically on same-site requests. For **cross-origin** SPAs (for example Vercel → Azure), configure `Cors:AllowedOrigins` with your exact SPA origin and use **HTTPS** in production so the cookie can use `SameSite=None; Secure`.
 
-- **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default). **Redeploy the API** after pulling this route; if the endpoint is missing (404), the SPA assumes registration is allowed and relies on `POST /api/auth/register` to enforce the flag.
-- **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`. Response JSON still includes `accessToken` (and `roles`) for compatibility, but the SPA should rely on the cookie for API calls.
-- **Register (optional, often disabled in production):** `POST /api/auth/register` with `{ "userName", "email", "password" }`. New accounts get the **`User`** role only (not **Admin**). When `Auth:AllowRegister` is `false`, the API returns **403** with a problem details body.
+- **Registration allowed?** `GET /api/auth/registration-status` returns `{ "allowRegister": true|false }` (no auth). The login page uses this to hide **Register** when `Auth:AllowRegister` is `false` in [appsettings.json](Luce.Api/appsettings.json) (production default). **Redeploy the API** after pulling this route; if the endpoint is missing (404), the SPA assumes registration is allowed and relies on `POST` registration endpoints to enforce the flag.
+- **Login:** `POST /api/auth/login` with JSON body `{ "email", "password" }`. Only **`@must.edu.eg`** addresses are allowed (so admins and students can sign in). Response JSON still includes `accessToken` (and `roles`) for compatibility, but the SPA should rely on the cookie for API calls.
+- **Register (students, OTP):** (1) `POST /api/auth/register/start` with `{ "userName", "email", "password" }` where **`email`** must match **`digits@must.edu.eg`**. The API sends a **6-digit OTP** via **Brevo** (configure `Brevo:ApiKey`, `Brevo:SenderEmail`, `Otp:Pepper` on the host). (2) `POST /api/auth/register/verify` with `{ "email", "otp", "password" }` to create the account. New accounts get the **`User`** role only. The legacy **`POST /api/auth/register`** returns **400** with a message to use the OTP flow.
 - **Response:** `{ "accessToken", "expiresAt", "email", "userName", "roles" }`. The SPA stores **`roles`** in **sessionStorage** (key `luce_roles`) for UI checks; it does **not** read the JWT from JavaScript.
 - **Current user:** `GET /api/auth/me` (requires auth) returns `{ "email", "userName", "roles" }`. Use this after navigation or on the home page to refresh session state. All `fetch` calls use **`credentials: "include"`** (see [src/Api.js](../src/Api.js)).
 - **Admin and authenticated requests:** send cookies with `credentials: "include"`. The API reads the JWT from the cookie or from `Authorization: Bearer` if present.
@@ -30,7 +30,7 @@ The API issues a JWT in an **HttpOnly** cookie named **`access_token`** on succe
 
 ### Default seeded admin (development)
 
-Configured under `Seed` in [appsettings.json](Luce.Api/appsettings.json). Change these values in production and rotate the password.
+Configured under `Seed` in [appsettings.json](Luce.Api/appsettings.json) (default admin email **`AymanShamel@must.edu.eg`**). Change the password in production and rotate after first login. To replace all users and re-seed, see [MAINTENANCE.md](MAINTENANCE.md).
 
 ## Public read endpoints (no auth)
 

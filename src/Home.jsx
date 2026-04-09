@@ -153,8 +153,8 @@ const App = () => {
         const alumniList = (bundle.alumni || []).map((a, i) => ({
           id: a.id,
           name: a.name,
-          image: resolveContentImage(a.imageUrl, localImageSets.alumni, i),
-          description: a.shortDescription || "",
+          imageUrl: resolveContentImage(a.imageUrl, localImageSets.alumni, i),
+          shortDescription: a.shortDescription || "",
           fullBio: a.fullBio || "",
         }));
         setAlumni(
@@ -762,7 +762,7 @@ const App = () => {
                 
                 <div className="w-24 h-24 rounded-full border-4 border-gray-100 dark:border-gray-700 overflow-hidden mb-4 group-hover:border-green-400 transition-colors">
                   <img
-                    src={person.imageUrl} // تم التعديل لـ imageUrl حسب الـ Guide
+                    src={person.imageUrl || person.image}
                     alt={person.name}
                     className="w-full h-full object-cover"
                   />
@@ -773,7 +773,7 @@ const App = () => {
                 </h3>
 
                 <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
-                  {person.shortDescription} {/* تم التعديل لـ shortDescription حسب الـ Guide */}
+                  {person.shortDescription || person.description}
                 </p>
 
                 <button
@@ -807,7 +807,7 @@ const App = () => {
             {/* Side Info */}
             <div className="md:w-1/3 bg-gray-50 dark:bg-gray-700 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-600">
               <img
-                src={selectedAlumnus.imageUrl}
+                src={selectedAlumnus.imageUrl || selectedAlumnus.image}
                 className="w-32 h-32 rounded-full border-4 border-green-400 mb-4 shadow-md object-cover"
                 alt=""
               />

@@ -23,6 +23,8 @@ Set these application settings (names may vary by panel; use environment variabl
 | `Jwt__AccessTokenMinutes` | Access token lifetime |
 | `Auth__AllowRegister` | Set `false` in production unless you intentionally allow admin self-registration |
 | `Seed__AdminEmail` / `Seed__AdminPassword` | Only for first deploy; change password after login |
+| `Brevo__ApiKey` / `Brevo__SenderEmail` / `Brevo__SenderName` | Transactional email for student registration OTP ([Brevo API](https://developers.brevo.com/docs/send-a-transactional-email)) |
+| `Otp__Pepper` / `Otp__ExpiryMinutes` | Secret mixed into OTP hashing; code lifetime in minutes |
 | `Cors__AllowedOrigins__0` … | Production SPA: `https://luce-six.vercel.app` (add more indexes for preview URLs if needed) |
 
 ## 3. Publish the API
@@ -63,3 +65,7 @@ Uploaded images are stored under **`wwwroot/uploads`**. Ensure the IIS app pool 
 - `GET https://luce.runasp.net/swagger` (if Swagger is enabled for your environment).
 - `GET https://luce.runasp.net/api/public/home-bundle` should return JSON (may be empty lists until content is added).
 - Log in with seeded admin credentials, then call an `/api/admin/*` endpoint with the bearer token.
+
+## 8. User database reset (optional)
+
+To delete all Identity users and rely on `Seed` to recreate the admin, see [MAINTENANCE.md](MAINTENANCE.md).
