@@ -913,80 +913,91 @@ const App = () => {
   </div>
 </section>
 
-<section
-  id="1000"
-  className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
-  dir="ltr"
->
-  <h2 className="text-3xl font-bold text-[#00a651] text-center mb-10">
-    Related Events
-  </h2>
-
-  <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    {events.map((event) => (
-      <div
-        key={event.id}
-        className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2"
-      >
-
-        {/* Image */}
-        <div className="relative h-74 overflow-hidden rounded-sm">
-          <img
-            src={event.image}
-            alt={event.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-          />
-
-          {/* Date Badge */}
-          <div className="absolute bottom-4 left-4 bg-[#1a3668] text-white w-14 h-16 flex flex-col items-center justify-center rounded-md shadow-lg">
-            <div className="text-2xl font-bold leading-none">
-              {event.date.day}
-            </div>
-            <div className="text-xs uppercase font-medium mt-1">
-              {event.date.month}
-            </div>
+<section id="1000" className="py-12 px-4 bg-[#0a192f] font-sans transition-colors duration-300">
+      <div className="max-w-7xl mx-auto relative">
+        
+        {/* Header with Custom Navigation Arrows */}
+        <div className="flex justify-between items-end mb-10">
+          <div className="text-left">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Notable Events</span>
+            <h2 className="text-4xl font-bold text-[#00a651] mt-2">
+              Related Events
+            </h2>
+          </div>
+          
+          {/* Custom Navigation Buttons (Arrows) */}
+          <div className="flex gap-3">
+            <button className="swiper-prev-btn w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-[#00a651] hover:border-[#00a651] transition-all">
+              <ChevronLeft size={20} />
+            </button>
+            <button className="swiper-next-btn w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-white hover:bg-[#00a651] hover:border-[#00a651] transition-all">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="mt-4 space-y-2 px-1">
-          
-          {/* Location & Time */}
-          <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
-            <span className="flex items-center gap-1">
-              <MapPin size={14} className="text-[#8ec63f]" />
-              <span className="hover:text-[#00a651] transition-colors">
-                {event.location}
-              </span>
-            </span>
+        {/* Swiper Container */}
+        <Swiper
+          modules={[Navigation]}
+          spaceBetween={24}
+          slidesPerView={1}
+          navigation={{
+            nextEl: '.swiper-next-btn',
+            prevEl: '.swiper-prev-btn',
+          }}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 },
+          }}
+          className="pb-10"
+        >
+          {events.map((event) => (
+            <SwiperSlide key={event.id}>
+              <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl p-6 h-full transition-all duration-300 hover:-translate-y-2 shadow-xl">
+                
+                {/* Profile Image (As per your image style) */}
+                <div className="flex justify-center mb-6">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-md">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
 
-            <span className="flex items-center gap-1">
-              <span className="text-[#8ec63f] text-sm">🕒</span>
-              {event.time}
-            </span>
-          </div>
+                {/* Info */}
+                <div className="text-center space-y-3">
+                  <h3 className="font-bold text-[#1a3668] dark:text-white text-xl">
+                    {event.title}
+                  </h3>
+                  
+                  <div className="flex items-center justify-center gap-4 text-[12px] text-gray-500">
+                     <span className="flex items-center gap-1">
+                        <MapPin size={14} className="text-[#8ec63f]" />
+                        {event.location}
+                     </span>
+                     <span>🕒 {event.time}</span>
+                  </div>
 
-          {/* Title */}
-          <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
-            {event.title}
-          </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-4 leading-relaxed">
+                    {event.description}
+                  </p>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-          {/* Description */}
-          <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-5">
-            {event.description}
-          </p>
+        {/* Bottom Button */}
+        <div className="text-center mt-8">
+          <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
+            See All Events
+          </button>
         </div>
       </div>
-    ))}
-  </div>
-
-  {/* Button */}
-  <div className="text-center mt-12">
-    <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
-      See All Events
-    </button>
-  </div>
-</section>
+    </section>
 <section
   id="2000"
   className="py-16 px-6 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
