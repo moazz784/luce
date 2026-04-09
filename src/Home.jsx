@@ -715,132 +715,123 @@ const App = () => {
     </div>
 
       {/* --- 5. Notable Alumni (Centered Version) --- */}
-     <section
-  id="5000"
-  className="py-20 bg-[#1a2b56] dark:bg-[#0f172a] relative overflow-hidden transition-colors duration-300"
->
-  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-
-  <div className="container mx-auto px-6 relative z-10">
-    <div className="flex justify-between items-end mb-12">
-      <div>
-        <span className="text-white/60 uppercase tracking-widest text-sm font-bold">
-          Notable Alumni
-        </span>
-        <h2 className="text-4xl font-bold text-green-400 mt-2">
-          What Our Alumni Say's
-        </h2>
-      </div>
-
-      <div className="flex gap-4">
-        <button className="nav-prev p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
-          <ChevronLeft size={24} />
-        </button>
-        <button className="nav-next p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
-          <ChevronRight size={24} />
-        </button>
-      </div>
-    </div>
-
-    <Swiper
-      modules={[Navigation, Autoplay]}
-      spaceBetween={30}
-      slidesPerView={1}
-      navigation={{ prevEl: ".nav-prev", nextEl: ".nav-next" }}
-      autoplay={{ delay: 4000 }}
-      breakpoints={{
-        640: { slidesPerView: 2 },
-        1024: {
-          slidesPerView:
-            alumni.length === 0
-              ? 1
-              : alumni.length < 4
-                ? alumni.length
-                : 4,
-        },
-      }}
-      className="pb-12 !flex !justify-center"
+<section
+      id="5000"
+      className="py-20 bg-[#1a2b56] dark:bg-[#0f172a] relative overflow-hidden transition-colors duration-300"
     >
-      {alumni.map((person) => (
-        <SwiperSlide key={person.id} className="flex justify-center">
-          <div className="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center h-[420px] w-full max-w-[320px] flex flex-col items-center shadow-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-2">
+      <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-            <div className="w-30 h-30 rounded-full border-4 border-gray-100 dark:border-gray-700 overflow-hidden mb-2 group-hover:border-green-400 transition-colors">
-              <img
-                src={person.image}
-                alt={person.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <span className="text-white/60 uppercase tracking-widest text-sm font-bold">
+              Notable Alumni
+            </span>
+            <h2 className="text-4xl font-bold text-green-400 mt-2">
+              What Our Alumni Say
+            </h2>
+          </div>
 
-            <h3 className="text-lg font-bold text-[#1a2b56] dark:text-white mb-2">
-              {person.name}
-            </h3>
-
-            <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
-              {person.description}
-            </p>
-
-            <button
-              onClick={() => setSelectedAlumnus(person)}
-              className="absolute bottom-0 left-0 right-0 bg-green-500 text-white py-4 font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-300"
-            >
-              Show More
+          {/* أزرار التنقل */}
+          <div className="flex gap-4">
+            <button className="nav-prev p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
+              <ChevronLeft size={24} />
+            </button>
+            <button className="nav-next p-3 border border-white/20 rounded-full text-white hover:bg-green-500 transition-all">
+              <ChevronRight size={24} />
             </button>
           </div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
-  </div>
+        </div>
 
-  {/* Modal */}
-  {selectedAlumnus && (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-
-      <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={() => setSelectedAlumnus(null)}
-      ></div>
-
-      <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300 transition-colors">
-
-        <button
-          onClick={() => setSelectedAlumnus(null)}
-          className="absolute top-5 right-5 p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all z-10"
+        <Swiper
+          modules={[Navigation, Autoplay]}
+          spaceBetween={20}
+          slidesPerView={1}
+          navigation={{ prevEl: ".nav-prev", nextEl: ".nav-next" }}
+          autoplay={{ delay: 4000 }}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 }, // الكروت تظهر جنب بعض (4 كروت) في الشاشات الكبيرة
+          }}
+          className="pb-12"
         >
-          <X size={20} />
-        </button>
+          {alumni.map((person) => (
+            <SwiperSlide key={person.id}>
+              <div className="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center h-[420px] w-full flex flex-col items-center shadow-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-2">
+                
+                <div className="w-24 h-24 rounded-full border-4 border-gray-100 dark:border-gray-700 overflow-hidden mb-4 group-hover:border-green-400 transition-colors">
+                  <img
+                    src={person.imageUrl} // تم التعديل لـ imageUrl حسب الـ Guide
+                    alt={person.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-        {/* Left */}
-        <div className="md:w-1/3 bg-gray-50 dark:bg-gray-700 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-600">
-          <img
-            src={selectedAlumnus.image}
-            className="w-33 h-33 rounded-full border-4 border-green-400 mb-4 shadow-md"
-            alt=""
-          />
-          <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
-            {selectedAlumnus.name}
-          </h4>
-          <span className="text-green-600 text-xs font-bold mt-1 uppercase tracking-wider">
-            MUST Graduate
-          </span>
-        </div>
+                <h3 className="text-lg font-bold text-[#1a2b56] dark:text-white mb-2">
+                  {person.name}
+                </h3>
 
-        {/* Right */}
-        <div className="md:w-2/3 p-8 overflow-y-auto max-h-[70vh]">
-          <h3 className="text-xl font-bold text-[#1a2b56] dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
-            Biography
-          </h3>
+                <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
+                  {person.shortDescription} {/* تم التعديل لـ shortDescription حسب الـ Guide */}
+                </p>
 
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-            {selectedAlumnus.fullBio}
-          </p>
-        </div>
-
+                <button
+                  onClick={() => setSelectedAlumnus(person)}
+                  className="absolute bottom-0 left-0 right-0 bg-green-500 text-white py-4 font-bold translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+                >
+                  Show More
+                </button>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
-    </div>
-  )}
-</section>
+
+      {/* Modal - المودال كما هو بدون تغيير في الشكل */}
+      {selectedAlumnus && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedAlumnus(null)}
+          ></div>
+
+          <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300 transition-colors">
+            <button
+              onClick={() => setSelectedAlumnus(null)}
+              className="absolute top-5 right-5 p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-red-500 hover:text-white transition-all z-10"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Side Info */}
+            <div className="md:w-1/3 bg-gray-50 dark:bg-gray-700 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-600">
+              <img
+                src={selectedAlumnus.imageUrl}
+                className="w-32 h-32 rounded-full border-4 border-green-400 mb-4 shadow-md object-cover"
+                alt=""
+              />
+              <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
+                {selectedAlumnus.name}
+              </h4>
+              <span className="text-green-600 text-xs font-bold mt-1 uppercase tracking-wider">
+                MUST Graduate
+              </span>
+            </div>
+
+            {/* Biography */}
+            <div className="md:w-2/3 p-8 overflow-y-auto max-h-[70vh]">
+              <h3 className="text-xl font-bold text-[#1a2b56] dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
+                Biography
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                {selectedAlumnus.fullBio}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
       {/* --- Awards & Certificates Section --- */}
 <section
   id="awards"
