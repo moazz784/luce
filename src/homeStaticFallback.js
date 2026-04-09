@@ -26,25 +26,50 @@ import s22 from "./assets/s22.jpeg";
 import s33 from "./assets/s33.jpeg";
 import s44 from "./assets/s44.jpeg";
 
-/** Same base rules as Api.js so /uploads/... resolves to the API host on Vercel. */
-function getApiBaseForAssets() {
-  const envBase = import.meta.env.VITE_API_BASE_URL;
-  if (envBase != null && envBase !== "") return String(envBase).replace(/\/$/, "");
-  if (import.meta.env.DEV) return "";
-  return "https://luce.runasp.net".replace(/\/$/, "");
+import { getApiBaseUrl } from "./Api";
+
+/** Normalize DB values like `uploads/foo.jpg` to `/uploads/foo.jpg`. */
+function toUploadsPath(u) {
+  const s = String(u).trim().replace(/\\/g, "/");
+  if (!s) return null;
+  if (s.startsWith("/")) return s;
+  if (/^uploads\//i.test(s)) return `/${s}`;
+  return null;
 }
 
-/** Prefer absolute http(s) URLs from the API; root-relative /uploads/... → API origin; else bundled locals. */
+/**
+ * Resolves image URLs stored by the API (wwwroot/uploads, including publish/wwwroot/uploads).
+ * Uses the same base as Api.js: dev → same-origin + Vite proxy; prod → VITE_API_BASE_URL or default API host.
+ */
 export function resolveContentImage(url, fallbacks, index) {
   const u = url && String(url).trim();
   if (!u) return fallbacks[index % fallbacks.length];
-  if (/^https?:\/\//i.test(u)) return u;
-  if (u.startsWith("/")) {
-    const base = getApiBaseForAssets();
-    if (base) return `${base}${u}`;
+
+  if (/^https?:\/\//i.test(u)) {
+    try {
+      const parsed = new URL(u);
+      const loopback =
+        parsed.hostname === "localhost" ||
+        parsed.hostname === "127.0.0.1" ||
+        parsed.hostname === "[::1]";
+      if (loopback && /\/uploads\//i.test(parsed.pathname)) {
+        const base = getApiBaseUrl();
+        const path = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+        if (base) return `${base}${path}`;
+        return path;
+      }
+    } catch {
+      /* ignore */
+    }
     return u;
   }
-  return fallbacks[index % fallbacks.length];
+
+  const path = toUploadsPath(u);
+  if (path == null) return fallbacks[index % fallbacks.length];
+
+  const base = getApiBaseUrl();
+  if (base) return `${base}${path}`;
+  return path;
 }
 
 export const localImageSets = {
