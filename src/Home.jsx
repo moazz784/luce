@@ -548,7 +548,7 @@ const App = () => {
         backdrop-blur-md
         border border-white/20
         text-white
-        hover:bg-white/20
+        hover:bg-green-500
         hover:scale-105
         transition-all duration-300
       "
@@ -591,7 +591,7 @@ const App = () => {
       },
       {
   Icon:Linkedin,
-  url: "https://www.linkedin.com/"
+  url: "https://www.linkedin.com/school/misr-university-for-science-and-technology/"
 }
     ].map((item, idx) => (
       <a
