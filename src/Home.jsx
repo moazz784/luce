@@ -54,6 +54,7 @@ const App = () => {
   const location = useLocation();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+   const [selectedNews, setSelectedNews] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -1111,90 +1112,125 @@ useEffect(() => {
       </div>
     </section>
 <section
-  id="2000"
-  className="py-16 px-6 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
-  dir="ltr"
->
-  {/* Title */}
-  <h2 className="text-4xl font-bold text-[#00a651] text-center mb-12 uppercase tracking-wide">
-    Latest News
-  </h2>
-
-  <div className="max-w-7xl mx-auto relative group">
-    <Swiper
-      modules={[Autoplay, Pagination, Navigation]}
-      spaceBetween={30}
-      slidesPerView={1}
-      loop={true}
-      autoplay={{
-        delay: 3500,
-        disableOnInteraction: false,
-      }}
-      pagination={{
-        clickable: true,
-        dynamicBullets: true,
-      }}
-      navigation={{
-        nextEl: '.swiper-button-next-custom',
-        prevEl: '.swiper-button-prev-custom',
-      }}
-      breakpoints={{
-        640: { slidesPerView: 1 },
-        768: { slidesPerView: 2 },
-        1024: { slidesPerView: 3 },
-      }}
-      className="pb-14"
+      id="2000"
+      className="py-16 px-6 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
+      dir="ltr"
     >
-      {newsData.map((news) => (
-        <SwiperSlide key={news.id}>
-          <div className="flex flex-col group/card cursor-pointer bg-white dark:bg-gray-800 rounded-md overflow-hidden h-full border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all duration-300">
+      {/* Title */}
+      <h2 className="text-4xl font-bold text-[#00a651] text-center mb-12 uppercase tracking-wide">
+        Latest News
+      </h2>
+
+      <div className="max-w-7xl mx-auto relative group">
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation]}
+          spaceBetween={30}
+          slidesPerView={1}
+          loop={true}
+          autoplay={{
+            delay: 3500,
+            disableOnInteraction: false,
+          }}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          navigation={{
+            nextEl: ".swiper-button-next-custom",
+            prevEl: ".swiper-button-prev-custom",
+          }}
+          breakpoints={{
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          className="pb-14"
+        >
+          {newsData.map((news) => (
+            <SwiperSlide key={news.id}>
+              <div
+                onClick={() => setSelectedNews(news)}
+                className="flex flex-col group/card cursor-pointer bg-white dark:bg-gray-800 rounded-md overflow-hidden h-full border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all duration-300"
+              >
+                {/* Image */}
+                <div className="overflow-hidden aspect-video relative">
+                  <img
+                    src={news.image}
+                    alt="news"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
+                  />
+
+                  <div className="absolute inset-0 bg-black/5 dark:bg-black/30 group-hover/card:bg-transparent transition-all"></div>
+                </div>
+
+                {/* Content */}
+                <div className="py-5 px-1 space-y-3">
+                  <div className="flex items-center gap-1.5 text-[#00a651]">
+                    <Calendar size={16} className="opacity-80" />
+                    <span className="w-8 h-[1px] bg-gray-200 dark:bg-gray-600"></span>
+                  </div>
+
+                  <h3 className="text-sm text-gray-500 dark:text-gray-300 line-clamp-4">
+                    {news.title}
+                  </h3>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* Arrows */}
+        <button className="swiper-button-prev-custom absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] dark:text-white hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
+          <ChevronLeft size={24} />
+        </button>
+
+        <button className="swiper-button-next-custom absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] dark:text-white hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
+          <ChevronRight size={24} />
+        </button>
+      </div>
+
+      {/* Modal */}
+      {selectedNews && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 w-[90%] max-w-2xl rounded-xl overflow-hidden shadow-2xl relative animate-fadeIn">
+
+            {/* Close */}
+            <button
+              onClick={() => setSelectedNews(null)}
+              className="absolute top-3 right-3 bg-black/10 hover:bg-black/20 text-black dark:text-white w-8 h-8 rounded-full"
+            >
+              ✕
+            </button>
 
             {/* Image */}
-            <div className="overflow-hidden aspect-video relative">
-              <img
-                src={news.image}
-                alt="news"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
-              />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/5 dark:bg-black/30 group-hover/card:bg-transparent transition-all"></div>
-            </div>
+            <img
+              src={selectedNews.image}
+              alt="news"
+              className="w-full h-72 object-cover"
+            />
 
             {/* Content */}
-            <div className="py-5 px-1 space-y-3">
-              <div className="flex items-center gap-1.5 text-[#00a651]">
-                <Calendar size={16} className="opacity-80" />
-                <span className="w-8 h-[1px] bg-gray-200 dark:bg-gray-600"></span>
+            <div className="p-5 space-y-3">
+              <div className="flex items-center gap-2 text-[#00a651]">
+                <Calendar size={16} />
+                <span className="text-sm">Latest Update</span>
               </div>
 
-              <h3 className="text-sm text-gray-500 dark:text-gray-300 line-clamp-4">
-                {news.title}
-              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                {selectedNews.title}
+              </p>
             </div>
-
           </div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+        </div>
+      )}
 
-    {/* Arrows */}
-    <button className="swiper-button-prev-custom absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] dark:text-white hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
-      <ChevronLeft size={24} />
-    </button>
-
-    <button className="swiper-button-next-custom absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-gray-800 shadow-lg rounded-full flex items-center justify-center text-[#1a2b56] dark:text-white hover:bg-[#00a651] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex">
-      <ChevronRight size={24} />
-    </button>
-  </div>
-
-  {/* Button */}
-  <div className="text-center mt-8">
-    <button className="border-2 border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-sm transform active:scale-95">
-      See All News
-    </button>
-  </div>
-</section>
+      {/* Button */}
+      <div className="text-center mt-8">
+        <button className="border-2 border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-sm transform active:scale-95">
+          See All News
+        </button>
+      </div>
+    </section>
   <section
   id="moazz"
   className="py-16 bg-gray-50 dark:bg-gray-900 font-sans transition-colors duration-300"
