@@ -21,7 +21,6 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { useTheme } from './ThemeContext'; // تأكد إن المسار لملف الـ Context مظبوط
-import { toast, ToastContainer } from "react-toastify"; // أضف ToastContainer هنا
 import 'react-toastify/dist/ReactToastify.css'; // ⚠️ السطر ده مهم جداً عشان الشكل يظهر
 // الأيقونات
 import { 
@@ -1352,6 +1351,11 @@ const handleLogout = async () => {
     <div className="border-t border-white/10 dark:border-gray-700 flex justify-center items-center py-7 text-center text-black dark:text-gray-400 text-[15px] opacity-70 dark:opacity-80 transition-colors duration-300">
   © 2026 Misr University for Science & Technology. All Rights Reserved.
 </div>
+<ToastContainer 
+  position="top-right"
+  autoClose={2000}
+  theme={isDark ? "dark" : "light"}
+/>
     </div>
   );
 };
