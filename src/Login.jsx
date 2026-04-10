@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { login, isMustLoginEmail } from "./authService";
 import { hasAdminRole } from "./jwtUtils";
 
-export default function Login({ toggleAuth }) {
+export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -21,16 +21,19 @@ export default function Login({ toggleAuth }) {
   }, []);
 
   const formik = useFormik({
-    initialValues: { email: "", password: "" },
+    initialValues: {
+      email: "",
+      password: "",
+    },
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
       try {
         await login(values.email, values.password);
-        toast.success("مرحباً بك مجدداً! جاري الدخول...");
+        toast.success("مرحباً بك مجدداً!");
         navigate(hasAdminRole() ? "/AdminDashboard" : "/", { replace: true });
       } catch (err) {
-        toast.error(err.message || "حدث خطأ في تسجيل الدخول");
+        toast.error(err.message || "حدث خطأ");
       } finally {
         setLoading(false);
       }
@@ -38,50 +41,39 @@ export default function Login({ toggleAuth }) {
   });
 
   return (
-    <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
-      <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-      <p className="text-gray-200 mb-6 text-sm">Login with your university email</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#0c2138] via-[#0f2a44] to-[#152f4a] flex items-center justify-center relative">
+      <div className="absolute inset-0 bg-[#0f2a44]/80"></div>
 
-      <form onSubmit={formik.handleSubmit} className="space-y-4">
-        <div>
+      <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
+        <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
+        <p className="text-gray-200 mb-6 text-sm">
+          Login with your university email
+        </p>
+
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           <input
             type="email"
             placeholder="Email (@must.edu.eg)"
-            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300"
             {...formik.getFieldProps("email")}
           />
-          {formik.touched.email && formik.errors.email && (
-            <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.email}</p>
-          )}
-        </div>
 
-        <div>
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full p-3 rounded-lg bg-white/20 text-white"
             {...formik.getFieldProps("password")}
           />
-          {formik.touched.password && formik.errors.password && (
-            <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.password}</p>
-          )}
-        </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition disabled:bg-gray-500"
-        >
-          {loading ? "جاري الدخول..." : "Login"}
-        </button>
-      </form>
-
-      <p className="text-gray-300 text-sm mt-6">
-        Don't have an account?{" "}
-        <span className="text-green-400 cursor-pointer hover:underline font-bold" onClick={toggleAuth}>
-          Register
-        </span>
-      </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-500 py-3 rounded-lg text-white font-bold"
+          >
+            {loading ? "جاري المعالجة..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1131,7 +1131,7 @@ useEffect(() => {
     {/* Title */}
     <div className="text-center mb-12">
       <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">
-        نقابة المهن العلمية <span className="text-blue-600">(ESSP)</span>
+       Syndicate of Scientific Professions<span className="text-blue-600">(ESSP)</span>
       </h2>
       <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
     </div>
@@ -1160,7 +1160,7 @@ useEffect(() => {
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/5 dark:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <span className="bg-white/90 dark:bg-gray-900 text-slate-800 dark:text-white px-4 py-2 rounded-lg font-bold shadow-lg">
-                اضغط لزيارة الرابط
+               Click to visit the link
               </span>
             </div>
           </a>
