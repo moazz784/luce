@@ -16,7 +16,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [registerAllowed, setRegisterAllowed] = useState(null);
 
-  // check if register allowed
+  // check registration status
   useEffect(() => {
     let cancelled = false;
 
@@ -70,20 +70,24 @@ export default function Register() {
       otp: "",
     },
     validationSchema,
+
     onSubmit: async (values) => {
       setLoading(true);
 
       try {
+        // STEP 1: send code
         if (registerStep === 1) {
           await registerStart(values.name, values.email, values.password);
           setRegisterStep(2);
           formik.setFieldValue("otp", "");
-          toast.info("تم إرسال كود التحقق");
+          toast.info("تم إرسال كود التحقق على الإيميل");
           return;
         }
 
+        // STEP 2: verify
         await registerVerify(values.email, values.otp, values.password);
-        toast.success("تم إنشاء الحساب بنجاح!");
+
+        toast.success("تم إنشاء الحساب بنجاح 🎉");
 
         setRegisterStep(1);
         formik.resetForm();
@@ -95,29 +99,29 @@ export default function Register() {
     },
   });
 
-  const showOtpStep = registerStep === 2;
-  const showRegisterForm = registerStep === 1;
-
   if (registerAllowed === false) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
-        Registration is currently disabled
+        Registration is disabled
       </div>
     );
   }
+
+  const isOtpStep = registerStep === 2;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0c2138] via-[#0f2a44] to-[#152f4a] flex items-center justify-center relative">
       <div className="absolute inset-0 bg-[#0f2a44]/80"></div>
 
       <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {showOtpStep ? "Verify Email" : "Create Account"}
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {isOtpStep ? "Verify Email" : "Create Account"}
         </h2>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
 
-          {showRegisterForm && (
+          {/* STEP 1 */}
+          {!isOtpStep && (
             <>
               <input
                 type="text"
@@ -149,12 +153,13 @@ export default function Register() {
             </>
           )}
 
-          {showOtpStep && (
+          {/* STEP 2 OTP */}
+          {isOtpStep && (
             <input
               type="text"
               placeholder="6-digit code"
               maxLength="6"
-              className="w-full p-3 rounded-lg bg-white/20 text-white text-center"
+              className="w-full p-3 rounded-lg bg-white/20 text-white text-center tracking-widest"
               {...formik.getFieldProps("otp")}
             />
           )}
@@ -166,11 +171,10 @@ export default function Register() {
           >
             {loading
               ? "جاري المعالجة..."
-              : showOtpStep
+              : isOtpStep
               ? "Verify & Register"
               : "Get Code"}
           </button>
-
         </form>
       </div>
     </div>
