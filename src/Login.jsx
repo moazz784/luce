@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // استيراد التوست
 import {
   login,
   registerStart,
@@ -12,7 +13,7 @@ import {
 import { api } from "./Api";
 import { hasAdminRole } from "./jwtUtils";
 
-export default function Auth() {
+export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [registerStep, setRegisterStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -20,6 +21,7 @@ export default function Auth() {
   const [registerAllowed, setRegisterAllowed] = useState(null);
   const navigate = useNavigate();
 
+  // التحقق من حالة التسجيل (مسموح أم لا)
   useEffect(() => {
     let cancelled = false;
     api("/api/auth/registration-status", { method: "GET" })
@@ -38,33 +40,19 @@ export default function Auth() {
     if (registerAllowed === false && !isLogin) setIsLogin(true);
   }, [registerAllowed, isLogin]);
 
+  // منطق التحقق (Validation) باستخدام Yup
   const validationSchema = useMemo(() => {
     if (isLogin) {
       return Yup.object({
-        name: Yup.string(),
         email: Yup.string()
           .email("بريد إلكتروني غير صحيح")
           .required("البريد الإلكتروني مطلوب")
-          .test(
-            "must",
-            "يجب استخدام بريد MUST (@must.edu.eg)",
-            (v) => !!v && isMustLoginEmail(v),
-          ),
-        password: Yup.string()
-          .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل")
-          .required("كلمة المرور مطلوبة"),
-        confirmPassword: Yup.string(),
-        otp: Yup.string(),
+          .test("must", "يجب استخدام بريد MUST (@must.edu.eg)", (v) => !!v && isMustLoginEmail(v)),
+        password: Yup.string().required("كلمة المرور مطلوبة"),
       });
     }
     if (registerStep === 2) {
       return Yup.object({
-        name: Yup.string(),
-        email: Yup.string().email().required(),
-        password: Yup.string()
-          .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل")
-          .required("كلمة المرور مطلوبة"),
-        confirmPassword: Yup.string(),
         otp: Yup.string()
           .matches(/^\d{6}$/, "أدخل الرمز المكوّن من 6 أرقام")
           .required("رمز التحقق مطلوب"),
@@ -75,18 +63,13 @@ export default function Auth() {
       email: Yup.string()
         .email("بريد إلكتروني غير صحيح")
         .required("البريد الإلكتروني مطلوب")
-        .test(
-          "student",
-          "استخدم رقم الطالب فقط: أرقام@must.edu.eg",
-          (v) => !!v && isStudentMustEmail(v),
-        ),
+        .test("student", "استخدم رقم الطالب فقط: أرقام@must.edu.eg", (v) => !!v && isStudentMustEmail(v)),
       password: Yup.string()
         .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل")
         .required("كلمة المرور مطلوبة"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "كلمات المرور غير متطابقة")
         .required("تأكيد كلمة المرور مطلوب"),
-      otp: Yup.string(),
     });
   }, [isLogin, registerStep]);
 
@@ -106,24 +89,32 @@ export default function Auth() {
 
       try {
         if (isLogin) {
+          // تسجيل الدخول
           await login(values.email, values.password);
+          toast.success("مرحباً بك مجدداً! جاري الدخول...");
           navigate(hasAdminRole() ? "/AdminDashboard" : "/", { replace: true });
           return;
         }
+
         if (registerStep === 1) {
+          // بداية التسجيل (إرسال الكود)
           await registerStart(values.name, values.email, values.password);
           setRegisterStep(2);
           formik.setFieldValue("otp", "");
-          setError("");
+          toast.info("تم إرسال كود التحقق لبريدك الإلكتروني");
           return;
         }
+
+        // تأكيد الكود وإتمام التسجيل
         await registerVerify(values.email, values.otp, values.password);
+        toast.success("تم إنشاء الحساب بنجاح! يمكنك الدخول الآن");
         formik.resetForm();
         setRegisterStep(1);
-        alert("تم إنشاء الحساب بنجاح");
-        navigate("/", { replace: true });
+        setIsLogin(true);
       } catch (err) {
-        setError(err.message || "حدث خطأ");
+        const errorMsg = err.message || "حدث خطأ ما";
+        setError(errorMsg);
+        toast.error(errorMsg); // إظهار الخطأ في توست
       } finally {
         setLoading(false);
       }
@@ -137,17 +128,17 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-to-br from-[#0c2138] via-[#0f2a44] to-[#152f4a] flex items-center justify-center relative">
       <div className="absolute inset-0 bg-[#0f2a44]/80"></div>
 
-      <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[350px] text-center border border-white/20">
+      <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
         <h2 className="text-2xl font-bold text-white mb-2">
-          {isLogin ? "Welcome Back" : showOtpStep ? "Verify email" : "Create Account"}
+          {isLogin ? "Welcome Back" : showOtpStep ? "Verify Email" : "Create Account"}
         </h2>
 
-        <p className="text-gray-200 mb-6">
+        <p className="text-gray-200 mb-6 text-sm">
           {isLogin
-            ? "Login to your account"
+            ? "Login with your university email"
             : showOtpStep
-              ? "Enter the 6-digit code sent to your email"
-              : "Sign up with your student ID email (@must.edu.eg)"}
+            ? `Enter code sent to: ${formik.values.email}`
+            : "Join LeafScan with your student ID email"}
         </p>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -155,13 +146,12 @@ export default function Auth() {
             <div>
               <input
                 type="text"
-                name="name"
                 placeholder="Full Name"
                 className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("name")}
               />
               {formik.touched.name && formik.errors.name && (
-                <p className="text-red-400 text-xs mt-1 text-left">{formik.errors.name}</p>
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.name}</p>
               )}
             </div>
           )}
@@ -170,49 +160,41 @@ export default function Auth() {
             <div>
               <input
                 type="email"
-                name="email"
                 placeholder="Email (@must.edu.eg)"
                 className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("email")}
-                disabled={isLogin ? false : false}
               />
               {formik.touched.email && formik.errors.email && (
-                <p className="text-red-400 text-xs mt-1 text-left">{formik.errors.email}</p>
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.email}</p>
               )}
             </div>
           )}
 
           {showOtpStep && (
-            <>
-              <p className="text-gray-300 text-xs text-left break-all">{formik.values.email}</p>
-              <div>
-                <input
-                  type="text"
-                  name="otp"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder="6-digit code"
-                  className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
-                  {...formik.getFieldProps("otp")}
-                />
-                {formik.touched.otp && formik.errors.otp && (
-                  <p className="text-red-400 text-xs mt-1 text-left">{formik.errors.otp}</p>
-                )}
-              </div>
-            </>
+            <div>
+              <input
+                type="text"
+                placeholder="6-digit code"
+                maxLength="6"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400 text-center tracking-widest"
+                {...formik.getFieldProps("otp")}
+              />
+              {formik.touched.otp && formik.errors.otp && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.otp}</p>
+              )}
+            </div>
           )}
 
           {(isLogin || showOtpStep || showRegisterForm) && (
             <div>
               <input
                 type="password"
-                name="password"
-                placeholder={showOtpStep ? "Password (same as before)" : "Password"}
+                placeholder="Password"
                 className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("password")}
               />
               {formik.touched.password && formik.errors.password && (
-                <p className="text-red-400 text-xs mt-1 text-left">{formik.errors.password}</p>
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.password}</p>
               )}
             </div>
           )}
@@ -221,57 +203,41 @@ export default function Auth() {
             <div>
               <input
                 type="password"
-                name="confirmPassword"
                 placeholder="Confirm Password"
                 className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("confirmPassword")}
               />
               {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                <p className="text-red-400 text-xs mt-1 text-left">{formik.errors.confirmPassword}</p>
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.confirmPassword}</p>
               )}
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 p-2 rounded text-red-200 text-sm">
-              {error}
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition disabled:bg-gray-500"
           >
-            {loading
-              ? "جاري التحميل..."
-              : isLogin
-                ? "Login"
-                : showOtpStep
-                  ? "Complete registration"
-                  : "Send verification code"}
+            {loading ? "جاري المعالجة..." : isLogin ? "Login" : showOtpStep ? "Verify & Register" : "Get Code"}
           </button>
 
           {showOtpStep && (
             <button
               type="button"
-              className="text-sm text-gray-300 hover:text-white underline"
-              onClick={() => {
-                setRegisterStep(1);
-                setError("");
-              }}
+              className="text-xs text-gray-300 hover:text-white underline mt-2"
+              onClick={() => setRegisterStep(1)}
             >
               Back to edit details
             </button>
           )}
         </form>
 
-        <p className="text-gray-300 text-sm mt-4 min-h-[1.25rem]">
+        <p className="text-gray-300 text-sm mt-6">
           {registerAllowed !== false ? (
             <>
-              {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
+              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <span
-                className="text-green-400 cursor-pointer hover:underline font-medium"
+                className="text-green-400 cursor-pointer hover:underline font-bold"
                 onClick={() => {
                   setIsLogin(!isLogin);
                   setRegisterStep(1);
@@ -283,9 +249,7 @@ export default function Auth() {
               </span>
             </>
           ) : (
-            <span className="text-gray-400">
-              New accounts are disabled. Contact an administrator.
-            </span>
+            <span className="text-gray-400 italic text-xs">Registration is currently disabled</span>
           )}
         </p>
       </div>
