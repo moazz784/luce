@@ -504,7 +504,7 @@ useEffect(() => {
         <button onClick={() => navigate("/login")} className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors">
           Login
         </button>
-        <button onClick={() => navigate("/login")} className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105">
+        <button onClick={() => navigate("/register")} className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105">
           Register
         </button>
       </div>
@@ -1214,14 +1214,19 @@ useEffect(() => {
   </div>
 
   {/* Contact Form */}
-  <div className="absolute right-10 lg:right-20 top-1/2 -translate-y-1/2 z-20 w-full max-w-[450px] hidden md:block">
-    <div className="bg-white dark:bg-gray-800 shadow-2xl p-8 rounded-sm border-t-4 border-green-500 transition-colors duration-300">
+<div className="absolute right-10 lg:right-20 top-1/2 -translate-y-1/2 z-20 w-full max-w-[550px] hidden md:block"> 
+    {/* تم زيادة العرض الأقصى من 450px لـ 550px */}
+    
+    <div className="bg-white dark:bg-gray-800 shadow-2xl p-10 rounded-sm border-t-4 border-green-500 transition-colors duration-300">
+      {/* تم زيادة الـ padding لـ p-10 ليعطي مساحة وطول أكبر */}
 
-      <h3 className="text-[#1a2b56] dark:text-white text-3xl font-bold mb-6">
+      <h3 className="text-[#1a2b56] dark:text-white text-4xl font-bold mb-8"> 
+        {/* كبرت الخط لـ text-4xl والـ margin bottom لـ mb-8 */}
         Leave a message
       </h3>
 
-      <form className="space-y-4" onSubmit={handleContactSubmit}>
+      <form className="space-y-6" onSubmit={handleContactSubmit}>
+        {/* زيادة المسافات بين الحقول بـ space-y-6 */}
 
         <div className="grid grid-cols-2 gap-4">
           <input
@@ -1232,7 +1237,7 @@ useEffect(() => {
             onChange={(e) =>
               setContactForm((f) => ({ ...f, name: e.target.value }))
             }
-            className="p-3 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-sm"
+            className="p-4 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-base"
           />
           <input
             type="email"
@@ -1242,7 +1247,7 @@ useEffect(() => {
             onChange={(e) =>
               setContactForm((f) => ({ ...f, email: e.target.value }))
             }
-            className="p-3 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-sm"
+            className="p-4 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-base"
           />
         </div>
 
@@ -1253,18 +1258,19 @@ useEffect(() => {
           onChange={(e) =>
             setContactForm((f) => ({ ...f, phone: e.target.value }))
           }
-          className="w-full p-3 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-sm"
+          className="w-full p-4 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-base"
         />
 
         <textarea
           placeholder="Say Something"
-          rows="3"
+          rows="5" 
+          /* تم زيادة عدد الأسطر من 3 لـ 5 لزيادة طول الفورم */
           required
           value={contactForm.message}
           onChange={(e) =>
             setContactForm((f) => ({ ...f, message: e.target.value }))
           }
-          className="w-full p-3 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-sm resize-none"
+          className="w-full p-4 bg-gray-100 dark:bg-gray-700 text-black dark:text-white outline-none focus:ring-1 focus:ring-green-500 text-base resize-none"
         />
 
         {contactStatus.error && (
@@ -1277,7 +1283,7 @@ useEffect(() => {
         <button
           type="submit"
           disabled={contactStatus.submitting}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-3 rounded-full transition-all"
+          className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-bold py-4 rounded-full transition-all text-lg"
         >
           {contactStatus.submitting ? "Sending…" : "Send Message"}
         </button>
