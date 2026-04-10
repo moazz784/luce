@@ -57,6 +57,7 @@ const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountLabel, setAccountLabel] = useState(() => {
+    const [selectedEvent, setSelectedEvent] = useState(null);
     try {
       return (
         sessionStorage.getItem("userName") ||
@@ -974,7 +975,10 @@ useEffect(() => {
   </div>
 </section>
 
-<section id="1000" className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300">
+ <section
+      id="1000"
+      className="py-12 px-4 bg-white dark:bg-gray-900 font-sans transition-colors duration-300"
+    >
       <h2 className="text-3xl font-bold text-[#00a651] text-center mb-10">
         Related Events
       </h2>
@@ -983,21 +987,24 @@ useEffect(() => {
         <Swiper
           modules={[Navigation, Pagination]}
           spaceBetween={24}
-          slidesPerView={1} // كارت واحد في الموبايل
+          slidesPerView={1}
           navigation={{
-            nextEl: '.button-next',
-            prevEl: '.button-prev',
+            nextEl: ".button-next",
+            prevEl: ".button-prev",
           }}
           pagination={{ clickable: true }}
           breakpoints={{
-            640: { slidesPerView: 2 }, // كارتين في الشاشات المتوسطة
-            1024: { slidesPerView: 4 }, // 4 كروت في الشاشات الكبيرة
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 4 },
           }}
           className="pb-12"
         >
           {events.map((event) => (
             <SwiperSlide key={event.id}>
-              <div className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2 h-full">
+              <div
+                onClick={() => setSelectedEvent(event)}
+                className="flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-2 h-full"
+              >
                 {/* Image */}
                 <div className="relative h-72 overflow-hidden rounded-sm">
                   <img
@@ -1005,10 +1012,15 @@ useEffect(() => {
                     alt={event.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
+
                   {/* Date Badge */}
                   <div className="absolute bottom-4 left-4 bg-[#1a3668] text-white w-14 h-16 flex flex-col items-center justify-center rounded-md shadow-lg">
-                    <div className="text-2xl font-bold leading-none">{event.date.day}</div>
-                    <div className="text-xs uppercase font-medium mt-1">{event.date.month}</div>
+                    <div className="text-2xl font-bold leading-none">
+                      {event.date.day}
+                    </div>
+                    <div className="text-xs uppercase font-medium mt-1">
+                      {event.date.month}
+                    </div>
                   </div>
                 </div>
 
@@ -1017,16 +1029,21 @@ useEffect(() => {
                   <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
                     <span className="flex items-center gap-1">
                       <MapPin size={14} className="text-[#8ec63f]" />
-                      <span className="hover:text-[#00a651] transition-colors">{event.location}</span>
+                      <span className="hover:text-[#00a651] transition-colors">
+                        {event.location}
+                      </span>
                     </span>
+
                     <span className="flex items-center gap-1">
                       <span className="text-[#8ec63f] text-sm">🕒</span>
                       {event.time}
                     </span>
                   </div>
+
                   <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
                     {event.title}
                   </h3>
+
                   <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-3">
                     {event.description}
                   </p>
@@ -1036,15 +1053,56 @@ useEffect(() => {
           ))}
         </Swiper>
 
-        {/* أزرار التنقل المخصصة */}
+        {/* أزرار التنقل */}
         <button className="button-prev absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md text-[#00a651] hidden lg:block border border-gray-100 dark:border-gray-700">
           <ChevronLeft size={24} />
         </button>
+
         <button className="button-next absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md text-[#00a651] hidden lg:block border border-gray-100 dark:border-gray-700">
           <ChevronRight size={24} />
         </button>
       </div>
 
+      {/* Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 w-[90%] max-w-2xl rounded-xl overflow-hidden shadow-2xl relative animate-fadeIn">
+
+            {/* Close */}
+            <button
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-3 right-3 bg-black/10 hover:bg-black/20 text-black dark:text-white w-8 h-8 rounded-full"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={selectedEvent.image}
+              alt={selectedEvent.title}
+              className="w-full h-72 object-cover"
+            />
+
+            {/* Content */}
+            <div className="p-5 space-y-3">
+              <h2 className="text-xl font-bold text-[#1a3668] dark:text-white">
+                {selectedEvent.title}
+              </h2>
+
+              <div className="text-sm text-gray-500 dark:text-gray-300 flex gap-4 flex-wrap">
+                <span>📍 {selectedEvent.location}</span>
+                <span>🕒 {selectedEvent.time}</span>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                {selectedEvent.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Button */}
       <div className="text-center mt-6">
         <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
           See All Events
