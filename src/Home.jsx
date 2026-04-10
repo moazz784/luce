@@ -366,11 +366,12 @@ const App = () => {
       {/* 1. Logo Section */}
       <div className="flex items-center gap-3 h-full cursor-pointer" onClick={() => navigate("/")}>
         <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 bg-white/5">
-          <img src={lo} alt="Logo" className="w-full h-full object-contain rounded-full" />
+          {/* تأكد من استيراد اللوجو الخاص بك هنا */}
+          <img src="/logo.png" alt="MUST Logo" className="w-full h-full object-contain rounded-full" />
         </div>
 
         <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
-          <h1 className="text-[11px] font-bold uppercase tracking-wider">
+          <h1 className="text-[11px] font-bold uppercase tracking-wider leading-tight">
             Misr University
           </h1>
           <p className="text-[9px] opacity-70 uppercase">
@@ -379,9 +380,10 @@ const App = () => {
         </div>
       </div>
 
-      {/* 2. Navigation Links (Desktop) */}
+      {/* 2. Navigation Links & Admin Dashboard Link */}
       <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
-        {navLinks.map((item) => (
+        {/* اللينكات العادية للموقع */}
+        {navLinks && navLinks.map((item) => (
           <li key={item.id} className="relative group flex items-center h-full">
             <a
               href={`#${item.id}`}
@@ -390,28 +392,24 @@ const App = () => {
               {item.name}
               {item.subItems && <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />}
             </a>
-
-            {/* Dropdown Menu */}
-            {item.subItems && (
-              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] dark:bg-slate-900 border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
-                {item.subItems.map((sub, idx) => (
-                  <li key={idx} className="relative group/nested border-b border-white/5">
-                    <a
-                      href={sub.link}
-                      className="flex justify-between px-5 py-3 text-[12px] hover:bg-green-500/10 hover:text-green-400 transition"
-                    >
-                      {sub.name}
-                      {sub.nestedItems && <ChevronRight size={14} />}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
           </li>
         ))}
+
+        {/* ✅ Dashboard Link: يظهر للأدمن فقط وسط اللينكات */}
+        {isLoggedIn && isAdmin && (
+          <li className="flex items-center h-full">
+            <button
+              onClick={() => navigate("/AdminDashboard")}
+              className="flex items-center gap-2 text-green-400 border border-green-500/30 px-4 py-2 rounded-lg bg-green-500/5 hover:bg-green-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-[11px] shadow-sm"
+            >
+              <LayoutDashboard size={14} />
+              Dashboard
+            </button>
+          </li>
+        )}
       </ul>
 
-      {/* 3. Right Section (Auth & Controls) */}
+      {/* 3. Right Section (Dark Mode, Language, & Logout) */}
       <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full">
         
         {/* Dark Mode Toggle */}
@@ -422,51 +420,46 @@ const App = () => {
         {/* Language Switcher */}
         <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
 
-        {/* Authentication Logic */}
+        {/* Authentication Section */}
         {isLoggedIn ? (
-          <div className="flex items-center gap-3">
-            {/* User Info Label */}
+          <div className="flex items-center gap-4">
+            {/* User Info & Label */}
             {accountLabel && (
-              <div className="hidden xl:flex flex-col items-end mr-1">
-                <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 tracking-tighter uppercase">
+              <div className="hidden xl:flex flex-col items-end">
+                <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 uppercase tracking-tighter">
                   {isAdmin ? "System Admin" : "Student"}
                 </span>
-                <span className="text-xs font-semibold truncate max-w-[100px]">{accountLabel}</span>
+                <div className="flex items-center gap-1.5">
+                   <span className="text-xs font-semibold truncate max-w-[120px]">{accountLabel}</span>
+                   <User size={14} className="opacity-50" />
+                </div>
               </div>
             )}
 
-            {/* Admin Dashboard Button */}
-            {isAdmin && (
-              <button
-                onClick={() => navigate("/AdminDashboard")}
-                className="flex items-center gap-2 bg-green-500/10 hover:bg-green-500 border border-green-500/50 text-green-400 hover:text-white px-3 py-2 rounded-lg transition-all duration-300 group"
-              >
-                <LayoutDashboard size={16} className="group-hover:rotate-12 transition-transform" />
-                <span className="text-[11px] font-bold uppercase hidden sm:inline">Panel</span>
-              </button>
-            )}
-
-            {/* Logout Button */}
+            {/* Logout Button (Moved to the end) */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-3 py-2 rounded-lg transition-all duration-300"
+              className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group"
             >
-              <LogOut size={16} />
+              <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
               <span className="text-[11px] font-bold uppercase hidden sm:inline">Logout</span>
             </button>
           </div>
         ) : (
+          /* Login/Register Section */
           <div className="flex items-center gap-2">
-            {/* Login Link */}
             <button 
               onClick={() => navigate("/login")} 
               className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors"
             >
               Login
             </button>
-            
-            {/* Register Button */}
-            
+            <button
+              onClick={() => navigate("/login")} // عدلها لـ /register لو عندك صفحة منفصلة
+              className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105"
+            >
+              Register
+            </button>
           </div>
         )}
       </div>
