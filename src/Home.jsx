@@ -409,7 +409,7 @@ useEffect(() => {
 
         {/* Dropdown */}
         {item.subItems && (
-          <div className="absolute top-full left-0 bg-[#1a2b56] text-white min-w-[260px] shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+          <div className="absolute top-full left-0 bg-[#1a2b56] text-white min-w-[260px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
 
             {item.subItems.map((sub, idx) => (
               <div key={idx} className="relative group/sub">
@@ -418,15 +418,15 @@ useEffect(() => {
                   href={sub.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex justify-between items-center px-4 py-3 hover:bg-gray-100 transition"
+                  className="flex justify-between items-center px-4 py-3 hover:bg-white/10 transition"
                 >
                   {sub.name}
                   {sub.nestedItems && <ChevronRight size={14} />}
                 </a>
 
-                {/* Nested */}
+                {/* Nested Dropdown */}
                 {sub.nestedItems && (
-                  <div className="absolute top-0 left-full bg-white min-w-[250px] shadow-lg rounded-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300">
+                  <div className="absolute top-0 left-full bg-[#1a2b56] text-white min-w-[250px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300">
 
                     {sub.nestedItems.map((nested, i) => (
                       <a
@@ -434,7 +434,7 @@ useEffect(() => {
                         href={nested.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block px-4 py-3 hover:bg-gray-100 transition"
+                        className="block px-4 py-3 hover:bg-white/10 transition"
                       >
                         {nested.name}
                       </a>
@@ -470,15 +470,12 @@ useEffect(() => {
   {/* Right Section */}
   <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full">
         
-    {/* Dark Mode */}
     <button onClick={() => setIsDark(!isDark)} className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full">
       {isDark ? <Sun size={19} className="text-yellow-400" /> : <Moon size={19} />}
     </button>
 
-    {/* Lang */}
     <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
 
-    {/* Auth */}
     {isLoggedIn ? (
       <div className="flex items-center gap-4">
 
@@ -504,20 +501,15 @@ useEffect(() => {
       </div>
     ) : (
       <div className="flex items-center gap-2">
-        <button 
-          onClick={() => navigate("/login")} 
-          className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors"
-        >
+        <button onClick={() => navigate("/login")} className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors">
           Login
         </button>
-        <button
-          onClick={() => navigate("/login")}
-          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105"
-        >
+        <button onClick={() => navigate("/login")} className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105">
           Register
         </button>
       </div>
     )}
+
   </div>
 </nav>
 <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
