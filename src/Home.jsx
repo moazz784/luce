@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import lo from "./assets/lo.png";
 // import { toast } from "react-toastify";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
