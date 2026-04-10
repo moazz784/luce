@@ -4,7 +4,6 @@ import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import lo from "./assets/lo.png";
-// import { toast } from "react-toastify";
 import { toast } from "react-toastify";
 import back from "./assets/back.png";
 import image5 from "./assets/400.png";
@@ -184,22 +183,25 @@ const App = () => {
 
 const handleLogout = async () => {
   try {
-    await logout();
+    await logout(); // الدالة اللي بتمسح التوكن من السيرفر أو السيشين
+    
+    // ✅ إضافة التوست هنا
+    toast.success("تم تسجيل الخروج بنجاح.. ننتظرك قريباً!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: isDark ? "dark" : "light", // عشان يماشي المود بتاع الموقع
+    });
 
+    // إعادة تعيين الحالات (States)
     setIsLoggedIn(false);
     setIsAdmin(false);
     setAccountLabel("");
-
-    navigate("/");
-
-    toast.success("تم تسجيل الخروج بنجاح.. ننتظرك قريباً!", {
-      autoClose: 2000,
-    });
-
+    
+    // توجيه المستخدم لصفحة الهوم أو اللوجين
+    navigate("/"); 
   } catch (err) {
-    toast.error("حدث خطأ أثناء تسجيل الخروج", {
-      autoClose: 3000,
-    });
+    // في حالة حدوث مشكلة في الاتصال
+    toast.error("حدث خطأ أثناء تسجيل الخروج");
   }
 };
 
@@ -1349,7 +1351,11 @@ const handleLogout = async () => {
     <div className="border-t border-white/10 dark:border-gray-700 flex justify-center items-center py-7 text-center text-black dark:text-gray-400 text-[15px] opacity-70 dark:opacity-80 transition-colors duration-300">
   © 2026 Misr University for Science & Technology. All Rights Reserved.
 </div>
-
+<ToastContainer 
+  position="top-right"
+  autoClose={2000}
+  theme={isDark ? "dark" : "light"}
+/>
     </div>
   );
 };
