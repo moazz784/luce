@@ -8,7 +8,6 @@ import ProtectedRoute from "./ProtectedRoute";
 // 1. استيراد المكون وملف الـ CSS الخاص بالتوست
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import Register from "./Register";
 
 function App() {
   return (
@@ -34,7 +33,7 @@ function App() {
             
             {/* تأكد أن اسم الملف هنا مطابق لما تستخدمه (Login أو Auth) */}
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/register" element={<Register />} /> */}
+
             {/* ✅ حماية الداشبورد */}
             <Route
               path="/AdminDashboard"

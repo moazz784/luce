@@ -487,8 +487,7 @@ const App = () => {
           >
             Login
           </button>
-        )
-        }
+        )}
 
       </div>
     </nav>
