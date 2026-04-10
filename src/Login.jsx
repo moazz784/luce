@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -138,7 +137,7 @@ export default function Login() {
           {isLogin
             ? "Login with your university email"
             : showOtpStep
-            ? Enter code sent to: ${formik.values.email}
+            ? `Enter code sent to: ${formik.values.email}`
             : "Join LeafScan with your student ID email"}
         </p>
 
