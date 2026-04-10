@@ -1214,10 +1214,10 @@ useEffect(() => {
   </div>
 
   {/* Contact Form */}
-<div className="absolute right-10 lg:right-20 top-1/2 -translate-y-1/2 z-20 w-full max-w-[550px] hidden md:block"> 
+<div className="absolute right-10 lg:right-20 top-1/2 -translate-y-1/2 z-20 w-full max-w-[500px] hidden md:block"> 
     {/* تم زيادة العرض الأقصى من 450px لـ 550px */}
     
-    <div className="bg-white dark:bg-gray-800 shadow-2xl p-10 rounded-sm border-t-4 border-green-500 transition-colors duration-300">
+    <div className="bg-white dark:bg-gray-800 shadow-2xl p-8 rounded-sm border-t-4 border-green-500 transition-colors duration-300">
       {/* تم زيادة الـ padding لـ p-10 ليعطي مساحة وطول أكبر */}
 
       <h3 className="text-[#1a2b56] dark:text-white text-4xl font-bold mb-8"> 
@@ -1225,7 +1225,7 @@ useEffect(() => {
         Leave a message
       </h3>
 
-      <form className="space-y-6" onSubmit={handleContactSubmit}>
+      <form className="space-y-5" onSubmit={handleContactSubmit}>
         {/* زيادة المسافات بين الحقول بـ space-y-6 */}
 
         <div className="grid grid-cols-2 gap-4">
