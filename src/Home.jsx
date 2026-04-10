@@ -377,7 +377,7 @@ useEffect(() => {
       
   {/* Logo */}
   <div className="flex items-center gap-3 h-full cursor-pointer" onClick={() => navigate("/")}>
-    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 bg-white/5">
+    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 ">
       <img src={lo} alt="MUST Logo" className="w-full h-full object-contain rounded-full" />
     </div>
 
