@@ -311,33 +311,45 @@ const App = () => {
           image: "",
         };
 
-  useEffect(() => {
-    let cancelled = false;
-    api("/api/auth/me", { method: "GET" })
-      .then((me) => {
-        if (cancelled) return;
-        const rolesRaw = me.roles ?? [];
-        const roles = Array.isArray(rolesRaw) ? rolesRaw.map(String) : [];
-        saveRolesToSession(roles);
-        const uname = me.userName ?? me.UserName ?? "";
-        const em = me.email ?? me.Email ?? "";
-        if (uname) sessionStorage.setItem("userName", uname);
-        if (em) sessionStorage.setItem("email", em);
-        setAccountLabel(uname || em || "");
-        setIsLoggedIn(true);
-        setIsAdmin(roles.includes("Admin"));
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setIsLoggedIn(false);
-        setIsAdmin(false);
-        setAccountLabel("");
-        clearAuthSession();
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [location.pathname]);
+useEffect(() => {
+  let cancelled = false;
+  api("/api/auth/me", { method: "GET" })
+    .then((me) => {
+      if (cancelled) return;
+
+      const rolesRaw = me.roles ?? [];
+
+      // ✅ التعديل هنا
+      const roles = Array.isArray(rolesRaw)
+        ? rolesRaw.map((r) => r.toLowerCase())
+        : [];
+
+      saveRolesToSession(roles);
+
+      const uname = me.userName ?? me.UserName ?? "";
+      const em = me.email ?? me.Email ?? "";
+
+      if (uname) sessionStorage.setItem("userName", uname);
+      if (em) sessionStorage.setItem("email", em);
+
+      setAccountLabel(uname || em || "");
+      setIsLoggedIn(true);
+
+      // ✅ والتعديل هنا
+      setIsAdmin(roles.includes("admin"));
+    })
+    .catch(() => {
+      if (cancelled) return;
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setAccountLabel("");
+      clearAuthSession();
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}, [location.pathname]);
 
   useEffect(() => {
     if (awards.length === 0) return;
