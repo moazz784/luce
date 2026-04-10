@@ -21,6 +21,8 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { useTheme } from './ThemeContext'; // تأكد إن المسار لملف الـ Context مظبوط
+import { toast, ToastContainer } from "react-toastify"; // أضف ToastContainer هنا
+import 'react-toastify/dist/ReactToastify.css'; // ⚠️ السطر ده مهم جداً عشان الشكل يظهر
 // الأيقونات
 import { 
   Search, 
