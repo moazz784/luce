@@ -409,7 +409,7 @@ useEffect(() => {
 
         {/* Dropdown */}
         {item.subItems && (
-          <div className="absolute top-full left-0 bg-white text-black min-w-[260px] shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+          <div className="absolute top-full left-0 bg-[#1a2b56] text-white min-w-[260px] shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
 
             {item.subItems.map((sub, idx) => (
               <div key={idx} className="relative group/sub">
