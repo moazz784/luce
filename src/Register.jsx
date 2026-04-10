@@ -2,11 +2,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+
 import {
   registerStart,
   registerVerify,
   isStudentMustEmail,
 } from "./authService";
+
 import { api } from "./Api";
 
 export default function Register() {
@@ -14,31 +16,48 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [registerAllowed, setRegisterAllowed] = useState(null);
 
+  // check if register allowed
   useEffect(() => {
-    api("/api/auth/registration-status")
-      .then((d) => setRegisterAllowed(!!d?.allowRegister))
-      .catch(() => setRegisterAllowed(true));
+    let cancelled = false;
+
+    api("/api/auth/registration-status", { method: "GET" })
+      .then((d) => {
+        if (!cancelled) setRegisterAllowed(!!d?.allowRegister);
+      })
+      .catch(() => {
+        if (!cancelled) setRegisterAllowed(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const validationSchema = useMemo(() => {
     if (registerStep === 2) {
       return Yup.object({
         otp: Yup.string()
-          .matches(/^\d{6}$/, "أدخل 6 أرقام")
-          .required(),
+          .matches(/^\d{6}$/, "أدخل الرمز المكوّن من 6 أرقام")
+          .required("رمز التحقق مطلوب"),
       });
     }
 
     return Yup.object({
-      name: Yup.string().required(),
+      name: Yup.string().required("الاسم مطلوب"),
       email: Yup.string()
-        .email()
-        .required()
-        .test("student", "email must", (v) => !!v && isStudentMustEmail(v)),
-      password: Yup.string().min(6).required(),
+        .email("بريد إلكتروني غير صحيح")
+        .required("البريد الإلكتروني مطلوب")
+        .test(
+          "student",
+          "استخدم رقم الطالب فقط: أرقام@must.edu.eg",
+          (v) => !!v && isStudentMustEmail(v)
+        ),
+      password: Yup.string()
+        .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+        .required("كلمة المرور مطلوبة"),
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password")])
-        .required(),
+        .oneOf([Yup.ref("password")], "كلمات المرور غير متطابقة")
+        .required("تأكيد كلمة المرور مطلوب"),
     });
   }, [registerStep]);
 
@@ -53,30 +72,38 @@ export default function Register() {
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
+
       try {
         if (registerStep === 1) {
           await registerStart(values.name, values.email, values.password);
           setRegisterStep(2);
-          toast.info("تم إرسال الكود");
+          formik.setFieldValue("otp", "");
+          toast.info("تم إرسال كود التحقق");
           return;
         }
 
         await registerVerify(values.email, values.otp, values.password);
-        toast.success("تم التسجيل!");
+        toast.success("تم إنشاء الحساب بنجاح!");
+
         setRegisterStep(1);
         formik.resetForm();
       } catch (err) {
-        toast.error(err.message || "Error");
+        toast.error(err.message || "حدث خطأ ما");
       } finally {
         setLoading(false);
       }
     },
   });
 
-  const showOtp = registerStep === 2;
+  const showOtpStep = registerStep === 2;
+  const showRegisterForm = registerStep === 1;
 
   if (registerAllowed === false) {
-    return <p className="text-center text-white">Registration disabled</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Registration is currently disabled
+      </div>
+    );
   }
 
   return (
@@ -85,55 +112,65 @@ export default function Register() {
 
       <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
         <h2 className="text-2xl font-bold text-white mb-2">
-          {showOtp ? "Verify Email" : "Create Account"}
+          {showOtpStep ? "Verify Email" : "Create Account"}
         </h2>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
-          {!showOtp && (
+
+          {showRegisterForm && (
             <>
               <input
+                type="text"
                 placeholder="Full Name"
-                className="w-full p-3 bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white"
                 {...formik.getFieldProps("name")}
               />
 
               <input
-                placeholder="Email"
-                className="w-full p-3 bg-white/20 text-white"
+                type="email"
+                placeholder="Email (@must.edu.eg)"
+                className="w-full p-3 rounded-lg bg-white/20 text-white"
                 {...formik.getFieldProps("email")}
               />
 
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full p-3 bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white"
                 {...formik.getFieldProps("password")}
               />
 
               <input
                 type="password"
                 placeholder="Confirm Password"
-                className="w-full p-3 bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white"
                 {...formik.getFieldProps("confirmPassword")}
               />
             </>
           )}
 
-          {showOtp && (
+          {showOtpStep && (
             <input
+              type="text"
               placeholder="6-digit code"
-              className="w-full p-3 bg-white/20 text-white text-center"
+              maxLength="6"
+              className="w-full p-3 rounded-lg bg-white/20 text-white text-center"
               {...formik.getFieldProps("otp")}
             />
           )}
 
-          <button className="w-full bg-green-500 py-3 text-white rounded-lg">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-500 py-3 text-white rounded-lg font-bold"
+          >
             {loading
-              ? "Loading..."
-              : showOtp
+              ? "جاري المعالجة..."
+              : showOtpStep
               ? "Verify & Register"
               : "Get Code"}
           </button>
+
         </form>
       </div>
     </div>
