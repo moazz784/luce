@@ -1,25 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // استيراد التوست
 import {
+  login,
   registerStart,
   registerVerify,
+  isMustLoginEmail,
   isStudentMustEmail,
 } from "./authService";
-
 import { api } from "./Api";
+import { hasAdminRole } from "./jwtUtils";
 
-export default function Register() {
+export default function Login() {
+  const [isLogin, setIsLogin] = useState(true);
   const [registerStep, setRegisterStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [registerAllowed, setRegisterAllowed] = useState(null);
+  const navigate = useNavigate();
 
-  // check registration status
+  // التحقق من حالة التسجيل (مسموح أم لا)
   useEffect(() => {
     let cancelled = false;
-
     api("/api/auth/registration-status", { method: "GET" })
       .then((d) => {
         if (!cancelled) setRegisterAllowed(!!d?.allowRegister);
@@ -27,13 +31,26 @@ export default function Register() {
       .catch(() => {
         if (!cancelled) setRegisterAllowed(true);
       });
-
     return () => {
       cancelled = true;
     };
   }, []);
 
+  useEffect(() => {
+    if (registerAllowed === false && !isLogin) setIsLogin(true);
+  }, [registerAllowed, isLogin]);
+
+  // منطق التحقق (Validation) باستخدام Yup
   const validationSchema = useMemo(() => {
+    if (isLogin) {
+      return Yup.object({
+        email: Yup.string()
+          .email("بريد إلكتروني غير صحيح")
+          .required("البريد الإلكتروني مطلوب")
+          .test("must", "يجب استخدام بريد MUST (@must.edu.eg)", (v) => !!v && isMustLoginEmail(v)),
+        password: Yup.string().required("كلمة المرور مطلوبة"),
+      });
+    }
     if (registerStep === 2) {
       return Yup.object({
         otp: Yup.string()
@@ -41,17 +58,12 @@ export default function Register() {
           .required("رمز التحقق مطلوب"),
       });
     }
-
     return Yup.object({
       name: Yup.string().required("الاسم مطلوب"),
       email: Yup.string()
         .email("بريد إلكتروني غير صحيح")
         .required("البريد الإلكتروني مطلوب")
-        .test(
-          "student",
-          "استخدم رقم الطالب فقط: أرقام@must.edu.eg",
-          (v) => !!v && isStudentMustEmail(v)
-        ),
+        .test("student", "استخدم رقم الطالب فقط: أرقام@must.edu.eg", (v) => !!v && isStudentMustEmail(v)),
       password: Yup.string()
         .min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل")
         .required("كلمة المرور مطلوبة"),
@@ -59,7 +71,7 @@ export default function Register() {
         .oneOf([Yup.ref("password")], "كلمات المرور غير متطابقة")
         .required("تأكيد كلمة المرور مطلوب"),
     });
-  }, [registerStep]);
+  }, [isLogin, registerStep]);
 
   const formik = useFormik({
     initialValues: {
@@ -70,112 +82,176 @@ export default function Register() {
       otp: "",
     },
     validationSchema,
-
+    enableReinitialize: true,
     onSubmit: async (values) => {
       setLoading(true);
+      setError("");
 
       try {
-        // STEP 1: send code
-        if (registerStep === 1) {
-          await registerStart(values.name, values.email, values.password);
-          setRegisterStep(2);
-          formik.setFieldValue("otp", "");
-          toast.info("تم إرسال كود التحقق على الإيميل");
+        if (isLogin) {
+          // تسجيل الدخول
+          await login(values.email, values.password);
+          toast.success("مرحباً بك مجدداً! جاري الدخول...");
+          navigate(hasAdminRole() ? "/AdminDashboard" : "/", { replace: true });
           return;
         }
 
-        // STEP 2: verify
+        if (registerStep === 1) {
+          // بداية التسجيل (إرسال الكود)
+          await registerStart(values.name, values.email, values.password);
+          setRegisterStep(2);
+          formik.setFieldValue("otp", "");
+          toast.info("تم إرسال كود التحقق لبريدك الإلكتروني");
+          return;
+        }
+
+        // تأكيد الكود وإتمام التسجيل
         await registerVerify(values.email, values.otp, values.password);
-
-        toast.success("تم إنشاء الحساب بنجاح 🎉");
-
-        setRegisterStep(1);
+        toast.success("تم إنشاء الحساب بنجاح! يمكنك الدخول الآن");
         formik.resetForm();
+        setRegisterStep(1);
+        setIsLogin(true);
       } catch (err) {
-        toast.error(err.message || "حدث خطأ ما");
+        const errorMsg = err.message || "حدث خطأ ما";
+        setError(errorMsg);
+        toast.error(errorMsg); // إظهار الخطأ في توست
       } finally {
         setLoading(false);
       }
     },
   });
 
-  if (registerAllowed === false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Registration is disabled
-      </div>
-    );
-  }
-
-  const isOtpStep = registerStep === 2;
+  const showRegisterForm = !isLogin && registerStep === 1;
+  const showOtpStep = !isLogin && registerStep === 2;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0c2138] via-[#0f2a44] to-[#152f4a] flex items-center justify-center relative">
       <div className="absolute inset-0 bg-[#0f2a44]/80"></div>
 
       <div className="relative bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[380px] text-center border border-white/20">
-        <h2 className="text-2xl font-bold text-white mb-4">
-          {isOtpStep ? "Verify Email" : "Create Account"}
+        <h2 className="text-2xl font-bold text-white mb-2">
+          {isLogin ? "Welcome Back" : showOtpStep ? "Verify Email" : "Create Account"}
         </h2>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <p className="text-gray-200 mb-6 text-sm">
+          {isLogin
+            ? "Login with your university email"
+            : showOtpStep
+            ? `Enter code sent to: ${formik.values.email}`
+            : "Join LeafScan with your student ID email"}
+        </p>
 
-          {/* STEP 1 */}
-          {!isOtpStep && (
-            <>
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+          {showRegisterForm && (
+            <div>
               <input
                 type="text"
                 placeholder="Full Name"
-                className="w-full p-3 rounded-lg bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("name")}
               />
+              {formik.touched.name && formik.errors.name && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.name}</p>
+              )}
+            </div>
+          )}
 
+          {!showOtpStep && (
+            <div>
               <input
                 type="email"
                 placeholder="Email (@must.edu.eg)"
-                className="w-full p-3 rounded-lg bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("email")}
               />
+              {formik.touched.email && formik.errors.email && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.email}</p>
+              )}
+            </div>
+          )}
 
+          {showOtpStep && (
+            <div>
+              <input
+                type="text"
+                placeholder="6-digit code"
+                maxLength="6"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400 text-center tracking-widest"
+                {...formik.getFieldProps("otp")}
+              />
+              {formik.touched.otp && formik.errors.otp && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.otp}</p>
+              )}
+            </div>
+          )}
+
+          {(isLogin || showOtpStep || showRegisterForm) && (
+            <div>
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full p-3 rounded-lg bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("password")}
               />
+              {formik.touched.password && formik.errors.password && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.password}</p>
+              )}
+            </div>
+          )}
 
+          {showRegisterForm && (
+            <div>
               <input
                 type="password"
                 placeholder="Confirm Password"
-                className="w-full p-3 rounded-lg bg-white/20 text-white"
+                className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("confirmPassword")}
               />
-            </>
-          )}
-
-          {/* STEP 2 OTP */}
-          {isOtpStep && (
-            <input
-              type="text"
-              placeholder="6-digit code"
-              maxLength="6"
-              className="w-full p-3 rounded-lg bg-white/20 text-white text-center tracking-widest"
-              {...formik.getFieldProps("otp")}
-            />
+              {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                <p className="text-red-400 text-[10px] mt-1 text-left">{formik.errors.confirmPassword}</p>
+              )}
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 py-3 text-white rounded-lg font-bold"
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition disabled:bg-gray-500"
           >
-            {loading
-              ? "جاري المعالجة..."
-              : isOtpStep
-              ? "Verify & Register"
-              : "Get Code"}
+            {loading ? "جاري المعالجة..." : isLogin ? "Login" : showOtpStep ? "Verify & Register" : "Get Code"}
           </button>
+
+          {showOtpStep && (
+            <button
+              type="button"
+              className="text-xs text-gray-300 hover:text-white underline mt-2"
+              onClick={() => setRegisterStep(1)}
+            >
+              Back to edit details
+            </button>
+          )}
         </form>
+
+        <p className="text-gray-300 text-sm mt-6">
+          {registerAllowed !== false ? (
+            <>
+              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+              <span
+                className="text-green-400 cursor-pointer hover:underline font-bold"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setRegisterStep(1);
+                  setError("");
+                  formik.resetForm();
+                }}
+              >
+                {isLogin ? "Register" : "Login"}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-400 italic text-xs">Registration is currently disabled</span>
+          )}
+        </p>
       </div>
     </div>
   );
