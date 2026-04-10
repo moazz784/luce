@@ -367,7 +367,7 @@ const App = () => {
       <div className="flex items-center gap-3 h-full cursor-pointer" onClick={() => navigate("/")}>
         <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 bg-white/5">
           {/* تأكد من استيراد اللوجو الخاص بك هنا */}
-          <img src="/logo.png" alt="MUST Logo" className="w-full h-full object-contain rounded-full" />
+          <img src={lo} alt="MUST Logo" className="w-full h-full object-contain rounded-full" />
         </div>
 
         <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
