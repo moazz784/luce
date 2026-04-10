@@ -564,7 +564,7 @@ useEffect(() => {
       key={i}
       href={`#${item.target}`}
       className="
-        px-5 py-5
+        px-5 py-2
         rounded-full
         bg-white/10
         backdrop-blur-md
