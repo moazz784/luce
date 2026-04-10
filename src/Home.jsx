@@ -542,7 +542,7 @@ useEffect(() => {
   {/* Content */}
   <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4">
 
-    <div className="max-w-4xl">
+    <div className="max-w-4xl mt-20">
 
       <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-6">
         Alumni Society
