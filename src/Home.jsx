@@ -53,11 +53,12 @@ const App = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountLabel, setAccountLabel] = useState(() => {
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    
     try {
       return (
         sessionStorage.getItem("userName") ||
