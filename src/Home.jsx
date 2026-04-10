@@ -35,6 +35,9 @@ import {
   ChevronDown,
   CheckCircle2,
   X,
+  user,
+  LayoutDashboard, 
+  LogOut,
   Moon,
   MapPin,
   ChevronLeft,
@@ -358,16 +361,16 @@ const App = () => {
       )}
       
       {/* --- 1. Navbar --- */}
-   <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px]">
-
-      {/* Logo */}
-      <div className="flex items-center gap-3 h-full">
-        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1">
+<nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300">
+      
+      {/* 1. Logo Section */}
+      <div className="flex items-center gap-3 h-full cursor-pointer" onClick={() => navigate("/")}>
+        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 bg-white/5">
           <img src={lo} alt="Logo" className="w-full h-full object-contain rounded-full" />
         </div>
 
         <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
-          <h1 className="text-[11px] font-bold uppercase">
+          <h1 className="text-[11px] font-bold uppercase tracking-wider">
             Misr University
           </h1>
           <p className="text-[9px] opacity-70 uppercase">
@@ -376,119 +379,96 @@ const App = () => {
         </div>
       </div>
 
-      {/* Links */}
+      {/* 2. Navigation Links (Desktop) */}
       <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
         {navLinks.map((item) => (
           <li key={item.id} className="relative group flex items-center h-full">
-
             <a
               href={`#${item.id}`}
               className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
             >
               {item.name}
-
-              {item.subItems && (
-                <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />
-              )}
+              {item.subItems && <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />}
             </a>
 
-            {/* Dropdown */}
+            {/* Dropdown Menu */}
             {item.subItems && (
-              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
-
+              <ul className="absolute left-0 top-full w-64 bg-[#1a2b4b] dark:bg-slate-900 border-t-2 border-green-500 shadow-2xl opacity-0 invisible translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
                 {item.subItems.map((sub, idx) => (
                   <li key={idx} className="relative group/nested border-b border-white/5">
-
                     <a
                       href={sub.link}
-                      className="flex justify-between px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
+                      className="flex justify-between px-5 py-3 text-[12px] hover:bg-green-500/10 hover:text-green-400 transition"
                     >
                       {sub.name}
                       {sub.nestedItems && <ChevronRight size={14} />}
                     </a>
-
-                    {/* Nested */}
-                    {sub.nestedItems && (
-                      <ul className="absolute left-full top-0 w-64 bg-[#1a2b4b] border-l-2 border-green-500 shadow-2xl opacity-0 invisible translate-x-2 group-hover/nested:visible group-hover/nested:opacity-100 group-hover/nested:translate-x-0 transition-all duration-300 z-[60]">
-
-                        {sub.nestedItems.map((nested, nIdx) => (
-                          <li key={nIdx}>
-                            <a
-                              href={nested.link}
-                              className="block px-5 py-3 text-[12px] hover:bg-[#243b6b] hover:text-green-400 transition"
-                            >
-                              {nested.name}
-                            </a>
-                          </li>
-                        ))}
-
-                      </ul>
-                    )}
                   </li>
                 ))}
-
               </ul>
             )}
-
           </li>
         ))}
       </ul>
 
-      {/* Right */}
-      <div className="flex items-center gap-4 border-l border-white/20 pl-4 h-full">
-
-        {/* Dark Mode */}
-        <button
-          onClick={() => setIsDark(!isDark)}
-          className="hover:text-green-400 transition p-1"
-        >
-          {isDark ? (
-            <Sun size={20} className="text-yellow-400" />
-          ) : (
-            <Moon size={20} />
-          )}
+      {/* 3. Right Section (Auth & Controls) */}
+      <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full">
+        
+        {/* Dark Mode Toggle */}
+        <button onClick={() => setIsDark(!isDark)} className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full">
+          {isDark ? <Sun size={19} className="text-yellow-400" /> : <Moon size={19} />}
         </button>
 
-        {/* Language */}
-        <span className="cursor-pointer font-bold text-sm hover:text-green-400">
-          ع
-        </span>
+        {/* Language Switcher */}
+        <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
 
-        {isLoggedIn && accountLabel && (
-          <span
-            className="flex items-center gap-1.5 min-w-0 max-w-[min(220px,42vw)] text-green-300"
-            title={accountLabel}
-          >
-            <User size={18} className="shrink-0 opacity-90" aria-hidden />
-            <span className="truncate text-sm font-semibold">{accountLabel}</span>
-          </span>
-        )}
-
-        {/* Admins: Dashboard. Any logged-in user: Logout (User role is not admin). */}
-        {isAdmin && (
-          <button
-            onClick={() => navigate("/AdminDashboard")}
-            className="p-2 border border-white/20 rounded hover:border-green-400 transition"
-          >
-            Dashboard
-          </button>
-        )}
+        {/* Authentication Logic */}
         {isLoggedIn ? (
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 transition px-4 py-1.5 rounded-full font-bold"
-          >
-            Logout
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-green-500 hover:bg-cyan-500 transition px-4 py-1.5 rounded-full font-bold"
-          >
-            Login
-          </button>
-        )}
+          <div className="flex items-center gap-3">
+            {/* User Info Label */}
+            {accountLabel && (
+              <div className="hidden xl:flex flex-col items-end mr-1">
+                <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 tracking-tighter uppercase">
+                  {isAdmin ? "System Admin" : "Student"}
+                </span>
+                <span className="text-xs font-semibold truncate max-w-[100px]">{accountLabel}</span>
+              </div>
+            )}
 
+            {/* Admin Dashboard Button */}
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/AdminDashboard")}
+                className="flex items-center gap-2 bg-green-500/10 hover:bg-green-500 border border-green-500/50 text-green-400 hover:text-white px-3 py-2 rounded-lg transition-all duration-300 group"
+              >
+                <LayoutDashboard size={16} className="group-hover:rotate-12 transition-transform" />
+                <span className="text-[11px] font-bold uppercase hidden sm:inline">Panel</span>
+              </button>
+            )}
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-3 py-2 rounded-lg transition-all duration-300"
+            >
+              <LogOut size={16} />
+              <span className="text-[11px] font-bold uppercase hidden sm:inline">Logout</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            {/* Login Link */}
+            <button 
+              onClick={() => navigate("/login")} 
+              className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors"
+            >
+              Login
+            </button>
+            
+            {/* Register Button */}
+            
+          </div>
+        )}
       </div>
     </nav>
 <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
