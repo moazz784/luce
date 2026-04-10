@@ -489,12 +489,7 @@ const App = () => {
           </button>
         )
         }
-<button
-        onClick={() => navigate("/register")}
-        className="bg-green-500 hover:bg-green-600 transition px-4 py-1.5 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20"
-      >
-        Register
-      </button>
+
       </div>
     </nav>
 <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
