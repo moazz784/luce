@@ -35,6 +35,8 @@ import {
   ChevronDown,
   CheckCircle2,
   X,
+   LogIn,
+   UserPlus,
   user,
   LayoutDashboard, 
   LogOut,
@@ -501,12 +503,25 @@ useEffect(() => {
       </div>
     ) : (
       <div className="flex items-center gap-2">
-        <button onClick={() => navigate("/login")} className="text-[13px] font-bold hover:text-green-400 px-3 transition-colors">
-          Login
-        </button>
-        <button onClick={() => navigate("/register")} className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-full font-bold text-[12px] shadow-lg shadow-green-500/20 transition-all hover:scale-105">
-          Register
-        </button>
+        <button
+    onClick={() => navigate("/login")}
+    className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px]
+               bg-white/10 hover:bg-white/20 text-white
+               transition-all hover:scale-105 shadow-lg"
+  >
+    <LogIn size={16} />
+    Login
+  </button>
+
+  <button
+    onClick={() => navigate("/register")}
+    className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px]
+               bg-green-500 hover:bg-green-600 text-white
+               transition-all hover:scale-105 shadow-lg shadow-green-500/20"
+  >
+    <UserPlus size={16} />
+    Register
+  </button>
       </div>
     )}
 
