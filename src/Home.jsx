@@ -540,9 +540,9 @@ useEffect(() => {
   </Swiper>
 
   {/* Content */}
-  <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4">
+  <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4 pt-40">
 
-    <div className="max-w-4xl mt-20">
+    <div className="max-w-4xl ">
 
       <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-6">
         Alumni Society
