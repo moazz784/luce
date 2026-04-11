@@ -496,7 +496,7 @@ useEffect(() => {
           </div>
         )}
 <button 
-  onClick={() => navigate("/Gallery")} 
+  onClick={() => navigate("/gallery")} 
   className="p-2"
 >
   <Menu size={28} />

@@ -36,7 +36,7 @@ function App() {
             {/* تأكد أن اسم الملف هنا مطابق لما تستخدمه (Login أو Auth) */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/GALERY" element={<Gallery />} />
+            <Route path="/gallery" element={<Gallery />} />
             {/* ✅ حماية الداشبورد */}
             <Route
               path="/AdminDashboard"
