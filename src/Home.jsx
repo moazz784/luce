@@ -495,7 +495,10 @@ useEffect(() => {
             </div>
           </div>
         )}
-
+<button className="p-2">
+   onClick={() => navigate("/Gallery")}
+  <Menu size={28} />
+</button>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group"
