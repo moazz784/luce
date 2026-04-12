@@ -47,6 +47,17 @@ import {
   ArrowUpRight,
   User, Calendar, Clock 
 } from 'lucide-react';
+
+function formatNewsPublishedAt(iso) {
+  if (iso == null || iso === "") return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(d);
+}
+
 // ضيف السطر ده جوه الفانكشن فوق مع الـ Navigate والـ States التانية
 const App = () => {
   const { isDark, setIsDark } = useTheme();
@@ -105,6 +116,7 @@ const App = () => {
           id: n.id,
           title: n.title,
           image: resolveContentImage(n.imageUrl, localImageSets.news, i),
+          publishedAt: n.publishedAt ?? n.PublishedAt ?? null,
         }));
         setNewsData(
           newsList.length ? newsList : staticFallbackBundle.newsData
@@ -1149,7 +1161,9 @@ useEffect(() => {
           }}
           className="pb-14"
         >
-          {newsData.map((news) => (
+          {newsData.map((news) => {
+            const newsDateLabel = formatNewsPublishedAt(news.publishedAt);
+            return (
             <SwiperSlide key={news.id}>
               <div
                 onClick={() => setSelectedNews(news)}
@@ -1168,10 +1182,14 @@ useEffect(() => {
 
                 {/* Content */}
                 <div className="py-5 px-1 space-y-3">
-                  <div className="flex items-center gap-1.5 text-[#00a651]">
-                    <Calendar size={16} className="opacity-80" />
-                    <span className="w-8 h-[1px] bg-gray-200 dark:bg-gray-600"></span>
-                  </div>
+                  {newsDateLabel ? (
+                    <div className="flex items-center gap-2 text-[#00a651] min-w-0">
+                      <Calendar size={16} className="opacity-80 shrink-0" />
+                      <span className="text-xs font-medium truncate">
+                        {newsDateLabel}
+                      </span>
+                    </div>
+                  ) : null}
 
                   <h3 className="text-sm text-gray-500 dark:text-gray-300 line-clamp-4">
                     {news.title}
@@ -1179,7 +1197,8 @@ useEffect(() => {
                 </div>
               </div>
             </SwiperSlide>
-          ))}
+          );
+          })}
         </Swiper>
 
         {/* Arrows */}
@@ -1216,7 +1235,10 @@ useEffect(() => {
             <div className="p-5 space-y-3">
               <div className="flex items-center gap-2 text-[#00a651]">
                 <Calendar size={16} />
-                <span className="text-sm">Latest Update</span>
+                <span className="text-sm">
+                  {formatNewsPublishedAt(selectedNews.publishedAt) ||
+                    "Latest Update"}
+                </span>
               </div>
 
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
