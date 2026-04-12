@@ -1050,6 +1050,7 @@ useEffect(() => {
             const displayTime =
               event.time?.trim() ||
               (event.eventDate ? formatEventSchedule(event.eventDate) : "");
+            const showMeta = !!(displayLocation || displayTime);
             return (
             <SwiperSlide key={event.id}>
               <div
@@ -1077,20 +1078,24 @@ useEffect(() => {
 
                 {/* Info */}
                 <div className="mt-4 space-y-2 px-1">
-                  {(displayLocation || displayTime) ? (
+                  {showMeta ? (
                       <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
-                        {displayLocation ? (
-                          <div className="flex items-start gap-2 min-w-0">
-                            <MapPin
-                              size={16}
-                              className="text-[#8ec63f] shrink-0 mt-0.5"
-                              aria-hidden
-                            />
-                            <span className="break-words leading-snug">
-                              {displayLocation}
-                            </span>
-                          </div>
-                        ) : null}
+                        <div className="flex items-start gap-2 min-w-0">
+                          <MapPin
+                            size={16}
+                            className="text-[#8ec63f] shrink-0 mt-0.5"
+                            aria-hidden
+                          />
+                          <span
+                            className={`break-words leading-snug ${
+                              displayLocation
+                                ? ""
+                                : "text-gray-500 dark:text-gray-400 italic"
+                            }`}
+                          >
+                            {displayLocation || "Venue TBA — set Location in Admin"}
+                          </span>
+                        </div>
                         {displayTime ? (
                           <div className="flex items-start gap-2 min-w-0">
                             <Clock
@@ -1138,6 +1143,7 @@ useEffect(() => {
           (selectedEvent.eventDate
             ? formatEventSchedule(selectedEvent.eventDate)
             : "");
+        const showModalMeta = !!(modalLocation || modalTime);
         return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 w-[90%] max-w-2xl rounded-xl overflow-hidden shadow-2xl relative animate-fadeIn">
@@ -1163,16 +1169,23 @@ useEffect(() => {
                 {selectedEvent.title}
               </h2>
 
+              {showModalMeta ? (
               <div className="text-sm text-gray-800 dark:text-gray-100 flex flex-col gap-2">
-                {modalLocation ? (
-                  <span className="flex items-start gap-2">
-                    <MapPin
-                      size={16}
-                      className="text-[#8ec63f] shrink-0 mt-0.5"
-                    />
-                    {modalLocation}
+                <span className="flex items-start gap-2">
+                  <MapPin
+                    size={16}
+                    className="text-[#8ec63f] shrink-0 mt-0.5"
+                  />
+                  <span
+                    className={
+                      modalLocation
+                        ? ""
+                        : "text-gray-500 dark:text-gray-400 italic"
+                    }
+                  >
+                    {modalLocation || "Venue TBA — set Location in Admin"}
                   </span>
-                ) : null}
+                </span>
                 {modalTime ? (
                   <span className="flex items-start gap-2">
                     <Clock
@@ -1183,6 +1196,7 @@ useEffect(() => {
                   </span>
                 ) : null}
               </div>
+              ) : null}
 
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 {selectedEvent.description}

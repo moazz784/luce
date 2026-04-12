@@ -288,10 +288,14 @@ const AdminDashboard = () => {
       };
     }
     if (activeSection === "Events") {
+      const locRaw = formData.location?.trim();
+      if (!locRaw) {
+        throw new Error("يرجى إدخال مكان الفعالية (Location)");
+      }
       const eventDate = formData.date
         ? new Date(formData.date + "T12:00:00").toISOString()
         : new Date().toISOString();
-      const loc = formData.location?.trim() || null;
+      const loc = locRaw;
       const tr = formData.timeRange?.trim() || null;
       const desc = formData.description?.trim() || null;
       return {
@@ -500,10 +504,11 @@ const AdminDashboard = () => {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                المكان / Location
+                المكان / Location <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
+                required
                 value={formData.location}
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
