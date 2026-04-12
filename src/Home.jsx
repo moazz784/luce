@@ -58,6 +58,11 @@ function formatNewsPublishedAt(iso) {
   }).format(d);
 }
 
+/** When timeRange is empty, show event schedule from API eventDate. */
+function formatEventSchedule(iso) {
+  return formatNewsPublishedAt(iso);
+}
+
 // ضيف السطر ده جوه الفانكشن فوق مع الـ Navigate والـ States التانية
 const App = () => {
   const { isDark, setIsDark } = useTheme();
@@ -157,21 +162,35 @@ const App = () => {
           awardsList.length ? awardsList : staticFallbackBundle.awards
         );
 
-        const eventsList = (bundle.events || []).map((e, i) => {
+        const rawEvents = bundle.events ?? bundle.Events ?? [];
+        const eventsList = rawEvents.map((e, i) => {
+          const eventDateIso = e.eventDate ?? e.EventDate ?? null;
           const rawDate = e.date ?? e.Date;
-          const dateParts =
+          let dateParts =
             rawDate && typeof rawDate === "object"
               ? {
                   day: String(rawDate.day ?? rawDate.Day ?? ""),
                   month: String(rawDate.month ?? rawDate.Month ?? ""),
                 }
               : { day: "", month: "" };
+          if (!dateParts.day && !dateParts.month && eventDateIso) {
+            const d = new Date(eventDateIso);
+            if (!Number.isNaN(d.getTime())) {
+              dateParts = {
+                day: String(d.getDate()).padStart(2, "0"),
+                month: d.toLocaleString("en", { month: "short" }),
+              };
+            }
+          }
+          const loc = String(e.location ?? e.Location ?? "").trim();
+          const tr = String(e.timeRange ?? e.TimeRange ?? "").trim();
           return {
             id: e.id,
             image: resolveContentImage(e.imageUrl, localImageSets.events, i),
             date: dateParts,
-            location: e.location ?? e.Location ?? "",
-            time: e.timeRange ?? e.TimeRange ?? "",
+            location: loc,
+            time: tr,
+            eventDate: eventDateIso,
             title: e.title,
             description: e.description ?? e.Description ?? "",
             color: e.accentColor ?? e.AccentColor ?? "#3b4b81",
@@ -1026,7 +1045,12 @@ useEffect(() => {
           }}
           className="pb-12"
         >
-          {events.map((event) => (
+          {events.map((event) => {
+            const displayLocation = event.location?.trim();
+            const displayTime =
+              event.time?.trim() ||
+              (event.eventDate ? formatEventSchedule(event.eventDate) : "");
+            return (
             <SwiperSlide key={event.id}>
               <div
                 onClick={() => setSelectedEvent(event)}
@@ -1053,19 +1077,34 @@ useEffect(() => {
 
                 {/* Info */}
                 <div className="mt-4 space-y-2 px-1">
-                  <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} className="text-[#8ec63f]" />
-                      <span className="hover:text-[#00a651] transition-colors">
-                        {event.location}
-                      </span>
-                    </span>
-
-                    <span className="flex items-center gap-1">
-                      <span className="text-[#8ec63f] text-sm">🕒</span>
-                      {event.time}
-                    </span>
-                  </div>
+                  {(displayLocation || displayTime) ? (
+                      <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
+                        {displayLocation ? (
+                          <div className="flex items-start gap-2 min-w-0">
+                            <MapPin
+                              size={16}
+                              className="text-[#8ec63f] shrink-0 mt-0.5"
+                              aria-hidden
+                            />
+                            <span className="break-words leading-snug">
+                              {displayLocation}
+                            </span>
+                          </div>
+                        ) : null}
+                        {displayTime ? (
+                          <div className="flex items-start gap-2 min-w-0">
+                            <Clock
+                              size={16}
+                              className="text-[#8ec63f] shrink-0 mt-0.5"
+                              aria-hidden
+                            />
+                            <span className="break-words leading-snug">
+                              {displayTime}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                  ) : null}
 
                   <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
                     {event.title}
@@ -1077,7 +1116,8 @@ useEffect(() => {
                 </div>
               </div>
             </SwiperSlide>
-          ))}
+            );
+          })}
         </Swiper>
 
         {/* أزرار التنقل */}
@@ -1091,7 +1131,14 @@ useEffect(() => {
       </div>
 
       {/* Modal */}
-      {selectedEvent && (
+      {selectedEvent && (() => {
+        const modalLocation = selectedEvent.location?.trim();
+        const modalTime =
+          selectedEvent.time?.trim() ||
+          (selectedEvent.eventDate
+            ? formatEventSchedule(selectedEvent.eventDate)
+            : "");
+        return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 w-[90%] max-w-2xl rounded-xl overflow-hidden shadow-2xl relative animate-fadeIn">
 
@@ -1116,9 +1163,25 @@ useEffect(() => {
                 {selectedEvent.title}
               </h2>
 
-              <div className="text-sm text-gray-500 dark:text-gray-300 flex gap-4 flex-wrap">
-                <span>📍 {selectedEvent.location}</span>
-                <span>🕒 {selectedEvent.time}</span>
+              <div className="text-sm text-gray-800 dark:text-gray-100 flex flex-col gap-2">
+                {modalLocation ? (
+                  <span className="flex items-start gap-2">
+                    <MapPin
+                      size={16}
+                      className="text-[#8ec63f] shrink-0 mt-0.5"
+                    />
+                    {modalLocation}
+                  </span>
+                ) : null}
+                {modalTime ? (
+                  <span className="flex items-start gap-2">
+                    <Clock
+                      size={16}
+                      className="text-[#8ec63f] shrink-0 mt-0.5"
+                    />
+                    {modalTime}
+                  </span>
+                ) : null}
               </div>
 
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
@@ -1127,7 +1190,8 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Button */}
       <div className="text-center mt-6">
