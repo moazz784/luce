@@ -48,6 +48,9 @@ function normalizeRows(section, rows) {
         title: r.title,
         date: r.eventDate ? String(r.eventDate).slice(0, 10) : "",
         image: r.imageUrl,
+        location: r.location ?? "",
+        timeRange: r.timeRange ?? "",
+        description: r.description ?? "",
       }));
     case "Awards":
       return rows.map((r) => ({
@@ -100,6 +103,9 @@ const AdminDashboard = () => {
     id: null,
     title: "",
     date: "",
+    location: "",
+    timeRange: "",
+    description: "",
     person: "",
     name: "",
     job: "",
@@ -207,6 +213,9 @@ const AdminDashboard = () => {
       id: item.id,
       title: item.title ?? "",
       date: item.date ?? "",
+      location: item.location ?? "",
+      timeRange: item.timeRange ?? "",
+      description: item.description ?? "",
       person: item.person ?? "",
       name: item.name ?? "",
       job: item.job ?? "",
@@ -225,6 +234,9 @@ const AdminDashboard = () => {
       id: null,
       title: "",
       date: "",
+      location: "",
+      timeRange: "",
+      description: "",
       person: "",
       name: "",
       job: "",
@@ -279,14 +291,17 @@ const AdminDashboard = () => {
       const eventDate = formData.date
         ? new Date(formData.date + "T12:00:00").toISOString()
         : new Date().toISOString();
+      const loc = formData.location?.trim() || null;
+      const tr = formData.timeRange?.trim() || null;
+      const desc = formData.description?.trim() || null;
       return {
         path,
         body: {
           title: formData.title,
           eventDate,
-          location: null,
-          timeRange: null,
-          description: null,
+          location: loc,
+          timeRange: tr,
+          description: desc,
           accentColor: null,
           imageUrl,
           sortOrder: 0,
@@ -418,6 +433,39 @@ const AdminDashboard = () => {
   const renderFormFields = () => {
     switch (activeSection) {
       case "News":
+        return (
+          <>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                العنوان
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="form-input"
+                placeholder="عنوان الخبر..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                التاريخ
+              </label>
+              <input
+                type="date"
+                required
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
+                className="form-input"
+              />
+            </div>
+          </>
+        );
       case "Events":
         return (
           <>
@@ -433,7 +481,7 @@ const AdminDashboard = () => {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 className="form-input"
-                placeholder="عنوان الخبر/الفعالية..."
+                placeholder="عنوان الفعالية..."
               />
             </div>
             <div>
@@ -448,6 +496,48 @@ const AdminDashboard = () => {
                   setFormData({ ...formData, date: e.target.value })
                 }
                 className="form-input"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                المكان / Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: Conference Hall"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                الوقت / Time range
+              </label>
+              <input
+                type="text"
+                value={formData.timeRange}
+                onChange={(e) =>
+                  setFormData({ ...formData, timeRange: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: 10:00 am - 3:00 pm"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                الوصف (اختياري)
+              </label>
+              <textarea
+                rows={4}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="form-input w-full"
+                placeholder="وصف مختصر للفعالية..."
               />
             </div>
           </>
@@ -915,6 +1005,23 @@ const AdminDashboard = () => {
                           {item.link}
                         </div>
                         <div className="text-xs text-slate-500">{item.buttonText}</div>
+                      </div>
+                    ) : activeSection === "Events" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.title}
+                        </div>
+                        {item.date && (
+                          <div className="text-sm text-slate-400">{item.date}</div>
+                        )}
+                        {item.location ? (
+                          <div className="text-sm text-purple-600 font-medium">
+                            {item.location}
+                          </div>
+                        ) : null}
+                        {item.timeRange ? (
+                          <div className="text-xs text-slate-500">{item.timeRange}</div>
+                        ) : null}
                       </div>
                     ) : (
                       <div>

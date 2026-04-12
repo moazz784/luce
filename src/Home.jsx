@@ -157,16 +157,26 @@ const App = () => {
           awardsList.length ? awardsList : staticFallbackBundle.awards
         );
 
-        const eventsList = (bundle.events || []).map((e, i) => ({
-          id: e.id,
-          image: resolveContentImage(e.imageUrl, localImageSets.events, i),
-          date: e.date || { day: "", month: "" },
-          location: e.location || "",
-          time: e.timeRange || "",
-          title: e.title,
-          description: e.description || "",
-          color: e.accentColor || "#3b4b81",
-        }));
+        const eventsList = (bundle.events || []).map((e, i) => {
+          const rawDate = e.date ?? e.Date;
+          const dateParts =
+            rawDate && typeof rawDate === "object"
+              ? {
+                  day: String(rawDate.day ?? rawDate.Day ?? ""),
+                  month: String(rawDate.month ?? rawDate.Month ?? ""),
+                }
+              : { day: "", month: "" };
+          return {
+            id: e.id,
+            image: resolveContentImage(e.imageUrl, localImageSets.events, i),
+            date: dateParts,
+            location: e.location ?? e.Location ?? "",
+            time: e.timeRange ?? e.TimeRange ?? "",
+            title: e.title,
+            description: e.description ?? e.Description ?? "",
+            color: e.accentColor ?? e.AccentColor ?? "#3b4b81",
+          };
+        });
         setEvents(
           eventsList.length ? eventsList : staticFallbackBundle.events
         );
