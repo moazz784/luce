@@ -15,7 +15,9 @@ import {
   UploadCloud,
   LogOut,
   Mail,
+  Home,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
 
@@ -82,6 +84,7 @@ function normalizeRows(section, rows) {
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("News");
 
   const [database, setDatabase] = useState({
@@ -611,7 +614,17 @@ const AdminDashboard = () => {
         <div className="p-6 text-2xl font-extrabold border-b border-slate-800 flex items-center gap-3 text-blue-400">
           <LayoutDashboard size={28} /> MUST Admin
         </div>
-        <nav className="flex-1 p-4 space-y-3">
+        <div className="px-4 pt-4">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-4 w-full p-4 rounded-xl text-lg font-medium transition-all duration-150 hover:bg-slate-800 text-slate-300"
+          >
+            <Home size={22} className="text-emerald-400" />
+            الرئيسية (Home)
+          </button>
+        </div>
+        <nav className="flex-1 p-4 space-y-3 pt-2">
           {menuItems.map((item) => (
             <button
               key={item.name}

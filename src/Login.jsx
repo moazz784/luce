@@ -11,8 +11,6 @@ import {
   isStudentMustEmail,
 } from "./authService";
 import { api } from "./Api";
-import { hasAdminRole } from "./jwtUtils";
-
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [registerStep, setRegisterStep] = useState(1);
@@ -92,7 +90,7 @@ export default function Login() {
           // تسجيل الدخول
           await login(values.email, values.password);
           toast.success("مرحباً بك مجدداً! جاري الدخول...");
-          navigate(hasAdminRole() ? "/AdminDashboard" : "/", { replace: true });
+          navigate("/", { replace: true });
           return;
         }
 
