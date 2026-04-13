@@ -43,6 +43,18 @@ import {
   Calendar, Clock 
 } from 'lucide-react';
 
+/** Alumni ShortDescription in admin/DB is sometimes left as the placeholder "MUST Graduate". Treat that as empty and show the real 2-line preview from description or fullBio. */
+function getAlumniPreviewText(person) {
+  const raw = (person.shortDescription ?? "").trim().replace(/\s+/g, " ");
+  if (raw && raw.toLowerCase() !== "must graduate") return person.shortDescription.trim();
+  const desc = (person.description ?? "").trim();
+  if (desc) return desc;
+  const bio = (person.fullBio ?? "").trim();
+  if (!bio) return "";
+  const firstBlock = bio.split(/\r?\n\s*\r?\n/)[0] ?? bio;
+  return firstBlock.replace(/\s+/g, " ").trim();
+}
+
 // ضيف السطر ده جوه الفانكشن فوق مع الـ Navigate والـ States التانية
 const App = () => {
   const navigate = useNavigate();
@@ -513,7 +525,7 @@ const App = () => {
                 </h3>
 
                 <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-2 min-h-[2.5rem]">
-                  {person.shortDescription || person.description}
+                  {getAlumniPreviewText(person)}
                 </p>
 
                 <button
@@ -554,12 +566,14 @@ const App = () => {
               <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
                 {selectedAlumnus.name}
               </h4>
-              {(selectedAlumnus.shortDescription || selectedAlumnus.description)
-                ?.trim() ? (
-                <span className="text-green-600 text-xs font-bold mt-1 text-center line-clamp-2 leading-snug">
-                  {selectedAlumnus.shortDescription || selectedAlumnus.description}
-                </span>
-              ) : null}
+              {(() => {
+                const preview = getAlumniPreviewText(selectedAlumnus);
+                return preview ? (
+                  <span className="text-green-600 text-xs font-bold mt-1 text-center line-clamp-2 leading-snug">
+                    {preview}
+                  </span>
+                ) : null;
+              })()}
             </div>
 
             {/* Biography */}
