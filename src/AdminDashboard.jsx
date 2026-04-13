@@ -17,6 +17,7 @@ import {
   LogOut,
   Mail,
   Home,
+  FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -145,9 +146,11 @@ const AdminDashboard = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingSyndicatePdf, setUploadingSyndicatePdf] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
+  const syndicatePdfInputRef = useRef(null);
 
   const [contactMessages, setContactMessages] = useState([]);
   const [contactLoading, setContactLoading] = useState(false);
@@ -236,6 +239,22 @@ const AdminDashboard = () => {
     }
   };
 
+  /** ESSP: upload PDF and set card `link` to the file URL (thumbnail image is separate). */
+  const handleSyndicatePdfForLink = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSyndicatePdf(true);
+    try {
+      const { url } = await uploadMedia(file);
+      setFormData((prev) => ({ ...prev, link: url }));
+    } catch (err) {
+      alert(err.message || "فشل رفع ملف PDF");
+    } finally {
+      setUploadingSyndicatePdf(false);
+      e.target.value = "";
+    }
+  };
+
   const startEdit = (item) => {
     setIsEditing(true);
     setFormData({
@@ -294,6 +313,7 @@ const AdminDashboard = () => {
     });
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (syndicatePdfInputRef.current) syndicatePdfInputRef.current.value = "";
   };
 
   const handleDelete = async (id) => {
@@ -804,20 +824,41 @@ const AdminDashboard = () => {
                 placeholder="عنوان البطاقة..."
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                رابط البطاقة
+                رابط البطاقة (يفتح عند الضغط على الصورة أو الزر)
               </label>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                اكتب رابطاً يدوياً (مثل https://…) أو ارفع ملف PDF ليصبح الرابط نفسه ملفاً
+                على الخادم. لا يزال مطلوباً رفع صورة مصغّرة في المربع على اليسار منفصلة.
+              </p>
               <input
-                type="url"
+                type="text"
                 required
                 value={formData.link}
                 onChange={(e) =>
                   setFormData({ ...formData, link: e.target.value })
                 }
                 className="form-input"
-                placeholder="https://..."
+                placeholder="https://… أو مسار بعد رفع PDF"
+                spellCheck={false}
               />
+              <input
+                type="file"
+                ref={syndicatePdfInputRef}
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={handleSyndicatePdfForLink}
+              />
+              <button
+                type="button"
+                disabled={uploadingSyndicatePdf}
+                onClick={() => syndicatePdfInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-600/40 bg-cyan-50 text-cyan-800 text-sm font-semibold hover:bg-cyan-100 disabled:opacity-60"
+              >
+                <FileText size={18} />
+                {uploadingSyndicatePdf ? "جاري رفع PDF…" : "رفع PDF كرابط"}
+              </button>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -842,7 +883,10 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 text-right" dir="rtl">
+    <div
+      className="admin-dashboard-shell flex h-screen bg-gray-100 text-right text-slate-900 dark:text-slate-900"
+      dir="rtl"
+    >
       <aside className="w-64 bg-slate-950 text-white flex flex-col shadow-2xl border-l border-slate-800">
         <div className="p-6 text-2xl font-extrabold border-b border-slate-800 flex items-center gap-3 text-blue-400">
           <LayoutDashboard size={28} /> MUST Admin
@@ -897,7 +941,7 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-10">
+      <main className="flex-1 overflow-y-auto p-10 text-slate-900 dark:text-slate-900">
         <div className="flex justify-between items-center mb-10 pb-4 border-b border-gray-200">
           <h1 className="text-4xl font-extrabold text-slate-900">
             إدارة قسم{" "}
@@ -920,7 +964,7 @@ const AdminDashboard = () => {
         )}
 
         {activeSection === "Contact" ? (
-        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-slate-900 dark:text-slate-900">
           <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <h3 className="text-xl font-bold text-slate-700">
               رسائل نموذج التواصل من الصفحة الرئيسية
@@ -1007,7 +1051,7 @@ const AdminDashboard = () => {
         </section>
         ) : (
         <>
-        <section className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 mb-12 relative overflow-hidden">
+        <section className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 mb-12 relative overflow-hidden text-slate-900 dark:text-slate-900">
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full opacity-50" />
 
           <div className="flex justify-between items-center mb-6 relative z-10">
@@ -1077,7 +1121,7 @@ const AdminDashboard = () => {
             <div className="md:col-span-3 flex justify-end mt-4">
               <button
                 type="submit"
-                disabled={saving || uploading}
+                disabled={saving || uploading || uploadingSyndicatePdf}
                 className={`flex items-center gap-2 px-10 py-3 rounded-xl font-bold text-white transition-all shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 disabled:opacity-60 ${
                   isEditing
                     ? "bg-orange-500 hover:bg-orange-600"
@@ -1091,7 +1135,7 @@ const AdminDashboard = () => {
           </form>
         </section>
 
-        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-slate-900 dark:text-slate-900">
           <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <h3 className="text-xl font-bold text-slate-700">
               المحتوى المنشور حالياً في هذا القسم

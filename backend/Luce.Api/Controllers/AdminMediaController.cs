@@ -15,7 +15,7 @@ public class AdminMediaController : ControllerBase
     public AdminMediaController(IMediaStorageService media) => _media = media;
 
     [HttpPost]
-    [RequestSizeLimit(5 * 1024 * 1024)]
+    [RequestSizeLimit(10 * 1024 * 1024)]
     [ProducesResponseType(typeof(MediaUploadResultDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<MediaUploadResultDto>> Upload(IFormFile file, CancellationToken cancellationToken)
     {

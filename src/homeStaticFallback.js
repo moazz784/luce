@@ -72,6 +72,41 @@ export function resolveContentImage(url, fallbacks, index) {
   return path;
 }
 
+/**
+ * Same base-URL rules as {@link resolveContentImage} for `/uploads/...` paths and API hosts,
+ * for syndicate/button **links** (URLs or PDFs) — no image fallbacks.
+ */
+export function resolveContentLink(url) {
+  const u = url && String(url).trim();
+  if (!u) return "";
+
+  if (/^https?:\/\//i.test(u)) {
+    try {
+      const parsed = new URL(u);
+      const loopback =
+        parsed.hostname === "localhost" ||
+        parsed.hostname === "127.0.0.1" ||
+        parsed.hostname === "[::1]";
+      if (loopback && /\/uploads\//i.test(parsed.pathname)) {
+        const base = getApiBaseUrl();
+        const path = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+        if (base) return `${base}${path}`;
+        return path;
+      }
+    } catch {
+      /* ignore */
+    }
+    return u;
+  }
+
+  const path = toUploadsPath(u);
+  if (path == null) return u;
+
+  const base = getApiBaseUrl();
+  if (base) return `${base}${path}`;
+  return path;
+}
+
 export const localImageSets = {
   news: [m11, m22, m33],
   hero: [backs, mmm, loz, loz2, loz3],

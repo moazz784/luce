@@ -8,10 +8,14 @@ public class MediaStorageService : IMediaStorageService
 {
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".jpg", ".jpeg", ".png", ".gif", ".webp"
+        ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"
     };
 
-    private const long MaxBytes = 5 * 1024 * 1024;
+    /// <summary>Images and other uploads except PDF.</summary>
+    private const long MaxBytesDefault = 5 * 1024 * 1024;
+
+    /// <summary>PDF documents (ESSP links etc.) can be slightly larger.</summary>
+    private const long MaxBytesPdf = 10 * 1024 * 1024;
 
     private readonly IWebHostEnvironment _env;
 
@@ -23,9 +27,13 @@ public class MediaStorageService : IMediaStorageService
         if (string.IsNullOrEmpty(ext) || !AllowedExtensions.Contains(ext))
             throw new InvalidOperationException("Unsupported file type.");
 
+        var maxForFile = string.Equals(ext, ".pdf", StringComparison.OrdinalIgnoreCase)
+            ? MaxBytesPdf
+            : MaxBytesDefault;
+
         if (stream.CanSeek)
         {
-            if (stream.Length > MaxBytes)
+            if (stream.Length > maxForFile)
                 throw new InvalidOperationException("File is too large.");
         }
 

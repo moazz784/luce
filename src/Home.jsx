@@ -12,6 +12,7 @@ import HomeHeroBanner from "./HomeHeroBanner";
 import { useSiteAuth } from "./useSiteAuth";
 import {
   resolveContentImage,
+  resolveContentLink,
   localImageSets,
   staticFallbackBundle,
 } from "./homeStaticFallback";
@@ -106,7 +107,7 @@ const App = () => {
           id: s.id,
           title: s.title,
           image: resolveContentImage(s.imageUrl, localImageSets.syndicate, i),
-          link: s.link,
+          link: resolveContentLink(s.link),
           btnText: s.buttonText,
           color: "bg-blue-600",
         }));

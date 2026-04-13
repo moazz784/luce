@@ -7,3 +7,30 @@ html {
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+/* Admin dashboard: app root uses `dark:text-white` — force readable fields on light cards + native date/time pickers */
+@layer components {
+  .form-input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-300 dark:bg-white dark:text-slate-900 dark:placeholder:text-slate-400;
+    color-scheme: light;
+    caret-color: rgb(15 23 42);
+  }
+
+  /* WebKit autofill often hides text; keep it dark on white */
+  .form-input:-webkit-autofill,
+  .form-input:-webkit-autofill:hover,
+  .form-input:-webkit-autofill:focus,
+  .form-input:-webkit-autofill:active {
+    -webkit-text-fill-color: rgb(15 23 42);
+    box-shadow: 0 0 0 1000px #fff inset;
+    transition: background-color 99999s ease-out 0s;
+  }
+}
+
+/* Catch-all for any input/textarea added later without .form-input (same visibility issue under dark mode) */
+.admin-dashboard-shell input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+.admin-dashboard-shell textarea {
+  color-scheme: light;
+  caret-color: rgb(15 23 42);
+  color: rgb(15 23 42);
+}
