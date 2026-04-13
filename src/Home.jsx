@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
@@ -8,6 +8,7 @@ import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
 import SiteChrome from "./SiteChrome";
+import HomeHeroBanner from "./HomeHeroBanner";
 import { useSiteAuth } from "./useSiteAuth";
 import {
   resolveContentImage,
@@ -24,14 +25,8 @@ import {
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
 // الأيقونات
 import { 
-  Search, 
-  Facebook, 
-  Instagram, 
-  Linkedin, 
-  Twitter, 
   GraduationCap, 
   Mail, 
   CheckCircle2,
@@ -235,124 +230,7 @@ const App = () => {
       onLogout={handleLogout}
     >
       <div id="100" className="relative">
-      <section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
-
-  {/* Slider */}
-  <Swiper
-    modules={[Navigation, Pagination, Autoplay, EffectFade]}
-    effect="fade"
-    speed={1200}
-    autoplay={{ delay: 5000, disableOnInteraction: false }}
-    pagination={{ clickable: true, dynamicBullets: true }}
-    navigation
-    className="h-full w-full"
-  >
-
-    {slides.map((slide) => (
-      <SwiperSlide key={slide.id}>
-        <div
-          className="relative h-full w-full bg-cover bg-center"
-          style={{ backgroundImage: `url('${slide.image}')` }}
-        >
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1a2b56]/80 via-[#1a2b56]/50 to-transparent dark:from-black/80 dark:via-black/40"></div>
-        </div>
-      </SwiperSlide>
-    ))}
-
-  </Swiper>
-
-  {/* Content */}
-  <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4 pt-40">
-
-    <div className="max-w-4xl ">
-
-      <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-6">
-        Alumni Society
-      </h2>
-
-      {/* Quick Links */}
-<div className="flex flex-wrap justify-center gap-3 text-sm md:text-base font-medium">
-  {[
-    { name: "Home", target: "home" },
-    { name: "Services", target: "6000" },
-    { name: "Notable", target: "5000" },
-    { name: "Awards", target: "awards" },
-    { name: "Events", target: "1000" },
-    { name: "News", target: "2000" },
-    { name: "Syndicates", target: "moazz" },
-    { name: "Contact Us", target: "3000" },
-  ].map((item, i) => (
-    <a
-      key={i}
-      href={`#${item.target}`}
-      className="
-        px-5 py-2
-        rounded-full
-        bg-white/10
-        backdrop-blur-md
-        border border-white/20
-        text-white
-        hover:bg-green-500
-        hover:scale-105
-        transition-all duration-300
-      "
-    >
-      {item.name}
-    </a>
-  ))}
-</div>
-
-    </div>
-
-  </div>
-
-  {/* Social Sidebar */}
-  <div className="fixed right-5 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-40">
-
-    {/* Search */}
-    <a
-      href="/search"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="p-3 bg-green-500 rounded-full text-white shadow-lg hover:scale-110 hover:rotate-6 transition-all duration-300"
-    >
-      <Search size={20} />
-    </a>
-
-    {/* Social */}
-    {[
-      {
-        Icon: Facebook,
-        url: "https://www.facebook.com/groups/766796172340576/",
-      },
-      {
-        Icon: Instagram,
-        url: "https://www.instagram.com/accounts/login/",
-      },
-      {
-        Icon: Twitter,
-        url: "https://x.com/must_university",
-      },
-      {
-  Icon:Linkedin,
-  url: "https://www.linkedin.com/school/misr-university-for-science-and-technology/"
-}
-    ].map((item, idx) => (
-      <a
-        key={idx}
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-xl hover:-translate-x-2 hover:scale-110 transition-all duration-300 flex items-center justify-center"
-      >
-        <item.Icon size={20} className="text-[#1a2b56] dark:text-white" />
-      </a>
-    ))}
-
-  </div>
-
-</section>
+        <HomeHeroBanner slides={slides} />
 
       {/* --- 3. Brief Section --- */}
      <div className="bg-white font-sans text-left" dir="ltr">

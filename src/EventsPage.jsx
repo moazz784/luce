@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "./Api";
 import SiteChrome from "./SiteChrome";
+import HomeHeroBanner from "./HomeHeroBanner";
 import { useSiteAuth } from "./useSiteAuth";
 import {
   formatEventSchedule,
@@ -42,6 +43,7 @@ export default function EventsPage() {
       accountLabel={accountLabel}
       onLogout={handleLogout}
     >
+      <HomeHeroBanner />
       <div className="py-16 px-6 bg-white dark:bg-gray-900 min-h-[60vh]">
         <h1 className="text-4xl font-bold text-[#00a651] text-center mb-4 uppercase tracking-wide">
           All Events
