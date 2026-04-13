@@ -10,6 +10,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Register from "./Register";
 import Gallery from "./Gallery";
+import EventsPage from "./EventsPage";
+import NewsPage from "./NewsPage";
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/news" element={<NewsPage />} />
             {/* ✅ حماية الداشبورد */}
             <Route
               path="/AdminDashboard"

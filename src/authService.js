@@ -73,6 +73,7 @@ export const registerVerify = async (email, otp, password) => {
   return data;
 };
 
+/** Clears server cookie and client session. Callers should navigate (e.g. to `/`) and show a toast. */
 export const logout = async () => {
   try {
     await api("/api/auth/logout", { method: "POST" });
@@ -80,7 +81,6 @@ export const logout = async () => {
     /* still clear client state */
   }
   clearAuthSession();
-  window.location.href = "/login";
 };
 
 export const isAuthenticated = () => loadRolesFromSession().length > 0;

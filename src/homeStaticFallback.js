@@ -226,6 +226,8 @@ export const staticFallbackBundle = {
       id: 1,
       name: "Ahmed Hesham Douma",
       image: a11,
+      shortDescription:
+        "Ahmed Hesham Douma, 🎓💻 a 2013 Information Technology and Artificial Intelligence graduate from MUST, is now the founder of TechieVai in Germany 🇩🇪.",
       description:
         "Ahmed Hesham Douma, 🎓💻 a 2013 Information Technology and Artificial Intelligence graduate from MUST, is now the founder of TechieVai in Germany 🇩🇪.",
       fullBio:
@@ -235,6 +237,8 @@ export const staticFallbackBundle = {
       id: 2,
       name: "Abdulrahman AlGhamdi",
       image: a44,
+      shortDescription:
+        "Abdulrahman AlGhamdi, Class of 2011, a strong foundation in cybersecurity. The education he gained at the university enabled him to advance into key security roles",
       description:
         "Abdulrahman AlGhamdi, Class of 2011, a strong foundation in cybersecurity. The education he gained at the university enabled him to advance into key security roles",
       fullBio:
@@ -244,6 +248,8 @@ export const staticFallbackBundle = {
       id: 3,
       name: "Samer Wagdy ",
       image: a22,
+      shortDescription:
+        "Samer Wagdy  , 2014 Information Technology and Artificial Intelligence graduates.. transformed their graduation project into GBarena,",
       description:
         "Samer Wagdy  , 2014 Information Technology and Artificial Intelligence graduates.. transformed their graduation project into GBarena,",
       fullBio:
@@ -253,6 +259,8 @@ export const staticFallbackBundle = {
       id: 4,
       name: "Mostafa Zaza",
       image: a33,
+      shortDescription:
+        " Mostafa Zaza , 2014 Information Technology and Artificial Intelligence graduates.. transformed their graduation project into GBarena,",
       description:
         " Mostafa Zaza , 2014 Information Technology and Artificial Intelligence graduates.. transformed their graduation project into GBarena,",
       fullBio:

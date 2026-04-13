@@ -89,7 +89,7 @@ export default function Login() {
         if (isLogin) {
           // تسجيل الدخول
           await login(values.email, values.password);
-          toast.success("مرحباً بك مجدداً! جاري الدخول...");
+          toast.success("Logged in successfully");
           navigate("/", { replace: true });
           return;
         }

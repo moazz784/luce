@@ -9,6 +9,7 @@ import {
   Trophy,
   Users,
   Image as ImageIcon,
+  Images,
   Link2,
   X,
   Save,
@@ -18,6 +19,7 @@ import {
   Home,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
 
@@ -28,9 +30,18 @@ const sectionApiPath = {
   Alumni: "/api/admin/alumni",
   Hero: "/api/admin/hero",
   Syndicates: "/api/admin/syndicates",
+  Gallery: "/api/admin/gallery",
 };
 
 const CONTACT_MESSAGES_PATH = "/api/admin/contact-messages";
+
+function isoToDatetimeLocalValue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function normalizeRows(section, rows) {
   if (!Array.isArray(rows)) return [];
@@ -39,7 +50,12 @@ function normalizeRows(section, rows) {
       return rows.map((r) => ({
         id: r.id,
         title: r.title,
-        date: r.publishedAt ? String(r.publishedAt).slice(0, 10) : "",
+        date: r.publishedAt ? new Date(r.publishedAt).toLocaleString() : "",
+        publishedAtLocal: r.publishedAt
+          ? isoToDatetimeLocalValue(r.publishedAt)
+          : "",
+        location: r.location ?? "",
+        newsBody: r.body ?? "",
         image: r.imageUrl,
       }));
     case "Events":
@@ -81,6 +97,13 @@ function normalizeRows(section, rows) {
         link: r.link || "",
         buttonText: r.buttonText || "",
       }));
+    case "Gallery":
+      return rows.map((r) => ({
+        id: r.id,
+        year: r.year,
+        sortOrder: r.sortOrder ?? 0,
+        image: r.imageUrl,
+      }));
     default:
       return [];
   }
@@ -97,21 +120,26 @@ const AdminDashboard = () => {
     Awards: [],
     Alumni: [],
     Syndicates: [],
+    Gallery: [],
   });
 
   const [formData, setFormData] = useState({
     id: null,
     title: "",
     date: "",
+    publishedAtLocal: "",
     location: "",
     timeRange: "",
     description: "",
+    newsBody: "",
     person: "",
     name: "",
     job: "",
     fullBio: "",
     link: "",
     buttonText: "",
+    galleryYear: "",
+    gallerySort: "",
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -132,6 +160,7 @@ const AdminDashboard = () => {
     { name: "Alumni", label: "الخريجين (Alumni)", icon: Users, color: "text-emerald-500" },
     { name: "Hero", label: "واجهة الموقع (Hero)", icon: ImageIcon, color: "text-rose-500" },
     { name: "Syndicates", label: "نقابة ESSP", icon: Link2, color: "text-cyan-500" },
+    { name: "Gallery", label: "معرض الصور (Gallery)", icon: Images, color: "text-pink-500" },
     { name: "Contact", label: "رسائل التواصل", icon: Mail, color: "text-amber-500" },
   ];
 
@@ -213,15 +242,29 @@ const AdminDashboard = () => {
       id: item.id,
       title: item.title ?? "",
       date: item.date ?? "",
+      publishedAtLocal: item.publishedAtLocal ?? "",
       location: item.location ?? "",
       timeRange: item.timeRange ?? "",
       description: item.description ?? "",
+      newsBody: item.newsBody ?? "",
       person: item.person ?? "",
       name: item.name ?? "",
       job: item.job ?? "",
       fullBio: item.fullBio ?? "",
       link: item.link ?? "",
       buttonText: item.buttonText ?? "",
+      galleryYear:
+        item.galleryYear != null && item.galleryYear !== ""
+          ? String(item.galleryYear)
+          : item.year != null
+            ? String(item.year)
+            : "",
+      gallerySort:
+        item.gallerySort != null && item.gallerySort !== ""
+          ? String(item.gallerySort)
+          : item.sortOrder != null
+            ? String(item.sortOrder)
+            : "",
       image: item.image ?? null,
     });
     setImagePreview(item.image);
@@ -234,15 +277,19 @@ const AdminDashboard = () => {
       id: null,
       title: "",
       date: "",
+      publishedAtLocal: "",
       location: "",
       timeRange: "",
       description: "",
+      newsBody: "",
       person: "",
       name: "",
       job: "",
       fullBio: "",
       link: "",
       buttonText: "",
+      galleryYear: "",
+      gallerySort: "",
       image: null,
     });
     setImagePreview(null);
@@ -272,14 +319,15 @@ const AdminDashboard = () => {
     }
     const path = sectionApiPath[activeSection];
     if (activeSection === "News") {
-      const publishedAt = formData.date
-        ? new Date(formData.date + "T12:00:00").toISOString()
+      const publishedAt = formData.publishedAtLocal
+        ? new Date(formData.publishedAtLocal).toISOString()
         : null;
       return {
         path,
         body: {
           title: formData.title,
-          body: null,
+          body: formData.newsBody?.trim() || null,
+          location: formData.location?.trim() || null,
           imageUrl,
           publishedAt,
           sortOrder: 0,
@@ -359,6 +407,22 @@ const AdminDashboard = () => {
         },
       };
     }
+    if (activeSection === "Gallery") {
+      const year = parseInt(formData.galleryYear, 10);
+      if (Number.isNaN(year) || year < 1900 || year > 3000) {
+        throw new Error("أدخل سنة صالحة (1900–3000)");
+      }
+      const sortParsed = parseInt(formData.gallerySort, 10);
+      const sortOrder = Number.isNaN(sortParsed) ? 0 : sortParsed;
+      return {
+        path,
+        body: {
+          year,
+          imageUrl,
+          sortOrder,
+        },
+      };
+    }
     throw new Error("قسم غير معروف");
   };
 
@@ -375,6 +439,7 @@ const AdminDashboard = () => {
               ? {
                   title: body.title,
                   body: body.body,
+                  location: body.location,
                   imageUrl: body.imageUrl,
                   publishedAt: body.publishedAt,
                   sortOrder: body.sortOrder,
@@ -416,11 +481,17 @@ const AdminDashboard = () => {
                           buttonText: body.buttonText,
                           sortOrder: body.sortOrder,
                         }
-                      : {
-                          title: body.title,
-                          imageUrl: body.imageUrl,
-                          sortOrder: body.sortOrder,
-                        },
+                      : activeSection === "Gallery"
+                        ? {
+                            year: body.year,
+                            imageUrl: body.imageUrl,
+                            sortOrder: body.sortOrder,
+                          }
+                        : {
+                            title: body.title,
+                            imageUrl: body.imageUrl,
+                            sortOrder: body.sortOrder,
+                          },
         });
       } else {
         await api(path, { method: "POST", body });
@@ -454,18 +525,49 @@ const AdminDashboard = () => {
                 placeholder="عنوان الخبر..."
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                التاريخ
+                التاريخ والوقت
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 required
-                value={formData.date}
+                value={formData.publishedAtLocal}
                 onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
+                  setFormData({
+                    ...formData,
+                    publishedAtLocal: e.target.value,
+                  })
                 }
                 className="form-input"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                المكان / Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: Main Campus — Conference Hall"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                نص الخبر (اختياري)
+              </label>
+              <textarea
+                rows={5}
+                value={formData.newsBody}
+                onChange={(e) =>
+                  setFormData({ ...formData, newsBody: e.target.value })
+                }
+                className="form-input w-full"
+                placeholder="المحتوى الكامل للخبر..."
               />
             </div>
           </>
@@ -648,6 +750,42 @@ const AdminDashboard = () => {
             />
           </div>
         );
+      case "Gallery":
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                السنة / Year
+              </label>
+              <input
+                type="number"
+                required
+                min={1900}
+                max={3000}
+                value={formData.galleryYear}
+                onChange={(e) =>
+                  setFormData({ ...formData, galleryYear: e.target.value })
+                }
+                className="form-input"
+                placeholder="2026"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                ترتيب العرض (Sort Order)
+              </label>
+              <input
+                type="number"
+                value={formData.gallerySort}
+                onChange={(e) =>
+                  setFormData({ ...formData, gallerySort: e.target.value })
+                }
+                className="form-input"
+                placeholder="0"
+              />
+            </div>
+          </>
+        );
       case "Syndicates":
         return (
           <>
@@ -747,7 +885,11 @@ const AdminDashboard = () => {
         <div className="p-4 border-t border-slate-800">
           <button
             type="button"
-            onClick={() => logout()}
+            onClick={async () => {
+              await logout();
+              toast.success("Logged out successfully");
+              navigate("/", { replace: true });
+            }}
             className="w-full p-3 bg-slate-800 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2 text-slate-400 hover:text-white"
           >
             <LogOut size={18} /> تسجيل الخروج
@@ -1027,6 +1169,29 @@ const AdminDashboard = () => {
                         {item.timeRange ? (
                           <div className="text-xs text-slate-500">{item.timeRange}</div>
                         ) : null}
+                      </div>
+                    ) : activeSection === "News" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.title}
+                        </div>
+                        {item.date && (
+                          <div className="text-sm text-slate-400">{item.date}</div>
+                        )}
+                        {item.location ? (
+                          <div className="text-sm text-blue-600 font-medium">
+                            {item.location}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : activeSection === "Gallery" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.year}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          sort: {item.sortOrder}
+                        </div>
                       </div>
                     ) : (
                       <div>
