@@ -850,9 +850,20 @@ const App = () => {
                     </div>
                   ) : null}
 
-                  <h3 className="text-sm text-gray-500 dark:text-gray-300 line-clamp-4">
-                    {news.title}
-                  </h3>
+                  {news.body?.trim() ? (
+                    <>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 mb-1">
+                        {news.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 line-clamp-2 break-words leading-relaxed">
+                        {news.body.trim()}
+                      </p>
+                    </>
+                  ) : (
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 break-words leading-relaxed">
+                      {news.title}
+                    </h3>
+                  )}
                 </div>
               </div>
             </SwiperSlide>

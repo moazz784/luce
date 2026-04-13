@@ -101,14 +101,20 @@ export default function NewsPage() {
                       </span>
                     </div>
                   </div>
-                  <h2 className="text-sm text-gray-800 dark:text-gray-100 font-semibold line-clamp-4 flex-1">
-                    {news.title}
-                  </h2>
                   {news.body?.trim() ? (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-3">
-                      {news.body}
-                    </p>
-                  ) : null}
+                    <>
+                      <h2 className="text-sm text-gray-800 dark:text-gray-100 font-semibold line-clamp-1 mb-1 flex-1">
+                        {news.title}
+                      </h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 break-words leading-relaxed flex-1">
+                        {news.body.trim()}
+                      </p>
+                    </>
+                  ) : (
+                    <h2 className="text-sm text-gray-800 dark:text-gray-100 font-semibold line-clamp-2 break-words leading-relaxed flex-1">
+                      {news.title}
+                    </h2>
+                  )}
                 </div>
               </article>
             );
