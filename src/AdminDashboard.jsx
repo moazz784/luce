@@ -19,7 +19,7 @@ import {
   Home,
   FileText,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
@@ -112,7 +112,11 @@ function normalizeRows(section, rows) {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("News");
+  const [searchParams] = useSearchParams();
+  const [activeSection, setActiveSection] = useState(() => {
+    const s = searchParams.get("section");
+    return s === "News" || s === "Events" ? s : "News";
+  });
 
   const [database, setDatabase] = useState({
     Hero: [],
@@ -290,7 +294,7 @@ const AdminDashboard = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setIsEditing(false);
     setFormData({
       id: null,
@@ -314,7 +318,15 @@ const AdminDashboard = () => {
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (syndicatePdfInputRef.current) syndicatePdfInputRef.current.value = "";
-  };
+  }, []);
+
+  useEffect(() => {
+    const s = searchParams.get("section");
+    if (s === "News" || s === "Events") {
+      setActiveSection(s);
+      resetForm();
+    }
+  }, [searchParams, resetForm]);
 
   const handleDelete = async (id) => {
     if (
@@ -1136,13 +1148,28 @@ const AdminDashboard = () => {
         </section>
 
         <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-slate-900 dark:text-slate-900">
-          <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+          <div className="p-6 bg-slate-50 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
             <h3 className="text-xl font-bold text-slate-700">
               المحتوى المنشور حالياً في هذا القسم
             </h3>
-            <span className="text-sm font-medium bg-blue-100 text-blue-700 px-4 py-1 rounded-full">
-              {database[activeSection].length} عناصر
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              {(activeSection === "News" || activeSection === "Events") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition"
+                >
+                  <Plus size={18} />
+                  إضافة جديد
+                </button>
+              )}
+              <span className="text-sm font-medium bg-blue-100 text-blue-700 px-4 py-1 rounded-full">
+                {database[activeSection].length} عناصر
+              </span>
+            </div>
           </div>
 
           <table className="w-full text-right border-collapse">
