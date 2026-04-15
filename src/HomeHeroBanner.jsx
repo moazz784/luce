@@ -125,7 +125,7 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
         </div>
       </div>
 
-      <div className="fixed right-5 top-1/2 translate-y-[calc(-50%+14px)] flex flex-col gap-4 z-40">
+      <div className="fixed right-5 top-1/2 translate-y-[calc(-50%+24px)] flex flex-col gap-4 z-40">
         <a
           href="/search"
           target="_blank"

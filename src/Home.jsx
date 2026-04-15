@@ -119,10 +119,7 @@ const App = () => {
           id: a.id,
           title: a.title || "",
           subtitle: a.subtitle || "",
-          name:
-            (a.content || a.winnerName || "").trim() ||
-            a.title ||
-            "",
+          winnerName: (a.winnerName || "").trim(),
           content: a.content || "",
           image: resolveContentImage(a.imageUrl, localImageSets.awards, i),
         }));
@@ -196,7 +193,7 @@ const App = () => {
           id: 0,
           title: "",
           subtitle: "",
-          name: "",
+          winnerName: "",
           content: "",
           image: "",
         };
@@ -497,26 +494,30 @@ const App = () => {
           transition={{ duration: 0.5 }}
           className="flex-1 p-8 lg:p-16 flex flex-col justify-center bg-white dark:bg-gray-800 z-10"
         >
-          <h3 className="text-2xl lg:text-3xl font-bold text-[#1a2b56] dark:text-white mb-4 leading-tight">
-            {/* {currentAward.title} */}
-          </h3>
-
           {currentAward.subtitle && (
-            <p className="text-lg text-[#00a651] font-semibold mb-6">
-              {/* {currentAward.subtitle} */}
+            <p className="text-lg text-[#00a651] font-semibold mb-4">
+              {currentAward.subtitle}
             </p>
           )}
 
-          <div className="mb-6">
-            {currentAward.name && (
-              <h4 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                {currentAward.name}
+          <div className="mb-6 space-y-4">
+            {currentAward.winnerName && (
+              <h4 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                {currentAward.winnerName}
               </h4>
             )}
 
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed italic text-sm lg:text-base">
-              {/* "{currentAward.content}" */}
-            </p>
+            {currentAward.title && (
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm lg:text-base whitespace-pre-wrap">
+                {currentAward.title}
+              </p>
+            )}
+
+            {currentAward.content && (
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm lg:text-base whitespace-pre-wrap">
+                {currentAward.content}
+              </p>
+            )}
           </div>
 
           <button className="flex items-center gap-2 text-[#00a651] font-bold hover:gap-4 transition-all w-fit group">

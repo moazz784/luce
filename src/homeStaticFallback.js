@@ -168,43 +168,52 @@ export const staticFallbackBundle = {
   awards: [
     {
       id: 1,
-      title:
+      subtitle:
         "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      subtitle: "Kerolos Mousa",
-      name: "The team from Misr University for Science and Technology (MUST) won first place in Egypt and third place in the Arab world, qualifying for the Imagine Cup global competition, which will be held in Seattle, USA, at the end of July. Under the slogan 'Dream... Build your dream and live it,' the sole Egyptian representative team will compete in the global competition, where qualified teams from universities around the world will vie to develop practical solutions for improving life globally using technology. The competition aims to provide more opportunities for students worldwide to acquire the skills that will help them innovate and turn ideas into reality. The winning team consists of three students: Samer Wagdy, Mostafa Zaza, and Hussein El-Sawy, all from the Faculty of Information Technology at MUST.",
+      winnerName: "Kerolos Mousa",
+      title:
+        "The team from Misr University for Science and Technology (MUST) won first place in Egypt and third place in the Arab world, qualifying for the Imagine Cup global competition, which will be held in Seattle, USA, at the end of July. Under the slogan 'Dream... Build your dream and live it,' the sole Egyptian representative team will compete in the global competition, where qualified teams from universities around the world will vie to develop practical solutions for improving life globally using technology. The competition aims to provide more opportunities for students worldwide to acquire the skills that will help them innovate and turn ideas into reality. The winning team consists of three students: Samer Wagdy, Mostafa Zaza, and Hussein El-Sawy, all from the Faculty of Information Technology at MUST.",
       content: "",
       image: s11,
     },
     {
       id: 2,
-      title:
+      subtitle:
         "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      subtitle: "Mostafa",
-      name: "We have saved the third place in Imagine Cup World Simi-final 'Pan Arab' Innovation category for Egypt our lovely country, which was held in Qatar, competing with 23 teams from 13 Arab country. It was a great honor to meet all of that innovators around the Arab world :)",
+      winnerName: "Mostafa",
+      title:
+        "We have saved the third place in Imagine Cup World Simi-final 'Pan Arab' Innovation category for Egypt our lovely country, which was held in Qatar, competing with 23 teams from 13 Arab country. It was a great honor to meet all of that innovators around the Arab world :)",
+      content: "",
       image: s22,
     },
     {
       id: 3,
-      title:
+      subtitle:
         "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      subtitle: "Mostafa",
-      name: "With more than 2700 applied startups, GBarena got selected among 70 other startups to be funded by the French government with incubation for one year in Marseille at Belle de Mai, to helping us enter the European esports market.",
+      winnerName: "Mostafa",
+      title:
+        "With more than 2700 applied startups, GBarena got selected among 70 other startups to be funded by the French government with incubation for one year in Marseille at Belle de Mai, to helping us enter the European esports market.",
+      content: "",
       image: s33,
     },
     {
       id: 4,
-      title:
+      subtitle:
         "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      subtitle: "Mostafa",
-      name: "GBarena has been selected to be one of the 50 startup world cup finalist projects from all over the world competing with the most promising startups in Copenhagen",
+      winnerName: "Mostafa",
+      title:
+        "GBarena has been selected to be one of the 50 startup world cup finalist projects from all over the world competing with the most promising startups in Copenhagen",
+      content: "",
       image: s33,
     },
     {
       id: 5,
-      title:
+      subtitle:
         "MUST Is A Pioneer In Getting Awards In All Fields Thanks To Its Precious Leading Authority And Success Seeking Students.",
-      subtitle: "Mostafa",
-      name: "The prize rewards entrepreneurs for developing products or services that use ICT in an innovative way to achieve social impact and meet the needs of Africans in the energy field. 'Twinkle Box'. Officially Honored by Mobinil Egypt for our achievement",
+      winnerName: "Mostafa",
+      title:
+        "The prize rewards entrepreneurs for developing products or services that use ICT in an innovative way to achieve social impact and meet the needs of Africans in the energy field. 'Twinkle Box'. Officially Honored by Mobinil Egypt for our achievement",
+      content: "",
       image: s44,
     },
   ],
