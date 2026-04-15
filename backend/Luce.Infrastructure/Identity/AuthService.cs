@@ -51,6 +51,14 @@ public class AuthService : IAuthService
         return Regex.IsMatch(email.Trim(), @"^\d+@must\.edu\.eg$", RegexOptions.IgnoreCase);
     }
 
+    /// <summary>Restricts bare login strings before appending @must.edu.eg (RFC-ish local part subset).</summary>
+    private static bool IsValidMustLocalPart(string localPart)
+    {
+        if (string.IsNullOrWhiteSpace(localPart) || localPart.Length > 64)
+            return false;
+        return Regex.IsMatch(localPart, @"^[a-zA-Z0-9._-]+$", RegexOptions.None);
+    }
+
     private static string HashOtp(string otp, string emailNorm, string pepper)
     {
         var bytes = Encoding.UTF8.GetBytes($"{pepper}|{emailNorm}|{otp.Trim()}");
@@ -91,6 +99,13 @@ public class AuthService : IAuthService
             user = await _users.FindByNameAsync(raw);
             if (user is not null && (string.IsNullOrWhiteSpace(user.Email) || !IsMustLoginEmail(user.Email)))
                 user = null;
+
+            if (user is null && IsValidMustLocalPart(raw))
+            {
+                var candidateEmail = $"{raw}@must.edu.eg";
+                if (IsMustLoginEmail(candidateEmail))
+                    user = await _users.FindByEmailAsync(candidateEmail);
+            }
         }
 
         if (user is null)
