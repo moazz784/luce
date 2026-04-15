@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
-  Menu,
   Moon,
   Sun,
   User,
@@ -150,13 +149,6 @@ export default function SiteChrome({
                   </div>
                 </div>
               )}
-              <button
-                type="button"
-                onClick={() => navigate("/gallery")}
-                className="p-2"
-              >
-                <Menu size={28} />
-              </button>
               <button
                 type="button"
                 onClick={onLogout}

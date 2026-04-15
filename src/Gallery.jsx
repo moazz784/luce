@@ -70,7 +70,7 @@ export default function Gallery() {
     >
       <section className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-5">
         <h1 className="text-4xl font-bold text-center text-green-600 mb-10">
-          Photo Gallery
+          Gallery
         </h1>
 
         {loading && (

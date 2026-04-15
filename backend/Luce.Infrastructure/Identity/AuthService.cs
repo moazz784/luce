@@ -74,19 +74,35 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        if (!IsMustLoginEmail(request.Email))
-            throw new InvalidOperationException("Only @must.edu.eg accounts can sign in.");
+        var raw = request.Login.Trim();
+        if (string.IsNullOrEmpty(raw))
+            throw new InvalidOperationException("Invalid username or password.");
 
-        var user = await _users.FindByEmailAsync(request.Email);
+        ApplicationUser? user;
+        if (raw.Contains('@', StringComparison.Ordinal))
+        {
+            if (!IsMustLoginEmail(raw))
+                throw new InvalidOperationException("Only @must.edu.eg accounts can sign in.");
+
+            user = await _users.FindByEmailAsync(raw);
+        }
+        else
+        {
+            user = await _users.FindByNameAsync(raw);
+            if (user is not null && (string.IsNullOrWhiteSpace(user.Email) || !IsMustLoginEmail(user.Email)))
+                user = null;
+        }
+
         if (user is null)
-            throw new InvalidOperationException("Invalid email or password.");
+            throw new InvalidOperationException("Invalid username or password.");
 
         var valid = await _users.CheckPasswordAsync(user, request.Password);
         if (!valid)
-            throw new InvalidOperationException("Invalid email or password.");
+            throw new InvalidOperationException("Invalid username or password.");
 
         var roleNames = await _users.GetRolesAsync(user);
-        return _jwt.CreateToken(user.Id, user.Email ?? request.Email, user.UserName ?? user.Email ?? request.Email, roleNames.ToList());
+        var emailClaim = user.Email ?? raw;
+        return _jwt.CreateToken(user.Id, emailClaim, user.UserName ?? emailClaim, roleNames.ToList());
     }
 
     public Task<AuthResponse?> RegisterUserAsync(RegisterRequest request, CancellationToken cancellationToken = default)

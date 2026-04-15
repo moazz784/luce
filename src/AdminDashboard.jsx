@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import {
   Trash2,
   Edit,
@@ -155,6 +155,7 @@ const AdminDashboard = () => {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
   const syndicatePdfInputRef = useRef(null);
+  const awardTitleTextareaRef = useRef(null);
 
   const [contactMessages, setContactMessages] = useState([]);
   const [contactLoading, setContactLoading] = useState(false);
@@ -190,6 +191,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadSection();
   }, [loadSection]);
+
+  useLayoutEffect(() => {
+    if (activeSection !== "Awards") return;
+    const el = awardTitleTextareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [formData.title, activeSection, isEditing]);
 
   useEffect(() => {
     if (activeSection !== "Contact") {
@@ -686,18 +695,24 @@ const AdminDashboard = () => {
           <>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                عنوان الجائزة
+                الوصف <span className="text-gray-400 font-normal">(Description)</span>
               </label>
-              <input
-                type="text"
+              <textarea
+                ref={awardTitleTextareaRef}
                 required
+                maxLength={500}
+                rows={2}
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="form-input"
-                placeholder="مثلاً: جائزة الطالب المثالي..."
+                className="form-input w-full min-h-[3rem] resize-none overflow-hidden"
+                style={{ fieldSizing: "content" }}
+                placeholder="وصف الجائزة..."
               />
+              <p className="text-[11px] text-gray-400 mt-1 text-left">
+                {formData.title.length}/500
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -833,7 +848,7 @@ const AdminDashboard = () => {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 className="form-input"
-                placeholder="عنوان البطاقة..."
+                placeholder="عنوان ..."
               />
             </div>
             <div className="md:col-span-2 space-y-2">

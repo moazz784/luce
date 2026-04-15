@@ -45,10 +45,10 @@ export function isStudentMustEmail(email) {
   return typeof email === "string" && /^\d+@must\.edu\.eg$/i.test(email.trim());
 }
 
-export const login = async (email, password) => {
+export const login = async (loginIdentifier, password) => {
   const data = await api("/api/auth/login", {
     method: "POST",
-    body: { email, password },
+    body: { login: loginIdentifier, password },
   });
 
   saveAuthResponse(data);

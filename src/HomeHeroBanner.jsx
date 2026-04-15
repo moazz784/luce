@@ -29,6 +29,7 @@ const QUICK_LINKS = [
   { name: "Events", target: "1000" },
   { name: "News", target: "2000" },
   { name: "Syndicates", target: "moazz" },
+  { name: "Gallery", href: "/gallery" },
   { name: "Contact Us", target: "3000" },
 ];
 
@@ -84,8 +85,8 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
         ))}
       </Swiper>
 
-      <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4 pt-40">
-        <div className="max-w-4xl ">
+      <div className="absolute inset-0 flex flex-col justify-end items-center text-center z-20 px-4 pb-14 md:pb-20 pt-8 pointer-events-none">
+        <div className="max-w-4xl pointer-events-auto">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-6">
             Alumni Society
           </h2>
@@ -94,7 +95,7 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
             {QUICK_LINKS.map((item, i) => (
               <a
                 key={i}
-                href={`/#${item.target}`}
+                href={item.href ?? `/#${item.target}`}
                 className="
                   px-5 py-2
                   rounded-full
@@ -114,7 +115,7 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
         </div>
       </div>
 
-      <div className="fixed right-5 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-40">
+      <div className="fixed right-5 top-1/2 translate-y-[calc(-50%+14px)] flex flex-col gap-4 z-40">
         <a
           href="/search"
           target="_blank"

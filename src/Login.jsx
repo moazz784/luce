@@ -43,9 +43,17 @@ export default function Login() {
     if (isLogin) {
       return Yup.object({
         email: Yup.string()
-          .email("بريد إلكتروني غير صحيح")
-          .required("البريد الإلكتروني مطلوب")
-          .test("must", "يجب استخدام بريد MUST (@must.edu.eg)", (v) => !!v && isMustLoginEmail(v)),
+          .required("اسم المستخدم أو البريد مطلوب")
+          .test(
+            "login",
+            "استخدم اسم المستخدم أو بريد MUST (@must.edu.eg)",
+            (v) => {
+              if (!v || !v.trim()) return false;
+              const t = v.trim();
+              if (t.includes("@")) return isMustLoginEmail(t);
+              return t.length >= 2 && t.length <= 256;
+            },
+          ),
         password: Yup.string().required("كلمة المرور مطلوبة"),
       });
     }
@@ -88,7 +96,7 @@ export default function Login() {
       try {
         if (isLogin) {
           // تسجيل الدخول
-          await login(values.email, values.password);
+          await login(values.email.trim(), values.password);
           toast.success("Logged in successfully");
           navigate("/", { replace: true });
           return;
@@ -133,7 +141,7 @@ export default function Login() {
 
         <p className="text-gray-200 mb-6 text-sm">
           {isLogin
-            ? "Login with your university email"
+            ? "Sign in with your MUST username, or your full @must.edu.eg email"
             : showOtpStep
             ? `Enter code sent to: ${formik.values.email}`
             : "Join LeafScan with your student ID email"}
@@ -157,8 +165,13 @@ export default function Login() {
           {!showOtpStep && (
             <div>
               <input
-                type="email"
-                placeholder="Email (@must.edu.eg)"
+                type={isLogin ? "text" : "email"}
+                placeholder={
+                  isLogin
+                    ? "Username or email (@must.edu.eg)"
+                    : "Email (@must.edu.eg)"
+                }
+                autoComplete={isLogin ? "username" : "email"}
                 className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none focus:ring-2 focus:ring-green-400"
                 {...formik.getFieldProps("email")}
               />
