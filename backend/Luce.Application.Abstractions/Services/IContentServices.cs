@@ -73,3 +73,13 @@ public interface IHomeBundleService
 {
     Task<HomeBundleDto> GetAsync(CancellationToken cancellationToken = default);
 }
+
+public interface IGalleryService
+{
+    Task<IReadOnlyList<GalleryPublicDto>> GetPublicAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<GalleryAdminDto>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<GalleryAdminDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<GalleryAdminDto> CreateAsync(GalleryCreateDto dto, CancellationToken cancellationToken = default);
+    Task<GalleryAdminDto?> UpdateAsync(int id, GalleryUpdateDto dto, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+}

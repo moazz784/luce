@@ -47,6 +47,7 @@ public class NewsService : INewsService
         {
             Title = dto.Title,
             Body = dto.Body,
+            Location = dto.Location,
             ImageUrl = dto.ImageUrl,
             PublishedAt = dto.PublishedAt,
             SortOrder = dto.SortOrder,
@@ -65,6 +66,7 @@ public class NewsService : INewsService
 
         entity.Title = dto.Title;
         entity.Body = dto.Body;
+        entity.Location = dto.Location;
         entity.ImageUrl = dto.ImageUrl;
         entity.PublishedAt = dto.PublishedAt;
         entity.SortOrder = dto.SortOrder;

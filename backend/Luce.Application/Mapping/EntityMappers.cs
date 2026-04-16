@@ -11,6 +11,7 @@ public static class EntityMappers
         Id = e.Id,
         Title = e.Title,
         Body = e.Body,
+        Location = e.Location,
         ImageUrl = e.ImageUrl,
         PublishedAt = e.PublishedAt
     };
@@ -20,6 +21,7 @@ public static class EntityMappers
         Id = e.Id,
         Title = e.Title,
         Body = e.Body,
+        Location = e.Location,
         ImageUrl = e.ImageUrl,
         PublishedAt = e.PublishedAt,
         SortOrder = e.SortOrder,
@@ -143,6 +145,24 @@ public static class EntityMappers
         ImageUrl = e.ImageUrl,
         Link = e.Link,
         ButtonText = e.ButtonText,
+        SortOrder = e.SortOrder,
+        CreatedAt = e.CreatedAt,
+        UpdatedAt = e.UpdatedAt
+    };
+
+    public static GalleryPublicDto ToPublicDto(this GalleryItem e) => new()
+    {
+        Id = e.Id,
+        Year = e.Year,
+        ImageUrl = e.ImageUrl,
+        SortOrder = e.SortOrder
+    };
+
+    public static GalleryAdminDto ToAdminDto(this GalleryItem e) => new()
+    {
+        Id = e.Id,
+        Year = e.Year,
+        ImageUrl = e.ImageUrl,
         SortOrder = e.SortOrder,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt

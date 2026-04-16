@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<ISyndicateService, SyndicateService>();
         services.AddScoped<IContactService, ContactService>();
         services.AddScoped<IHomeBundleService, HomeBundleService>();
+        services.AddScoped<IGalleryService, GalleryService>();
         return services;
     }
 }

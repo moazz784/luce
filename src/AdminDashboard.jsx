@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import {
   Trash2,
   Edit,
@@ -9,13 +9,18 @@ import {
   Trophy,
   Users,
   Image as ImageIcon,
+  Images,
   Link2,
   X,
   Save,
   UploadCloud,
   LogOut,
   Mail,
+  Home,
+  FileText,
 } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
 
@@ -26,9 +31,18 @@ const sectionApiPath = {
   Alumni: "/api/admin/alumni",
   Hero: "/api/admin/hero",
   Syndicates: "/api/admin/syndicates",
+  Gallery: "/api/admin/gallery",
 };
 
 const CONTACT_MESSAGES_PATH = "/api/admin/contact-messages";
+
+function isoToDatetimeLocalValue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function normalizeRows(section, rows) {
   if (!Array.isArray(rows)) return [];
@@ -37,7 +51,12 @@ function normalizeRows(section, rows) {
       return rows.map((r) => ({
         id: r.id,
         title: r.title,
-        date: r.publishedAt ? String(r.publishedAt).slice(0, 10) : "",
+        date: r.publishedAt ? new Date(r.publishedAt).toLocaleString() : "",
+        publishedAtLocal: r.publishedAt
+          ? isoToDatetimeLocalValue(r.publishedAt)
+          : "",
+        location: r.location ?? "",
+        newsBody: r.body ?? "",
         image: r.imageUrl,
       }));
     case "Events":
@@ -46,6 +65,9 @@ function normalizeRows(section, rows) {
         title: r.title,
         date: r.eventDate ? String(r.eventDate).slice(0, 10) : "",
         image: r.imageUrl,
+        location: r.location ?? "",
+        timeRange: r.timeRange ?? "",
+        description: r.description ?? "",
       }));
     case "Awards":
       return rows.map((r) => ({
@@ -76,13 +98,25 @@ function normalizeRows(section, rows) {
         link: r.link || "",
         buttonText: r.buttonText || "",
       }));
+    case "Gallery":
+      return rows.map((r) => ({
+        id: r.id,
+        year: r.year,
+        sortOrder: r.sortOrder ?? 0,
+        image: r.imageUrl,
+      }));
     default:
       return [];
   }
 }
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState("News");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeSection, setActiveSection] = useState(() => {
+    const s = searchParams.get("section");
+    return s === "News" || s === "Events" ? s : "News";
+  });
 
   const [database, setDatabase] = useState({
     Hero: [],
@@ -91,26 +125,37 @@ const AdminDashboard = () => {
     Awards: [],
     Alumni: [],
     Syndicates: [],
+    Gallery: [],
   });
 
   const [formData, setFormData] = useState({
     id: null,
     title: "",
     date: "",
+    publishedAtLocal: "",
+    location: "",
+    timeRange: "",
+    description: "",
+    newsBody: "",
     person: "",
     name: "",
     job: "",
     fullBio: "",
     link: "",
     buttonText: "",
+    galleryYear: "",
+    gallerySort: "",
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingSyndicatePdf, setUploadingSyndicatePdf] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
+  const syndicatePdfInputRef = useRef(null);
+  const awardTitleTextareaRef = useRef(null);
 
   const [contactMessages, setContactMessages] = useState([]);
   const [contactLoading, setContactLoading] = useState(false);
@@ -123,6 +168,7 @@ const AdminDashboard = () => {
     { name: "Alumni", label: "الخريجين (Alumni)", icon: Users, color: "text-emerald-500" },
     { name: "Hero", label: "واجهة الموقع (Hero)", icon: ImageIcon, color: "text-rose-500" },
     { name: "Syndicates", label: "نقابة ESSP", icon: Link2, color: "text-cyan-500" },
+    { name: "Gallery", label: "معرض الصور (Gallery)", icon: Images, color: "text-pink-500" },
     { name: "Contact", label: "رسائل التواصل", icon: Mail, color: "text-amber-500" },
   ];
 
@@ -145,6 +191,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadSection();
   }, [loadSection]);
+
+  useLayoutEffect(() => {
+    if (activeSection !== "Awards") return;
+    const el = awardTitleTextareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [formData.title, activeSection, isEditing]);
 
   useEffect(() => {
     if (activeSection !== "Contact") {
@@ -198,41 +252,90 @@ const AdminDashboard = () => {
     }
   };
 
+  /** ESSP: upload PDF and set card `link` to the file URL (thumbnail image is separate). */
+  const handleSyndicatePdfForLink = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSyndicatePdf(true);
+    try {
+      const { url } = await uploadMedia(file);
+      setFormData((prev) => ({ ...prev, link: url }));
+    } catch (err) {
+      alert(err.message || "فشل رفع ملف PDF");
+    } finally {
+      setUploadingSyndicatePdf(false);
+      e.target.value = "";
+    }
+  };
+
   const startEdit = (item) => {
     setIsEditing(true);
     setFormData({
       id: item.id,
       title: item.title ?? "",
       date: item.date ?? "",
+      publishedAtLocal: item.publishedAtLocal ?? "",
+      location: item.location ?? "",
+      timeRange: item.timeRange ?? "",
+      description: item.description ?? "",
+      newsBody: item.newsBody ?? "",
       person: item.person ?? "",
       name: item.name ?? "",
       job: item.job ?? "",
       fullBio: item.fullBio ?? "",
       link: item.link ?? "",
       buttonText: item.buttonText ?? "",
+      galleryYear:
+        item.galleryYear != null && item.galleryYear !== ""
+          ? String(item.galleryYear)
+          : item.year != null
+            ? String(item.year)
+            : "",
+      gallerySort:
+        item.gallerySort != null && item.gallerySort !== ""
+          ? String(item.gallerySort)
+          : item.sortOrder != null
+            ? String(item.sortOrder)
+            : "",
       image: item.image ?? null,
     });
     setImagePreview(item.image);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setIsEditing(false);
     setFormData({
       id: null,
       title: "",
       date: "",
+      publishedAtLocal: "",
+      location: "",
+      timeRange: "",
+      description: "",
+      newsBody: "",
       person: "",
       name: "",
       job: "",
       fullBio: "",
       link: "",
       buttonText: "",
+      galleryYear: "",
+      gallerySort: "",
       image: null,
     });
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+    if (syndicatePdfInputRef.current) syndicatePdfInputRef.current.value = "";
+  }, []);
+
+  useEffect(() => {
+    const s = searchParams.get("section");
+    if (s === "News" || s === "Events") {
+      setActiveSection(s);
+      resetForm();
+    }
+  }, [searchParams, resetForm]);
 
   const handleDelete = async (id) => {
     if (
@@ -257,14 +360,15 @@ const AdminDashboard = () => {
     }
     const path = sectionApiPath[activeSection];
     if (activeSection === "News") {
-      const publishedAt = formData.date
-        ? new Date(formData.date + "T12:00:00").toISOString()
+      const publishedAt = formData.publishedAtLocal
+        ? new Date(formData.publishedAtLocal).toISOString()
         : null;
       return {
         path,
         body: {
           title: formData.title,
-          body: null,
+          body: formData.newsBody?.trim() || null,
+          location: formData.location?.trim() || null,
           imageUrl,
           publishedAt,
           sortOrder: 0,
@@ -273,17 +377,24 @@ const AdminDashboard = () => {
       };
     }
     if (activeSection === "Events") {
+      const locRaw = formData.location?.trim();
+      if (!locRaw) {
+        throw new Error("يرجى إدخال مكان الفعالية (Location)");
+      }
       const eventDate = formData.date
         ? new Date(formData.date + "T12:00:00").toISOString()
         : new Date().toISOString();
+      const loc = locRaw;
+      const tr = formData.timeRange?.trim() || null;
+      const desc = formData.description?.trim() || null;
       return {
         path,
         body: {
           title: formData.title,
           eventDate,
-          location: null,
-          timeRange: null,
-          description: null,
+          location: loc,
+          timeRange: tr,
+          description: desc,
           accentColor: null,
           imageUrl,
           sortOrder: 0,
@@ -337,6 +448,22 @@ const AdminDashboard = () => {
         },
       };
     }
+    if (activeSection === "Gallery") {
+      const year = parseInt(formData.galleryYear, 10);
+      if (Number.isNaN(year) || year < 1900 || year > 3000) {
+        throw new Error("أدخل سنة صالحة (1900–3000)");
+      }
+      const sortParsed = parseInt(formData.gallerySort, 10);
+      const sortOrder = Number.isNaN(sortParsed) ? 0 : sortParsed;
+      return {
+        path,
+        body: {
+          year,
+          imageUrl,
+          sortOrder,
+        },
+      };
+    }
     throw new Error("قسم غير معروف");
   };
 
@@ -353,6 +480,7 @@ const AdminDashboard = () => {
               ? {
                   title: body.title,
                   body: body.body,
+                  location: body.location,
                   imageUrl: body.imageUrl,
                   publishedAt: body.publishedAt,
                   sortOrder: body.sortOrder,
@@ -394,11 +522,17 @@ const AdminDashboard = () => {
                           buttonText: body.buttonText,
                           sortOrder: body.sortOrder,
                         }
-                      : {
-                          title: body.title,
-                          imageUrl: body.imageUrl,
-                          sortOrder: body.sortOrder,
-                        },
+                      : activeSection === "Gallery"
+                        ? {
+                            year: body.year,
+                            imageUrl: body.imageUrl,
+                            sortOrder: body.sortOrder,
+                          }
+                        : {
+                            title: body.title,
+                            imageUrl: body.imageUrl,
+                            sortOrder: body.sortOrder,
+                          },
         });
       } else {
         await api(path, { method: "POST", body });
@@ -415,6 +549,70 @@ const AdminDashboard = () => {
   const renderFormFields = () => {
     switch (activeSection) {
       case "News":
+        return (
+          <>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                العنوان
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="form-input"
+                placeholder="عنوان الخبر..."
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                التاريخ والوقت
+              </label>
+              <input
+                type="datetime-local"
+                required
+                value={formData.publishedAtLocal}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    publishedAtLocal: e.target.value,
+                  })
+                }
+                className="form-input"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                المكان / Location
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: Main Campus — Conference Hall"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                نص الخبر (اختياري)
+              </label>
+              <textarea
+                rows={5}
+                value={formData.newsBody}
+                onChange={(e) =>
+                  setFormData({ ...formData, newsBody: e.target.value })
+                }
+                className="form-input w-full"
+                placeholder="المحتوى الكامل للخبر..."
+              />
+            </div>
+          </>
+        );
       case "Events":
         return (
           <>
@@ -430,7 +628,7 @@ const AdminDashboard = () => {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 className="form-input"
-                placeholder="عنوان الخبر/الفعالية..."
+                placeholder="عنوان الفعالية..."
               />
             </div>
             <div>
@@ -447,6 +645,49 @@ const AdminDashboard = () => {
                 className="form-input"
               />
             </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                المكان / Location <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: Conference Hall"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                الوقت / Time range
+              </label>
+              <input
+                type="text"
+                value={formData.timeRange}
+                onChange={(e) =>
+                  setFormData({ ...formData, timeRange: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: 10:00 am - 3:00 pm"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                الوصف (اختياري)
+              </label>
+              <textarea
+                rows={4}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="form-input w-full"
+                placeholder="وصف مختصر للفعالية..."
+              />
+            </div>
           </>
         );
       case "Awards":
@@ -454,18 +695,24 @@ const AdminDashboard = () => {
           <>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                عنوان الجائزة
+                الوصف <span className="text-gray-400 font-normal">(Description)</span>
               </label>
-              <input
-                type="text"
+              <textarea
+                ref={awardTitleTextareaRef}
                 required
+                maxLength={500}
+                rows={2}
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                className="form-input"
-                placeholder="مثلاً: جائزة الطالب المثالي..."
+                className="form-input w-full min-h-[3rem] resize-none overflow-hidden"
+                style={{ fieldSizing: "content" }}
+                placeholder="وصف الجائزة..."
               />
+              <p className="text-[11px] text-gray-400 mt-1 text-left">
+                {formData.title.length}/500
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -550,6 +797,42 @@ const AdminDashboard = () => {
             />
           </div>
         );
+      case "Gallery":
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                السنة / Year
+              </label>
+              <input
+                type="number"
+                required
+                min={1900}
+                max={3000}
+                value={formData.galleryYear}
+                onChange={(e) =>
+                  setFormData({ ...formData, galleryYear: e.target.value })
+                }
+                className="form-input"
+                placeholder="2026"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                ترتيب العرض (Sort Order)
+              </label>
+              <input
+                type="number"
+                value={formData.gallerySort}
+                onChange={(e) =>
+                  setFormData({ ...formData, gallerySort: e.target.value })
+                }
+                className="form-input"
+                placeholder="0"
+              />
+            </div>
+          </>
+        );
       case "Syndicates":
         return (
           <>
@@ -565,23 +848,44 @@ const AdminDashboard = () => {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 className="form-input"
-                placeholder="عنوان البطاقة..."
+                placeholder="عنوان ..."
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
-                رابط البطاقة
+                رابط البطاقة (يفتح عند الضغط على الصورة أو الزر)
               </label>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                اكتب رابطاً يدوياً (مثل https://…) أو ارفع ملف PDF ليصبح الرابط نفسه ملفاً
+                على الخادم. لا يزال مطلوباً رفع صورة مصغّرة في المربع على اليسار منفصلة.
+              </p>
               <input
-                type="url"
+                type="text"
                 required
                 value={formData.link}
                 onChange={(e) =>
                   setFormData({ ...formData, link: e.target.value })
                 }
                 className="form-input"
-                placeholder="https://..."
+                placeholder="https://… أو مسار بعد رفع PDF"
+                spellCheck={false}
               />
+              <input
+                type="file"
+                ref={syndicatePdfInputRef}
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={handleSyndicatePdfForLink}
+              />
+              <button
+                type="button"
+                disabled={uploadingSyndicatePdf}
+                onClick={() => syndicatePdfInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-600/40 bg-cyan-50 text-cyan-800 text-sm font-semibold hover:bg-cyan-100 disabled:opacity-60"
+              >
+                <FileText size={18} />
+                {uploadingSyndicatePdf ? "جاري رفع PDF…" : "رفع PDF كرابط"}
+              </button>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -606,12 +910,25 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 text-right" dir="rtl">
+    <div
+      className="admin-dashboard-shell flex h-screen bg-gray-100 text-right text-slate-900 dark:text-slate-900"
+      dir="rtl"
+    >
       <aside className="w-64 bg-slate-950 text-white flex flex-col shadow-2xl border-l border-slate-800">
         <div className="p-6 text-2xl font-extrabold border-b border-slate-800 flex items-center gap-3 text-blue-400">
           <LayoutDashboard size={28} /> MUST Admin
         </div>
-        <nav className="flex-1 p-4 space-y-3">
+        <div className="px-4 pt-4">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-4 w-full p-4 rounded-xl text-lg font-medium transition-all duration-150 hover:bg-slate-800 text-slate-300"
+          >
+            <Home size={22} className="text-emerald-400" />
+            الرئيسية (Home)
+          </button>
+        </div>
+        <nav className="flex-1 p-4 space-y-3 pt-2">
           {menuItems.map((item) => (
             <button
               key={item.name}
@@ -639,7 +956,11 @@ const AdminDashboard = () => {
         <div className="p-4 border-t border-slate-800">
           <button
             type="button"
-            onClick={() => logout()}
+            onClick={async () => {
+              await logout();
+              toast.success("Logged out successfully");
+              navigate("/", { replace: true });
+            }}
             className="w-full p-3 bg-slate-800 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2 text-slate-400 hover:text-white"
           >
             <LogOut size={18} /> تسجيل الخروج
@@ -647,7 +968,7 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-10">
+      <main className="flex-1 overflow-y-auto p-10 text-slate-900 dark:text-slate-900">
         <div className="flex justify-between items-center mb-10 pb-4 border-b border-gray-200">
           <h1 className="text-4xl font-extrabold text-slate-900">
             إدارة قسم{" "}
@@ -670,7 +991,7 @@ const AdminDashboard = () => {
         )}
 
         {activeSection === "Contact" ? (
-        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-slate-900 dark:text-slate-900">
           <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <h3 className="text-xl font-bold text-slate-700">
               رسائل نموذج التواصل من الصفحة الرئيسية
@@ -757,7 +1078,7 @@ const AdminDashboard = () => {
         </section>
         ) : (
         <>
-        <section className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 mb-12 relative overflow-hidden">
+        <section className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 mb-12 relative overflow-hidden text-slate-900 dark:text-slate-900">
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full opacity-50" />
 
           <div className="flex justify-between items-center mb-6 relative z-10">
@@ -827,7 +1148,7 @@ const AdminDashboard = () => {
             <div className="md:col-span-3 flex justify-end mt-4">
               <button
                 type="submit"
-                disabled={saving || uploading}
+                disabled={saving || uploading || uploadingSyndicatePdf}
                 className={`flex items-center gap-2 px-10 py-3 rounded-xl font-bold text-white transition-all shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 disabled:opacity-60 ${
                   isEditing
                     ? "bg-orange-500 hover:bg-orange-600"
@@ -841,14 +1162,29 @@ const AdminDashboard = () => {
           </form>
         </section>
 
-        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-          <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+        <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-slate-900 dark:text-slate-900">
+          <div className="p-6 bg-slate-50 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
             <h3 className="text-xl font-bold text-slate-700">
               المحتوى المنشور حالياً في هذا القسم
             </h3>
-            <span className="text-sm font-medium bg-blue-100 text-blue-700 px-4 py-1 rounded-full">
-              {database[activeSection].length} عناصر
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              {(activeSection === "News" || activeSection === "Events") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition"
+                >
+                  <Plus size={18} />
+                  إضافة جديد
+                </button>
+              )}
+              <span className="text-sm font-medium bg-blue-100 text-blue-700 px-4 py-1 rounded-full">
+                {database[activeSection].length} عناصر
+              </span>
+            </div>
           </div>
 
           <table className="w-full text-right border-collapse">
@@ -902,6 +1238,46 @@ const AdminDashboard = () => {
                           {item.link}
                         </div>
                         <div className="text-xs text-slate-500">{item.buttonText}</div>
+                      </div>
+                    ) : activeSection === "Events" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.title}
+                        </div>
+                        {item.date && (
+                          <div className="text-sm text-slate-400">{item.date}</div>
+                        )}
+                        {item.location ? (
+                          <div className="text-sm text-purple-600 font-medium">
+                            {item.location}
+                          </div>
+                        ) : null}
+                        {item.timeRange ? (
+                          <div className="text-xs text-slate-500">{item.timeRange}</div>
+                        ) : null}
+                      </div>
+                    ) : activeSection === "News" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.title}
+                        </div>
+                        {item.date && (
+                          <div className="text-sm text-slate-400">{item.date}</div>
+                        )}
+                        {item.location ? (
+                          <div className="text-sm text-blue-600 font-medium">
+                            {item.location}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : activeSection === "Gallery" ? (
+                      <div>
+                        <div className="font-semibold text-slate-800 text-lg">
+                          {item.year}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          sort: {item.sortOrder}
+                        </div>
                       </div>
                     ) : (
                       <div>

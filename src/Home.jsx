@@ -1,75 +1,64 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { useNavigate, useLocation } from "react-router-dom";
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import lo from "./assets/lo.png";
 import { toast } from "react-toastify";
 import back from "./assets/back.png";
 import image5 from "./assets/400.png";
 import { api } from "./Api";
-import { logout } from "./authService";
-import { clearAuthSession, saveRolesToSession } from "./jwtUtils";
+import SiteChrome from "./SiteChrome";
+import HomeHeroBanner from "./HomeHeroBanner";
+import { useSiteAuth } from "./useSiteAuth";
 import {
   resolveContentImage,
+  resolveContentLink,
   localImageSets,
   staticFallbackBundle,
 } from "./homeStaticFallback";
+import {
+  mapEventsFromApi,
+  mapNewsFromApi,
+  formatNewsPublishedAt,
+  formatEventSchedule,
+} from "./eventsNewsUtils";
 // استيراد ستايلات Swiper الأساسية
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-import { useTheme } from './ThemeContext'; // تأكد إن المسار لملف الـ Context مظبوط
 // الأيقونات
 import { 
-  Search, 
-  Facebook, 
-  Instagram, 
-  Linkedin, 
-  Twitter, 
-  Menu, 
-  Sun, 
   GraduationCap, 
   Mail, 
-  ChevronDown,
   CheckCircle2,
   X,
-   LogIn,
-   UserPlus,
-  user,
-  LayoutDashboard, 
-  LogOut,
-  Moon,
   MapPin,
   ChevronLeft,
   ChevronRight, 
   ArrowUpRight,
-  User, Calendar, Clock 
+  Calendar, Clock 
 } from 'lucide-react';
+
+/** Alumni ShortDescription in admin/DB is sometimes left as the placeholder "MUST Graduate". Treat that as empty and show the real 2-line preview from description or fullBio. */
+function getAlumniPreviewText(person) {
+  const raw = (person.shortDescription ?? "").trim().replace(/\s+/g, " ");
+  if (raw && raw.toLowerCase() !== "must graduate") return person.shortDescription.trim();
+  const desc = (person.description ?? "").trim();
+  if (desc) return desc;
+  const bio = (person.fullBio ?? "").trim();
+  if (!bio) return "";
+  const firstBlock = bio.split(/\r?\n\s*\r?\n/)[0] ?? bio;
+  return firstBlock.replace(/\s+/g, " ").trim();
+}
+
 // ضيف السطر ده جوه الفانكشن فوق مع الـ Navigate والـ States التانية
 const App = () => {
-  const { isDark, setIsDark } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
    const [selectedNews, setSelectedNews] = useState(null);
   const [awardIndex, setAwardIndex] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [accountLabel, setAccountLabel] = useState(() => {
-    
-    try {
-      return (
-        sessionStorage.getItem("userName") ||
-        sessionStorage.getItem("email") ||
-        ""
-      );
-    } catch {
-      return "";
-    }
-  });
+  const { isLoggedIn, isAdmin, accountLabel, handleLogout } = useSiteAuth();
 
   const [newsData, setNewsData] = useState([]);
   const [slides, setSlides] = useState([]);
@@ -101,11 +90,7 @@ const App = () => {
         const bundle = await api("/api/public/home-bundle", { method: "GET" });
         if (cancelled) return;
 
-        const newsList = (bundle.news || []).map((n, i) => ({
-          id: n.id,
-          title: n.title,
-          image: resolveContentImage(n.imageUrl, localImageSets.news, i),
-        }));
+        const newsList = mapNewsFromApi(bundle.news || []);
         setNewsData(
           newsList.length ? newsList : staticFallbackBundle.newsData
         );
@@ -122,7 +107,7 @@ const App = () => {
           id: s.id,
           title: s.title,
           image: resolveContentImage(s.imageUrl, localImageSets.syndicate, i),
-          link: s.link,
+          link: resolveContentLink(s.link),
           btnText: s.buttonText,
           color: "bg-blue-600",
         }));
@@ -134,10 +119,7 @@ const App = () => {
           id: a.id,
           title: a.title || "",
           subtitle: a.subtitle || "",
-          name:
-            (a.content || a.winnerName || "").trim() ||
-            a.title ||
-            "",
+          winnerName: (a.winnerName || "").trim(),
           content: a.content || "",
           image: resolveContentImage(a.imageUrl, localImageSets.awards, i),
         }));
@@ -145,16 +127,8 @@ const App = () => {
           awardsList.length ? awardsList : staticFallbackBundle.awards
         );
 
-        const eventsList = (bundle.events || []).map((e, i) => ({
-          id: e.id,
-          image: resolveContentImage(e.imageUrl, localImageSets.events, i),
-          date: e.date || { day: "", month: "" },
-          location: e.location || "",
-          time: e.timeRange || "",
-          title: e.title,
-          description: e.description || "",
-          color: e.accentColor || "#3b4b81",
-        }));
+        const rawEvents = bundle.events ?? bundle.Events ?? [];
+        const eventsList = mapEventsFromApi(rawEvents);
         setEvents(
           eventsList.length ? eventsList : staticFallbackBundle.events
         );
@@ -188,10 +162,6 @@ const App = () => {
     };
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactStatus({ submitting: true, error: "", ok: false });
@@ -216,94 +186,6 @@ const App = () => {
     }
   };
 
-  const navLinks = [ {
-      name: 'The University',
-      id: 'brief',
-      subItems: [
-        {
-          name: 'About MUST',
-          link: '#',
-          nestedItems: [
-            { name: 'Board of Trustees', link: 'https://must.edu.eg/about-must/board-of-trustees/' },
-            { name: 'President', link: 'https://must.edu.eg/about-must/president/' },
-            { name: 'Vision & Mission', link: 'https://must.edu.eg/about-must/vision-mission/' },
-            { name: 'MUST Values & Principles', link: 'https://must.edu.eg/about-must/must-policies/' },
-            { name: 'History', link: 'https://must.edu.eg/history/' },
-          ]
-        },
-        { 
-          name: 'Sectors', 
-          link: '#',
-          nestedItems: [
-            { name: 'Environmental And Community Service Sector', link: 'https://must.edu.eg/sectors/environmental-and-community-service-sector/' },
-            { name: 'Sustainability Sector', link: 'https://must.edu.eg/sustainability-office/' },
-          ]
-        },
-        { 
-          name: 'Reports', 
-          link: '#',
-          nestedItems: [
-            { name: 'Interdisciplinary Subjects', link: 'https://must.edu.eg/reports/interdisciplinary-science/' },
-            { name: 'Financial Report', link: 'https://must.edu.eg/reports/financial-report/' },
-          ]
-        },
-        { name: 'Policies', link: 'https://must.edu.eg/policies/' },
-        { name: 'University Council Minutes', link: 'https://must.edu.eg/univeristy-council-minutes/' },
-        { name: 'Quality Assurance and Accreditation Sector', link: 'https://must.edu.eg/sectors/quality-assurance-and-accreditation-sector/' },
-        { name: 'Accreditation & Partnerships', link: 'https://must.edu.eg/?page_id=1660' },
-        { name: 'Contact Us', link: 'https://must.edu.eg/contact/' },
-        { 
-          name: 'Resources', 
-          link: '#' ,
-          nestedItems: [
-              { name: 'Smart E-Learning', link: 'https://must.edu.eg/smart-e-learning/' }
-          ]
-        },
-      ]
-    },
-    { 
-      name: 'Academics', 
-      id: 'academics',
-      subItems: [
-        { name: 'Undergraduate Studies', link: 'https://must.edu.eg/academic_programs/undergraduate-studies/' },
-        { name: 'Post-Graduate Program', link: 'https://must.edu.eg/academic_programs/graduate-studies/' },
-        { name: 'Academic Calendar', link: 'https://must.edu.eg/academic-calendar/' },
-        { name: 'International Students Affairs Sector', link: 'https://must.edu.eg/sectors/international-students-affairs-sector/' },
-      ]
-    },
-    { name: 'Admission', link: 'https://admission.must.edu.eg/' },
-    { 
-      name: 'MUST BUZZ', 
-      id: '2000',
-      subItems: [
-        { name: 'MUST Events', link: 'https://must.edu.eg/event/' },
-        { name: 'MUST News', link: 'https://must.edu.eg/news/' },
-        { name: 'MUST Blogs', link: 'https://must.edu.eg/blog/' },
-        { name: 'Announcements', link: 'https://must.edu.eg/anouncement/' },
-      ]
-    },
-    {
-      name: 'Centers',
-      id: '4000',
-      subItems: [
-        { name: 'Centers', link: 'https://must.edu.eg/centers/' },
-        { name: 'Units', link: 'https://must.edu.eg/units/' },
-        { name: 'Research Center...', link: 'https://must.edu.eg/sectors/research-center-for-public-opinion-and-societal-issues-monitoring/' },
-      ]
-    },
-    {
-      name: 'Life At MUST',
-      id: '3000',
-      subItems: [
-        { name: 'MUST Life', link: 'https://must.edu.eg/must-life/' },
-        { name: 'MUST Stars', link: 'https://must.edu.eg/stars/' },
-        { name: 'MUST Clubs', link: 'https://must.edu.eg/clubs/' },
-        { name: 'Facilities', link: 'https://must.edu.eg/facilities/' },
-      ]
-    },
-    { name: 'SDGs', link: 'https://sdg.must.edu.eg/SDG/' } ];
-    
-
   const currentAward =
     awards.length > 0
       ? awards[awardIndex % awards.length]
@@ -311,50 +193,10 @@ const App = () => {
           id: 0,
           title: "",
           subtitle: "",
-          name: "",
+          winnerName: "",
           content: "",
           image: "",
         };
-
-useEffect(() => {
-  let cancelled = false;
-  api("/api/auth/me", { method: "GET" })
-    .then((me) => {
-      if (cancelled) return;
-
-      const rolesRaw = me.roles ?? [];
-
-      // ✅ التعديل هنا
-      const roles = Array.isArray(rolesRaw)
-        ? rolesRaw.map((r) => r.toLowerCase())
-        : [];
-
-      saveRolesToSession(roles);
-
-      const uname = me.userName ?? me.UserName ?? "";
-      const em = me.email ?? me.Email ?? "";
-
-      if (uname) sessionStorage.setItem("userName", uname);
-      if (em) sessionStorage.setItem("email", em);
-
-      setAccountLabel(uname || em || "");
-      setIsLoggedIn(true);
-
-      // ✅ والتعديل هنا
-      setIsAdmin(roles.includes("admin"));
-    })
-    .catch(() => {
-      if (cancelled) return;
-      setIsLoggedIn(false);
-      setIsAdmin(false);
-      setAccountLabel("");
-      clearAuthSession();
-    });
-
-  return () => {
-    cancelled = true;
-  };
-}, [location.pathname]);
 
   useEffect(() => {
     if (awards.length === 0) return;
@@ -365,239 +207,27 @@ useEffect(() => {
   }, [awards.length]);
 
   return (
-    <div id='100' className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
-      {bundleLoading && (
-        <div className="bg-[#1a2b56] text-white text-center text-sm py-2 z-[200] relative">
-          Loading content…
-        </div>
-      )}
-      {bundleError && (
-        <div className="bg-red-800 text-white text-center text-sm py-2 px-4 z-[200] relative">
-          {bundleError}
-        </div>
-      )}
-      
-      {/* --- 1. Navbar --- */}
-<nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300">
-      
-  {/* Logo */}
-  <div className="flex items-center gap-3 h-full cursor-pointer" onClick={() => navigate("/")}>
-    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 ">
-      <img src={lo} alt="MUST Logo" className="w-full h-full object-contain rounded-full" />
-    </div>
-
-    <div className="hidden sm:block border-l border-white/20 ml-2 pl-3 text-left">
-      <h1 className="text-[11px] font-bold uppercase tracking-wider leading-tight">
-        Misr University
-      </h1>
-      <p className="text-[9px] opacity-70 uppercase">
-        For Science & Technology
-      </p>
-    </div>
-  </div>
-
-  {/* Links */}
-  <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
-
-    {navLinks.map((item) => (
-      <li key={item.id} className="relative group flex items-center h-full">
-
-        <a
-          href={item.link ? item.link : `#${item.id}`}
-          className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
-        >
-          {item.name}
-          {item.subItems && (
-            <ChevronDown size={14} className="opacity-60 group-hover:rotate-180 transition" />
-          )}
-        </a>
-
-        {/* Dropdown */}
-        {item.subItems && (
-          <div className="absolute top-full left-0 bg-[#1a2b56] text-white min-w-[260px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-
-            {item.subItems.map((sub, idx) => (
-              <div key={idx} className="relative group/sub">
-
-                <a
-                  href={sub.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex justify-between items-center px-4 py-3 hover:bg-white/10 transition"
-                >
-                  {sub.name}
-                  {sub.nestedItems && <ChevronRight size={14} />}
-                </a>
-
-                {/* Nested Dropdown */}
-                {sub.nestedItems && (
-                  <div className="absolute top-0 left-full bg-[#1a2b56] text-white min-w-[250px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300">
-
-                    {sub.nestedItems.map((nested, i) => (
-                      <a
-                        key={i}
-                        href={nested.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block px-4 py-3 hover:bg-white/10 transition"
-                      >
-                        {nested.name}
-                      </a>
-                    ))}
-
-                  </div>
-                )}
-
-              </div>
-            ))}
-
-          </div>
-        )}
-
-      </li>
-    ))}
-
-    {/* Dashboard */}
-    {isLoggedIn && isAdmin && (
-      <li className="flex items-center h-full">
-        <button
-          onClick={() => navigate("/AdminDashboard")}
-          className="flex items-center gap-2 text-green-400 border border-green-500/30 px-4 py-2 rounded-lg bg-green-500/5 hover:bg-green-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-[11px] shadow-sm"
-        >
-          <LayoutDashboard size={14} />
-          Dashboard
-        </button>
-      </li>
-    )}
-
-  </ul>
-
-  {/* Right Section */}
-  <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full">
-        
-    <button onClick={() => setIsDark(!isDark)} className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full">
-      {isDark ? <Sun size={19} className="text-yellow-400" /> : <Moon size={19} />}
-    </button>
-
-    <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
-
-    {isLoggedIn ? (
-      <div className="flex items-center gap-4">
-
-        {accountLabel && (
-          <div className="hidden xl:flex flex-col items-end">
-            <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 uppercase tracking-tighter">
-              {isAdmin ? "System Admin" : "Student"}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold truncate max-w-[120px]">{accountLabel}</span>
-              <User size={14} className="opacity-50" />
+    <SiteChrome
+      topSlot={
+        <>
+          {bundleLoading && (
+            <div className="bg-[#1a2b56] text-white text-center text-sm py-2 z-[200] relative">
+              Loading content…
             </div>
-          </div>
-        )}
-<button 
-  onClick={() => navigate("/gallery")} 
-  className="p-2"
->
-  <Menu size={28} />
-</button>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group"
-        >
-          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[11px] font-bold uppercase hidden sm:inline">Logout</span>
-        </button>
-      </div>
-    ) : (
-      <div className="flex items-center gap-2">
-        <button
-    onClick={() => navigate("/login")}
-    className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px]
-               bg-white/10 hover:bg-white/20 text-white
-               transition-all hover:scale-105 shadow-lg"
-  >
-    <LogIn size={16} />
-    Login
-  </button>
-
-  <button
-    onClick={() => navigate("/register")}
-    className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px]
-               bg-green-500 hover:bg-green-600 text-white
-               transition-all hover:scale-105 shadow-lg shadow-green-500/20"
-  >
-    <UserPlus size={16} />
-    Register
-  </button>
-      </div>
-    )}
-
-  </div>
-</nav>
-<section className="relative h-[480px] md:h-[550px] w-full overflow-hidden">
-
-  {/* Slider */}
-  <Swiper
-    modules={[Navigation, Pagination, Autoplay, EffectFade]}
-    effect="fade"
-    speed={1200}
-    autoplay={{ delay: 5000, disableOnInteraction: false }}
-    pagination={{ clickable: true, dynamicBullets: true }}
-    navigation
-    className="h-full w-full"
-  >
-
-    {slides.map((slide) => (
-      <SwiperSlide key={slide.id}>
-        <div
-          className="relative h-full w-full bg-cover bg-center"
-          style={{ backgroundImage: `url('${slide.image}')` }}
-        >
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1a2b56]/80 via-[#1a2b56]/50 to-transparent dark:from-black/80 dark:via-black/40"></div>
-        </div>
-      </SwiperSlide>
-    ))}
-
-  </Swiper>
-
-  {/* Content */}
-  <div className="absolute inset-0 flex items-center justify-center text-center z-20 px-4 pt-40">
-
-    <div className="max-w-4xl ">
-
-      <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-6">
-        Alumni Society
-      </h2>
-
-      {/* Quick Links */}
-<div className="flex flex-wrap justify-center gap-3 text-sm md:text-base font-medium">
-  {[
-    { name: "Home", target: "home" },
-    { name: "Services", target: "6000" },
-    { name: "Notable", target: "5000" },
-    { name: "Awards", target: "awards" },
-    { name: "Events", target: "1000" },
-    { name: "News", target: "2000" },
-    { name: "Syndicates", target: "moazz" },
-    { name: "Contact Us", target: "3000" },
-  ].map((item, i) => (
-    <a
-      key={i}
-      href={`#${item.target}`}
-      className="
-        px-5 py-2
-        rounded-full
-        bg-white/10
-        backdrop-blur-md
-        border border-white/20
-        text-white
-        hover:bg-green-500
-        hover:scale-105
-        transition-all duration-300
-      "
+          )}
+          {bundleError && (
+            <div className="bg-red-800 text-white text-center text-sm py-2 px-4 z-[200] relative">
+              {bundleError}
+            </div>
+          )}
+        </>
+      }
+      isLoggedIn={isLoggedIn}
+      isAdmin={isAdmin}
+      accountLabel={accountLabel}
+      onLogout={handleLogout}
     >
+<<<<<<< HEAD
       {item.name}
     </a>
   ))}
@@ -653,6 +283,10 @@ useEffect(() => {
   </div>
 
 </section>
+=======
+      <div id="100" className="relative">
+        <HomeHeroBanner slides={slides} />
+>>>>>>> be4f75400d312eb36a4a320b9ddc33f03ab1116e
 
       {/* --- 3. Brief Section --- */}
      <div className="bg-white font-sans text-left" dir="ltr">
@@ -824,8 +458,8 @@ useEffect(() => {
                   {person.name}
                 </h3>
 
-                <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-4">
-                  {person.shortDescription || person.description}
+                <p className="text-gray-500 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-2 min-h-[2.5rem]">
+                  {getAlumniPreviewText(person)}
                 </p>
 
                 <button
@@ -866,9 +500,14 @@ useEffect(() => {
               <h4 className="font-bold text-[#1a2b56] dark:text-white text-center">
                 {selectedAlumnus.name}
               </h4>
-              <span className="text-green-600 text-xs font-bold mt-1 uppercase tracking-wider">
-                MUST Graduate
-              </span>
+              {(() => {
+                const preview = getAlumniPreviewText(selectedAlumnus);
+                return preview ? (
+                  <span className="text-green-600 text-xs font-bold mt-1 text-center line-clamp-2 leading-snug">
+                    {preview}
+                  </span>
+                ) : null;
+              })()}
             </div>
 
             {/* Biography */}
@@ -913,26 +552,30 @@ useEffect(() => {
           transition={{ duration: 0.5 }}
           className="flex-1 p-8 lg:p-16 flex flex-col justify-center bg-white dark:bg-gray-800 z-10"
         >
-          <h3 className="text-2xl lg:text-3xl font-bold text-[#1a2b56] dark:text-white mb-4 leading-tight">
-            {/* {currentAward.title} */}
-          </h3>
-
           {currentAward.subtitle && (
-            <p className="text-lg text-[#00a651] font-semibold mb-6">
-              {/* {currentAward.subtitle} */}
+            <p className="text-lg text-[#00a651] font-semibold mb-4">
+              {currentAward.subtitle}
             </p>
           )}
 
-          <div className="mb-6">
-            {currentAward.name && (
-              <h4 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                {currentAward.name}
+          <div className="mb-6 space-y-4">
+            {currentAward.winnerName && (
+              <h4 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                {currentAward.winnerName}
               </h4>
             )}
 
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed italic text-sm lg:text-base">
-              {/* "{currentAward.content}" */}
-            </p>
+            {currentAward.title && (
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm lg:text-base whitespace-pre-wrap">
+                {currentAward.title}
+              </p>
+            )}
+
+            {currentAward.content && (
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm lg:text-base whitespace-pre-wrap">
+                {currentAward.content}
+              </p>
+            )}
           </div>
 
           <button className="flex items-center gap-2 text-[#00a651] font-bold hover:gap-4 transition-all w-fit group">
@@ -1006,7 +649,13 @@ useEffect(() => {
           }}
           className="pb-12"
         >
-          {events.map((event) => (
+          {events.map((event) => {
+            const displayLocation = event.location?.trim();
+            const displayTime =
+              event.time?.trim() ||
+              (event.eventDate ? formatEventSchedule(event.eventDate) : "");
+            const showMeta = !!(displayLocation || displayTime);
+            return (
             <SwiperSlide key={event.id}>
               <div
                 onClick={() => setSelectedEvent(event)}
@@ -1033,19 +682,38 @@ useEffect(() => {
 
                 {/* Info */}
                 <div className="mt-4 space-y-2 px-1">
-                  <div className="flex flex-wrap items-center text-[11px] text-gray-500 dark:text-gray-300 gap-3">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} className="text-[#8ec63f]" />
-                      <span className="hover:text-[#00a651] transition-colors">
-                        {event.location}
-                      </span>
-                    </span>
-
-                    <span className="flex items-center gap-1">
-                      <span className="text-[#8ec63f] text-sm">🕒</span>
-                      {event.time}
-                    </span>
-                  </div>
+                  {showMeta ? (
+                      <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
+                        <div className="flex items-start gap-2 min-w-0">
+                          <MapPin
+                            size={16}
+                            className="text-[#8ec63f] shrink-0 mt-0.5"
+                            aria-hidden
+                          />
+                          <span
+                            className={`break-words leading-snug ${
+                              displayLocation
+                                ? ""
+                                : "text-gray-500 dark:text-gray-400 italic"
+                            }`}
+                          >
+                            {displayLocation || "Venue TBA — set Location in Admin"}
+                          </span>
+                        </div>
+                        {displayTime ? (
+                          <div className="flex items-start gap-2 min-w-0">
+                            <Clock
+                              size={16}
+                              className="text-[#8ec63f] shrink-0 mt-0.5"
+                              aria-hidden
+                            />
+                            <span className="break-words leading-snug">
+                              {displayTime}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                  ) : null}
 
                   <h3 className="font-bold text-[#1a3668] dark:text-white text-[15px] leading-tight hover:underline min-h-[40px]">
                     {event.title}
@@ -1057,7 +725,8 @@ useEffect(() => {
                 </div>
               </div>
             </SwiperSlide>
-          ))}
+            );
+          })}
         </Swiper>
 
         {/* أزرار التنقل */}
@@ -1071,7 +740,15 @@ useEffect(() => {
       </div>
 
       {/* Modal */}
-      {selectedEvent && (
+      {selectedEvent && (() => {
+        const modalLocation = selectedEvent.location?.trim();
+        const modalTime =
+          selectedEvent.time?.trim() ||
+          (selectedEvent.eventDate
+            ? formatEventSchedule(selectedEvent.eventDate)
+            : "");
+        const showModalMeta = !!(modalLocation || modalTime);
+        return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 w-[90%] max-w-2xl rounded-xl overflow-hidden shadow-2xl relative animate-fadeIn">
 
@@ -1096,10 +773,34 @@ useEffect(() => {
                 {selectedEvent.title}
               </h2>
 
-              <div className="text-sm text-gray-500 dark:text-gray-300 flex gap-4 flex-wrap">
-                <span>📍 {selectedEvent.location}</span>
-                <span>🕒 {selectedEvent.time}</span>
+              {showModalMeta ? (
+              <div className="text-sm text-gray-800 dark:text-gray-100 flex flex-col gap-2">
+                <span className="flex items-start gap-2">
+                  <MapPin
+                    size={16}
+                    className="text-[#8ec63f] shrink-0 mt-0.5"
+                  />
+                  <span
+                    className={
+                      modalLocation
+                        ? ""
+                        : "text-gray-500 dark:text-gray-400 italic"
+                    }
+                  >
+                    {modalLocation || "Venue TBA — set Location in Admin"}
+                  </span>
+                </span>
+                {modalTime ? (
+                  <span className="flex items-start gap-2">
+                    <Clock
+                      size={16}
+                      className="text-[#8ec63f] shrink-0 mt-0.5"
+                    />
+                    {modalTime}
+                  </span>
+                ) : null}
               </div>
+              ) : null}
 
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 {selectedEvent.description}
@@ -1107,11 +808,16 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Button */}
       <div className="text-center mt-6">
-        <button className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md">
+        <button
+          type="button"
+          onClick={() => navigate("/events")}
+          className="bg-[#00a651] hover:bg-[#008d44] text-white font-bold py-3 px-10 rounded-full transition-all duration-300 shadow-md"
+        >
           See All Events
         </button>
       </div>
@@ -1151,7 +857,11 @@ useEffect(() => {
           }}
           className="pb-14"
         >
-          {newsData.map((news) => (
+          {newsData.map((news) => {
+            const newsDateLabel = formatNewsPublishedAt(news.publishedAt);
+            const newsLoc = news.location?.trim();
+            const showNewsMeta = !!(newsDateLabel || newsLoc);
+            return (
             <SwiperSlide key={news.id}>
               <div
                 onClick={() => setSelectedNews(news)}
@@ -1170,18 +880,54 @@ useEffect(() => {
 
                 {/* Content */}
                 <div className="py-5 px-1 space-y-3">
-                  <div className="flex items-center gap-1.5 text-[#00a651]">
-                    <Calendar size={16} className="opacity-80" />
-                    <span className="w-8 h-[1px] bg-gray-200 dark:bg-gray-600"></span>
-                  </div>
+                  {showNewsMeta ? (
+                    <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
+                      {newsDateLabel ? (
+                        <div className="flex items-center gap-2 text-[#00a651] min-w-0">
+                          <Calendar size={16} className="opacity-80 shrink-0" />
+                          <span className="text-xs font-medium truncate">
+                            {newsDateLabel}
+                          </span>
+                        </div>
+                      ) : null}
+                      <div className="flex items-start gap-2 min-w-0">
+                        <MapPin
+                          size={16}
+                          className="text-[#8ec63f] shrink-0 mt-0.5"
+                          aria-hidden
+                        />
+                        <span
+                          className={`text-xs break-words leading-snug ${
+                            newsLoc
+                              ? "text-gray-700 dark:text-gray-200"
+                              : "text-gray-500 dark:text-gray-400 italic"
+                          }`}
+                        >
+                          {newsLoc || "Location TBA — set in Admin"}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
 
-                  <h3 className="text-sm text-gray-500 dark:text-gray-300 line-clamp-4">
-                    {news.title}
-                  </h3>
+                  {news.body?.trim() ? (
+                    <>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 mb-1">
+                        {news.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 line-clamp-2 break-words leading-relaxed">
+                        {news.body.trim()}
+                      </p>
+                    </>
+                  ) : (
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 break-words leading-relaxed">
+                      {news.title}
+                    </h3>
+                  )}
                 </div>
               </div>
             </SwiperSlide>
-          ))}
+          );
+          })}
         </Swiper>
 
         {/* Arrows */}
@@ -1216,14 +962,44 @@ useEffect(() => {
 
             {/* Content */}
             <div className="p-5 space-y-3">
-              <div className="flex items-center gap-2 text-[#00a651]">
-                <Calendar size={16} />
-                <span className="text-sm">Latest Update</span>
-              </div>
-
-              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+              <h2 className="text-xl font-bold text-[#1a3668] dark:text-white">
                 {selectedNews.title}
-              </p>
+              </h2>
+              <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
+                <span className="flex items-start gap-2 text-[#00a651]">
+                  <Calendar size={16} className="shrink-0 mt-0.5" />
+                  <span>
+                    {formatNewsPublishedAt(selectedNews.publishedAt) ||
+                      "Latest Update"}
+                  </span>
+                </span>
+                <span className="flex items-start gap-2">
+                  <MapPin
+                    size={16}
+                    className="text-[#8ec63f] shrink-0 mt-0.5"
+                    aria-hidden
+                  />
+                  <span
+                    className={
+                      selectedNews.location?.trim()
+                        ? ""
+                        : "text-gray-500 dark:text-gray-400 italic"
+                    }
+                  >
+                    {selectedNews.location?.trim() ||
+                      "Location TBA — set in Admin"}
+                  </span>
+                </span>
+              </div>
+              {selectedNews.body?.trim() ? (
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                  {selectedNews.body}
+                </p>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                  No article body — add text in Admin (optional).
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -1231,7 +1007,11 @@ useEffect(() => {
 
       {/* Button */}
       <div className="text-center mt-8">
-        <button className="border-2 border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-sm transform active:scale-95">
+        <button
+          type="button"
+          onClick={() => navigate("/news")}
+          className="border-2 border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-bold py-3 px-12 rounded-full transition-all duration-300 shadow-sm transform active:scale-95"
+        >
           See All News
         </button>
       </div>
@@ -1407,75 +1187,8 @@ useEffect(() => {
     </div>
   </div>
 </section>
-<footer className="bg-[#1a2b56] dark:bg-black text-white pt-20 pb-10 border-t-4 border-white/10 dark:border-gray-700 transition-colors duration-300">
-  <div className="container mx-auto px-6">
-    
-    {/* Logo */}
-    <div className="flex justify-center mb-16">
-      <div className="p-4 rounded-full w-44 h-44 flex items-center justify-center">
-        <img src={lo} alt="MUST Logo" className="w-44" />
       </div>
-    </div>
-
-    {/* Links Grid */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-sm">
-
-      {/* Column 1 */}
-      <div>
-        <h4 className="text-[#00a651] font-bold mb-6 text-base">Links</h4>
-        <ul className="space-y-3 text-white/80 dark:text-gray-300">
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Home</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">The University</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Academics</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Life At MUST</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">FAQs</li>
-        </ul>
-      </div>
-
-      {/* Column 2 */}
-      <div>
-        <h4 className="text-[#00a651] font-bold mb-6 text-base">About University</h4>
-        <ul className="space-y-3 text-white/80 dark:text-gray-300">
-          <li className="hover:text-green-400 cursor-pointer transition-colors">About MUST</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">History</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Accreditation</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Why MUST</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Privacy Policy</li>
-        </ul>
-      </div>
-
-      {/* Column 3 */}
-      <div>
-        <h4 className="text-[#00a651] font-bold mb-6 text-base">MUST BUZZ</h4>
-        <ul className="space-y-3 text-white/80 dark:text-gray-300">
-          <li className="hover:text-green-400 cursor-pointer transition-colors">MUST Events</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">MUST News</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Blog</li>
-          <li className="hover:text-green-400 cursor-pointer transition-colors">Announcement</li>
-        </ul>
-      </div>
-
-      {/* Column 4 */}
-      <div>
-        <h4 className="text-[#00a651] font-bold mb-6 text-base">Contact Info</h4>
-        <div className="space-y-4 font-bold text-white dark:text-gray-300">
-          <p className="text-lg">16878</p>
-          <p className="text-[#00a651] hover:underline cursor-pointer">
-            Info@Must.Edu.Eg
-          </p>
-          <p className="opacity-80 font-normal leading-relaxed">
-            Al Motamayez District – 6th of October, Egypt
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</footer>
-    <div className="border-t border-white/10 dark:border-gray-700 flex justify-center items-center py-7 text-center text-black dark:text-gray-400 text-[15px] opacity-70 dark:opacity-80 transition-colors duration-300">
-  © 2026 Misr University for Science & Technology. All Rights Reserved.
-</div>
-    </div>
+    </SiteChrome>
   );
 };
 

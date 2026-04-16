@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        DeleteAuthCookie(Response);
+        DeleteAuthCookie();
         return Ok();
     }
 
@@ -147,9 +147,31 @@ public class AuthController : ControllerBase
         Response.Cookies.Append(AuthCookieName, auth.AccessToken, opts);
     }
 
-    private static void DeleteAuthCookie(HttpResponse response)
+    /// <summary>
+    /// Must use the same Path, SameSite, and Secure flags as <see cref="AppendAuthCookie"/> or the browser may not remove the cookie.
+    /// </summary>
+    private void DeleteAuthCookie()
     {
-        response.Cookies.Delete(AuthCookieName, new CookieOptions { Path = "/" });
+        var opts = new CookieOptions
+        {
+            HttpOnly = true,
+            Path = "/",
+            Expires = DateTime.UnixEpoch,
+        };
+
+        var host = Request.Host.Host;
+        if (host.Contains("localhost", StringComparison.OrdinalIgnoreCase) || host == "127.0.0.1")
+        {
+            opts.SameSite = SameSiteMode.Lax;
+            opts.Secure = false;
+        }
+        else
+        {
+            opts.SameSite = SameSiteMode.None;
+            opts.Secure = true;
+        }
+
+        Response.Cookies.Delete(AuthCookieName, opts);
     }
 }
 

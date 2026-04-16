@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<SyndicateCard> SyndicateCards => Set<SyndicateCard>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<RegistrationOtp> RegistrationOtps => Set<RegistrationOtp>();
+    public DbSet<GalleryItem> GalleryItems => Set<GalleryItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -30,6 +31,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
         {
             e.Property(x => x.Title).HasMaxLength(500);
             e.Property(x => x.ImageUrl).HasMaxLength(2000);
+            e.Property(x => x.Location).HasMaxLength(300);
         });
 
         builder.Entity<EventItem>(e =>
@@ -83,6 +85,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
             e.Property(x => x.Email).HasMaxLength(256);
             e.Property(x => x.OtpHash).HasMaxLength(128);
             e.Property(x => x.PendingUserName).HasMaxLength(256);
+        });
+
+        builder.Entity<GalleryItem>(e =>
+        {
+            e.Property(x => x.ImageUrl).HasMaxLength(2000);
         });
     }
 }

@@ -18,6 +18,7 @@ public class PublicController : ControllerBase
     private readonly IHeroService _hero;
     private readonly ISyndicateService _syndicates;
     private readonly IContactService _contact;
+    private readonly IGalleryService _gallery;
 
     public PublicController(
         IHomeBundleService homeBundle,
@@ -27,7 +28,8 @@ public class PublicController : ControllerBase
         IAlumniService alumni,
         IHeroService hero,
         ISyndicateService syndicates,
-        IContactService contact)
+        IContactService contact,
+        IGalleryService gallery)
     {
         _homeBundle = homeBundle;
         _news = news;
@@ -37,6 +39,7 @@ public class PublicController : ControllerBase
         _hero = hero;
         _syndicates = syndicates;
         _contact = contact;
+        _gallery = gallery;
     }
 
     [HttpGet("home-bundle")]
@@ -85,6 +88,13 @@ public class PublicController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<SyndicatePublicDto>>> GetSyndicates(CancellationToken cancellationToken)
     {
         var list = await _syndicates.GetPublicAsync(cancellationToken);
+        return Ok(list);
+    }
+
+    [HttpGet("gallery")]
+    public async Task<ActionResult<IReadOnlyList<GalleryPublicDto>>> GetGallery(CancellationToken cancellationToken)
+    {
+        var list = await _gallery.GetPublicAsync(cancellationToken);
         return Ok(list);
     }
 

@@ -19,9 +19,10 @@ public class RegisterRequest
 
 public class LoginRequest
 {
+    /// <summary>Username or full @must.edu.eg email.</summary>
     [Required]
-    [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    [MaxLength(256)]
+    public string Login { get; set; } = string.Empty;
 
     [Required]
     public string Password { get; set; } = string.Empty;

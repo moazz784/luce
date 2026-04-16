@@ -13,6 +13,7 @@ public interface IApplicationDbContext
     DbSet<SyndicateCard> SyndicateCards { get; }
     DbSet<ContactMessage> ContactMessages { get; }
     DbSet<RegistrationOtp> RegistrationOtps { get; }
+    DbSet<GalleryItem> GalleryItems { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
