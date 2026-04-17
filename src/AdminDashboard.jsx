@@ -18,6 +18,7 @@ import {
   Mail,
   Home,
   FileText,
+  Video,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -103,7 +104,8 @@ function normalizeRows(section, rows) {
         id: r.id,
         year: r.year,
         sortOrder: r.sortOrder ?? 0,
-        image: r.imageUrl,
+        mediaUrl: r.imageUrl, // can be image or video
+        mediaType: r.mediaType || (r.imageUrl?.match(/\.(mp4|webm|ogg)/i) ? "video" : "image"),
       }));
     default:
       return [];
@@ -145,9 +147,10 @@ const AdminDashboard = () => {
     buttonText: "",
     galleryYear: "",
     gallerySort: "",
-    image: null,
+    media: null,
+    mediaType: "image",
   });
-  const [imagePreview, setImagePreview] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingSyndicatePdf, setUploadingSyndicatePdf] = useState(false);
@@ -237,16 +240,21 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleImageChange = async (e) => {
+  const handleMediaChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Determine media type
+    const isVideo = file.type.startsWith("video/");
+    setFormData(prev => ({ ...prev, mediaType: isVideo ? "video" : "image" }));
+    
     setUploading(true);
     try {
       const { url } = await uploadMedia(file);
-      setImagePreview(url);
-      setFormData((prev) => ({ ...prev, image: url }));
+      setMediaPreview(url);
+      setFormData((prev) => ({ ...prev, media: url }));
     } catch (err) {
-      alert(err.message || "فشل رفع الصورة");
+      alert(err.message || "فشل رفع الملف");
     } finally {
       setUploading(false);
     }
@@ -297,9 +305,10 @@ const AdminDashboard = () => {
           : item.sortOrder != null
             ? String(item.sortOrder)
             : "",
-      image: item.image ?? null,
+      media: item.mediaUrl ?? null,
+      mediaType: item.mediaType ?? "image",
     });
-    setImagePreview(item.image);
+    setMediaPreview(item.mediaUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -322,9 +331,10 @@ const AdminDashboard = () => {
       buttonText: "",
       galleryYear: "",
       gallerySort: "",
-      image: null,
+      media: null,
+      mediaType: "image",
     });
-    setImagePreview(null);
+    setMediaPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (syndicatePdfInputRef.current) syndicatePdfInputRef.current.value = "";
   }, []);
@@ -354,9 +364,9 @@ const AdminDashboard = () => {
   };
 
   const buildPayload = () => {
-    const imageUrl = formData.image;
-    if (!imageUrl) {
-      throw new Error("يرجى رفع صورة");
+    const mediaUrl = formData.media;
+    if (!mediaUrl) {
+      throw new Error("يرجى رفع ملف (صورة أو فيديو)");
     }
     const path = sectionApiPath[activeSection];
     if (activeSection === "News") {
@@ -369,7 +379,7 @@ const AdminDashboard = () => {
           title: formData.title,
           body: formData.newsBody?.trim() || null,
           location: formData.location?.trim() || null,
-          imageUrl,
+          imageUrl: mediaUrl,
           publishedAt,
           sortOrder: 0,
           isPublished: true,
@@ -396,7 +406,7 @@ const AdminDashboard = () => {
           timeRange: tr,
           description: desc,
           accentColor: null,
-          imageUrl,
+          imageUrl: mediaUrl,
           sortOrder: 0,
         },
       };
@@ -409,7 +419,7 @@ const AdminDashboard = () => {
           subtitle: null,
           winnerName: formData.person,
           content: null,
-          imageUrl,
+          imageUrl: mediaUrl,
           sortOrder: 0,
         },
       };
@@ -421,7 +431,7 @@ const AdminDashboard = () => {
           name: formData.name,
           shortDescription: formData.job,
           fullBio: formData.fullBio || null,
-          imageUrl,
+          imageUrl: mediaUrl,
           sortOrder: 0,
         },
       };
@@ -431,7 +441,7 @@ const AdminDashboard = () => {
         path,
         body: {
           title: formData.title || null,
-          imageUrl,
+          imageUrl: mediaUrl,
           sortOrder: 0,
         },
       };
@@ -441,7 +451,7 @@ const AdminDashboard = () => {
         path,
         body: {
           title: formData.title,
-          imageUrl,
+          imageUrl: mediaUrl,
           link: formData.link,
           buttonText: formData.buttonText,
           sortOrder: 0,
@@ -459,7 +469,8 @@ const AdminDashboard = () => {
         path,
         body: {
           year,
-          imageUrl,
+          imageUrl: mediaUrl,
+          mediaType: formData.mediaType,
           sortOrder,
         },
       };
@@ -526,6 +537,7 @@ const AdminDashboard = () => {
                         ? {
                             year: body.year,
                             imageUrl: body.imageUrl,
+                            mediaType: body.mediaType,
                             sortOrder: body.sortOrder,
                           }
                         : {
@@ -909,6 +921,26 @@ const AdminDashboard = () => {
     }
   };
 
+  const renderGalleryMediaPreview = (mediaUrl, mediaType) => {
+    if (!mediaUrl) return null;
+    if (mediaType === "video") {
+      return (
+        <video
+          src={mediaUrl}
+          className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
+          controls
+        />
+      );
+    }
+    return (
+      <img
+        src={mediaUrl}
+        alt="Gallery media"
+        className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
+      />
+    );
+  };
+
   return (
     <div
       className="admin-dashboard-shell flex h-screen bg-gray-100 text-right text-slate-900 dark:text-slate-900"
@@ -1010,7 +1042,7 @@ const AdminDashboard = () => {
                   <th className="p-4 text-slate-600 font-bold">الهاتف</th>
                   <th className="p-4 text-slate-600 font-bold">الرسالة</th>
                   <th className="p-4 text-slate-600 font-bold text-center w-36">إجراءات</th>
-                </tr>
+                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {contactMessages.map((item) => (
@@ -1020,7 +1052,7 @@ const AdminDashboard = () => {
                         {item.createdAt
                           ? String(item.createdAt).replace("T", " ").slice(0, 19)
                           : "—"}
-                      </td>
+                       </td>
                       <td className="p-4 font-medium text-slate-800">{item.name}</td>
                       <td className="p-4 text-sm text-blue-700 break-all">{item.email}</td>
                       <td className="p-4 text-sm text-slate-600">{item.phone || "—"}</td>
@@ -1118,28 +1150,37 @@ const AdminDashboard = () => {
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleImageChange}
-                accept="image/*"
+                onChange={handleMediaChange}
+                accept="image/*,video/*"
                 className="hidden"
               />
 
-              {imagePreview ? (
+              {mediaPreview ? (
                 <div className="relative group">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-32 object-cover rounded-xl shadow-md"
-                  />
-                  <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs">
-                    <UploadCloud size={20} /> تغيير الصورة
+                  {formData.mediaType === "video" ? (
+                    <video
+                      src={mediaPreview}
+                      className="w-full h-32 object-cover rounded-xl shadow-md"
+                      controls
+                    />
+                  ) : (
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-xl shadow-md"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                    {formData.mediaType === "video" ? <Video size={20} /> : <UploadCloud size={20} />}
+                    تغيير الملف
                   </div>
                 </div>
               ) : (
                 <div className="py-6 text-gray-400 group-hover:text-blue-500">
                   <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
-                  <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                  <span className="font-medium text-sm">اضغط لرفع صورة أو فيديو</span>
                   <p className="text-xs mt-1">
-                    {uploading ? "جاري الرفع…" : "PNG, JPG (حتى 5MB)"}
+                    {uploading ? "جاري الرفع…" : "PNG, JPG, MP4, WebM (حتى 50MB)"}
                   </p>
                 </div>
               )}
@@ -1190,7 +1231,7 @@ const AdminDashboard = () => {
           <table className="w-full text-right border-collapse">
             <thead>
               <tr className="bg-slate-100/50 border-b border-slate-100">
-                <th className="p-5 text-slate-600 font-bold w-24">الصورة</th>
+                <th className="p-5 text-slate-600 font-bold w-24">الملف</th>
                 <th className="p-5 text-slate-600 font-bold">التفاصيل</th>
                 <th className="p-5 text-slate-600 font-bold text-center w-40">
                   الإجراءات
@@ -1204,11 +1245,15 @@ const AdminDashboard = () => {
                   className="hover:bg-blue-50/50 transition duration-100"
                 >
                   <td className="p-5">
-                    <img
-                      src={item.image}
-                      alt="Thumb"
-                      className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
-                    />
+                    {activeSection === "Gallery" ? (
+                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType)
+                    ) : (
+                      <img
+                        src={item.image}
+                        alt="Thumb"
+                        className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
+                      />
+                    )}
                   </td>
                   <td className="p-5">
                     {activeSection === "Alumni" ? (
@@ -1276,7 +1321,7 @@ const AdminDashboard = () => {
                           {item.year}
                         </div>
                         <div className="text-xs text-slate-500">
-                          sort: {item.sortOrder}
+                          sort: {item.sortOrder} • {item.mediaType === "video" ? "فيديو" : "صورة"}
                         </div>
                       </div>
                     ) : (
