@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Play, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "./Api";
 import SiteChrome from "./SiteChrome";
 import { useSiteAuth } from "./useSiteAuth";
@@ -10,6 +11,8 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeYear, setActiveYear] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [mediaType, setMediaType] = useState("all"); // "all", "images", "videos"
 
   useEffect(() => {
     let cancelled = false;
@@ -51,15 +54,94 @@ export default function Gallery() {
     }
   }, [yearsSorted, activeYear]);
 
-  const imagesForYear = useMemo(() => {
+  // Filter items by media type
+  const filteredItems = useMemo(() => {
     if (activeYear == null) return [];
-    return items
-      .filter((x) => (x.year ?? x.Year) === activeYear)
-      .sort(
-        (a, b) =>
-          (a.sortOrder ?? a.SortOrder ?? 0) - (b.sortOrder ?? b.SortOrder ?? 0),
-      );
-  }, [items, activeYear]);
+    let filtered = items.filter((x) => (x.year ?? x.Year) === activeYear);
+    
+    if (mediaType === "images") {
+      filtered = filtered.filter((x) => x.type !== "video");
+    } else if (mediaType === "videos") {
+      filtered = filtered.filter((x) => x.type === "video");
+    }
+    
+    return filtered.sort(
+      (a, b) =>
+        (a.sortOrder ?? a.SortOrder ?? 0) - (b.sortOrder ?? b.SortOrder ?? 0),
+    );
+  }, [items, activeYear, mediaType]);
+
+  const openModal = (item) => {
+    setSelectedMedia(item);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeModal = () => {
+    setSelectedMedia(null);
+    document.body.style.overflow = "auto";
+  };
+
+  const nextMedia = () => {
+    if (!selectedMedia) return;
+    const currentIndex = filteredItems.findIndex(
+      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id)
+    );
+    const nextIndex = (currentIndex + 1) % filteredItems.length;
+    setSelectedMedia(filteredItems[nextIndex]);
+  };
+
+  const prevMedia = () => {
+    if (!selectedMedia) return;
+    const currentIndex = filteredItems.findIndex(
+      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id)
+    );
+    const prevIndex = (currentIndex - 1 + filteredItems.length) % filteredItems.length;
+    setSelectedMedia(filteredItems[prevIndex]);
+  };
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedMedia) return;
+      if (e.key === "ArrowRight") nextMedia();
+      if (e.key === "ArrowLeft") prevMedia();
+      if (e.key === "Escape") closeModal();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedMedia, filteredItems]);
+
+  const isVideo = (item) => {
+    return item.type === "video" || 
+           (item.videoUrl) || 
+           (item.url && (item.url.includes("youtube") || item.url.includes("vimeo")));
+  };
+
+  const getThumbnail = (item) => {
+    if (item.thumbnailUrl) return item.thumbnailUrl;
+    if (item.imageUrl) return item.imageUrl;
+    if (item.ImageUrl) return item.ImageUrl;
+    return "/api/placeholder/400/300";
+  };
+
+  const getVideoEmbedUrl = (url) => {
+    if (!url) return null;
+    // YouTube
+    if (url.includes("youtube.com/watch")) {
+      const videoId = url.split("v=")[1]?.split("&")[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes("youtu.be")) {
+      const videoId = url.split("/").pop();
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Vimeo
+    if (url.includes("vimeo.com")) {
+      const videoId = url.split("/").pop();
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
+  };
 
   return (
     <SiteChrome
@@ -72,6 +154,47 @@ export default function Gallery() {
         <h1 className="text-4xl font-bold text-center text-green-600 mb-10">
           Gallery
         </h1>
+
+        {/* Media Type Tabs */}
+        <div className="flex justify-center gap-4 flex-wrap mb-6">
+          <button
+            type="button"
+            onClick={() => setMediaType("all")}
+            className={`px-6 py-2 rounded-full font-semibold transition flex items-center gap-2 ${
+              mediaType === "all"
+                ? "bg-green-600 text-white"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-green-500 hover:text-white"
+            }`}
+          >
+            <ImageIcon size={18} />
+            <Play size={18} />
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaType("images")}
+            className={`px-6 py-2 rounded-full font-semibold transition flex items-center gap-2 ${
+              mediaType === "images"
+                ? "bg-green-600 text-white"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-green-500 hover:text-white"
+            }`}
+          >
+            <ImageIcon size={18} />
+            Images
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaType("videos")}
+            className={`px-6 py-2 rounded-full font-semibold transition flex items-center gap-2 ${
+              mediaType === "videos"
+                ? "bg-green-600 text-white"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-green-500 hover:text-white"
+            }`}
+          >
+            <Play size={18} />
+            Videos
+          </button>
+        </div>
 
         {loading && (
           <p className="text-center text-gray-600 dark:text-gray-400">
@@ -86,7 +209,7 @@ export default function Gallery() {
 
         {!loading && !error && yearsSorted.length === 0 && (
           <p className="text-center text-gray-500 dark:text-gray-400">
-            No gallery images yet. Add them from the Admin dashboard.
+            No gallery items yet. Add them from the Admin dashboard.
           </p>
         )}
 
@@ -109,33 +232,173 @@ export default function Gallery() {
               ))}
             </div>
 
-            <motion.div
-              key={activeYear}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
-            >
-              {imagesForYear.map((row) => {
-                const url = row.imageUrl ?? row.ImageUrl ?? "";
-                const id = row.id ?? row.Id;
-                return (
-                  <div
-                    key={id}
-                    className="overflow-hidden rounded-2xl shadow-lg group"
-                  >
-                    <img
-                      src={url}
-                      alt=""
-                      className="w-full h-60 object-cover transform group-hover:scale-110 transition duration-500"
-                    />
-                  </div>
-                );
-              })}
-            </motion.div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${activeYear}-${mediaType}`}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -40 }}
+                transition={{ duration: 0.5 }}
+                className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
+              >
+                {filteredItems.map((row) => {
+                  const url = row.imageUrl ?? row.ImageUrl ?? "";
+                  const videoUrl = row.videoUrl ?? row.VideoUrl ?? "";
+                  const id = row.id ?? row.Id;
+                  const title = row.title ?? row.Title ?? "";
+                  const isMediaVideo = isVideo(row);
+                  const thumbnail = getThumbnail(row);
+                  
+                  return (
+                    <motion.div
+                      key={id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={() => openModal(row)}
+                      className="overflow-hidden rounded-2xl shadow-lg group cursor-pointer relative bg-white dark:bg-gray-800"
+                    >
+                      <div className="relative overflow-hidden aspect-video">
+                        <img
+                          src={thumbnail}
+                          alt={title || "Gallery item"}
+                          className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
+                        />
+                        {isMediaVideo && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="bg-green-600 rounded-full p-4">
+                              <Play size={32} className="text-white fill-white" />
+                            </div>
+                          </div>
+                        )}
+                        {isMediaVideo && (
+                          <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <Play size={12} />
+                            Video
+                          </div>
+                        )}
+                      </div>
+                      {title && (
+                        <div className="p-3">
+                          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
+                            {title}
+                          </h3>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+
+            {filteredItems.length === 0 && !loading && (
+              <p className="text-center text-gray-500 dark:text-gray-400 py-10">
+                No {mediaType === "images" ? "images" : mediaType === "videos" ? "videos" : "items"} found for this year.
+              </p>
+            )}
           </>
         )}
       </section>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {selectedMedia && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md"
+            onClick={closeModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative max-w-5xl w-[90%] max-h-[90vh] bg-black rounded-xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all duration-200"
+              >
+                <X size={24} />
+              </button>
+
+              {/* Navigation buttons */}
+              {filteredItems.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevMedia();
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all duration-200"
+                  >
+                    <ChevronLeft size={32} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextMedia();
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all duration-200"
+                  >
+                    <ChevronRight size={32} />
+                  </button>
+                </>
+              )}
+
+              {/* Media counter */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-black/50 rounded-full text-white text-sm">
+                {filteredItems.findIndex(i => (i.id ?? i.Id) === (selectedMedia.id ?? selectedMedia.Id)) + 1} / {filteredItems.length}
+              </div>
+
+              {/* Content */}
+              <div className="flex items-center justify-center min-h-[50vh] max-h-[90vh]">
+                {isVideo(selectedMedia) ? (
+                  <iframe
+                    src={getVideoEmbedUrl(selectedMedia.videoUrl ?? selectedMedia.VideoUrl ?? selectedMedia.url)}
+                    className="w-full h-[70vh]"
+                    allowFullScreen
+                    title="Video player"
+                  />
+                ) : (
+                  <img
+                    src={selectedMedia.imageUrl ?? selectedMedia.ImageUrl}
+                    alt={selectedMedia.title ?? selectedMedia.Title ?? "Gallery item"}
+                    className="max-w-full max-h-[85vh] object-contain"
+                  />
+                )}
+              </div>
+
+              {/* Caption */}
+              {(selectedMedia.title || selectedMedia.description) && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                  {selectedMedia.title && (
+                    <h3 className="text-white text-xl font-bold">
+                      {selectedMedia.title}
+                    </h3>
+                  )}
+                  {selectedMedia.description && (
+                    <p className="text-gray-200 text-sm mt-2">
+                      {selectedMedia.description}
+                    </p>
+                  )}
+                  {selectedMedia.year && (
+                    <p className="text-green-400 text-sm mt-1">
+                      Year: {selectedMedia.year}
+                    </p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </SiteChrome>
   );
 }
