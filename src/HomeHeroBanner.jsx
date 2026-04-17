@@ -29,7 +29,7 @@ const QUICK_LINKS = [
   { name: "Events", target: "1000" },
   { name: "News", target: "2000" },
   { name: "Syndicates", target: "moazz" },
-  { name: "Gallery", href: "/gallery" },
+  { name: "Media Gallery", href: "/gallery" },
   { name: "Contact Us", target: "3000" },
 ];
 
