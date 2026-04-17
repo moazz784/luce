@@ -57,7 +57,6 @@ function getAlumniPreviewText(person) {
   return firstBlock.replace(/\s+/g, " ").trim();
 }
 
-// ضيف السطر ده جوه الفانكشن فوق مع الـ Navigate والـ States التانية
 const App = () => {
   const navigate = useNavigate();
   const [selectedAlumnus, setSelectedAlumnus] = useState(null);
@@ -212,6 +211,30 @@ const App = () => {
     return () => clearInterval(timer);
   }, [awards.length]);
 
+  // Social links array - unique links only
+  const socialLinks = [
+    {
+      Icon: Facebook,
+      url: "https://www.facebook.com/groups/766796172340576/",
+      label: "Facebook"
+    },
+    {
+      Icon: Instagram,
+      url: "https://www.instagram.com/accounts/login/",
+      label: "Instagram"
+    },
+    {
+      Icon: Twitter,
+      url: "https://x.com/must_university",
+      label: "Twitter"
+    },
+    {
+      Icon: Linkedin,
+      url: "https://www.linkedin.com/school/misr-university-for-science-and-technology/",
+      label: "LinkedIn"
+    }
+  ];
+
   return (
     <SiteChrome
       topSlot={
@@ -245,31 +268,15 @@ const App = () => {
           <Search size={20} />
         </a>
 
-        {/* Social */}
-        {[
-          {
-            Icon: Facebook,
-            url: "https://www.facebook.com/groups/766796172340576/",
-          },
-          {
-            Icon: Instagram,
-            url: "https://www.instagram.com/accounts/login/",
-          },
-          {
-            Icon: Twitter,
-            url: "https://x.com/must_university",
-          },
-          {
-            Icon: Linkedin,
-            url: "https://www.linkedin.com/school/misr-university-for-science-and-technology/"
-          }
-        ].map((item, idx) => (
+        {/* Social Links - No duplicates */}
+        {socialLinks.map((item, idx) => (
           <a
             key={idx}
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
             className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-xl hover:-translate-x-2 hover:scale-110 transition-all duration-300 flex items-center justify-center"
+            aria-label={item.label}
           >
             <item.Icon size={20} className="text-[#1a2b56] dark:text-white" />
           </a>
