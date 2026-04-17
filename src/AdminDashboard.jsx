@@ -19,6 +19,7 @@ import {
   Home,
   FileText,
   Video,
+  Youtube,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -104,8 +105,9 @@ function normalizeRows(section, rows) {
         id: r.id,
         year: r.year,
         sortOrder: r.sortOrder ?? 0,
-        mediaUrl: r.imageUrl, // can be image or video
-        mediaType: r.mediaType || (r.imageUrl?.match(/\.(mp4|webm|ogg)/i) ? "video" : "image"),
+        mediaUrl: r.imageUrl,
+        videoUrl: r.videoUrl || null,
+        mediaType: r.mediaType || (r.videoUrl ? "video" : "image"),
       }));
     default:
       return [];
@@ -149,6 +151,7 @@ const AdminDashboard = () => {
     gallerySort: "",
     media: null,
     mediaType: "image",
+    videoLink: "",
   });
   const [mediaPreview, setMediaPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -246,8 +249,15 @@ const AdminDashboard = () => {
     
     // Determine media type
     const isVideo = file.type.startsWith("video/");
-    setFormData(prev => ({ ...prev, mediaType: isVideo ? "video" : "image" }));
     
+    // إذا كان فيديو محلي، نعطي تحذير ونطلب استخدام رابط
+    if (isVideo) {
+      alert("⚠️ يرجى استخدام رابط فيديو خارجي (YouTube, Vimeo, إلخ) بدلاً من رفع ملف فيديو.\nيمكنك إدخال الرابط في حقل 'رابط الفيديو' أدناه.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    
+    setFormData(prev => ({ ...prev, mediaType: "image", videoLink: "" }));
     setUploading(true);
     try {
       const { url } = await uploadMedia(file);
@@ -260,7 +270,32 @@ const AdminDashboard = () => {
     }
   };
 
-  /** ESSP: upload PDF and set card `link` to the file URL (thumbnail image is separate). */
+  const handleVideoLinkChange = (e) => {
+    const link = e.target.value.trim();
+    setFormData(prev => ({ 
+      ...prev, 
+      videoLink: link, 
+      mediaType: "video", 
+      media: null 
+    }));
+    setMediaPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleMediaTypeToggle = (type) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      mediaType: type,
+      ...(type === "image" ? { videoLink: "" } : { media: null })
+    }));
+    if (type === "image") {
+      setMediaPreview(null);
+    } else {
+      setMediaPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const handleSyndicatePdfForLink = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -306,7 +341,8 @@ const AdminDashboard = () => {
             ? String(item.sortOrder)
             : "",
       media: item.mediaUrl ?? null,
-      mediaType: item.mediaType ?? "image",
+      mediaType: item.mediaType ?? (item.videoUrl ? "video" : "image"),
+      videoLink: item.videoUrl ?? "",
     });
     setMediaPreview(item.mediaUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -333,6 +369,7 @@ const AdminDashboard = () => {
       gallerySort: "",
       media: null,
       mediaType: "image",
+      videoLink: "",
     });
     setMediaPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -364,12 +401,12 @@ const AdminDashboard = () => {
   };
 
   const buildPayload = () => {
-    const mediaUrl = formData.media;
-    if (!mediaUrl) {
-      throw new Error("يرجى رفع ملف (صورة أو فيديو)");
-    }
     const path = sectionApiPath[activeSection];
+    
     if (activeSection === "News") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة للخبر");
+      }
       const publishedAt = formData.publishedAtLocal
         ? new Date(formData.publishedAtLocal).toISOString()
         : null;
@@ -379,14 +416,18 @@ const AdminDashboard = () => {
           title: formData.title,
           body: formData.newsBody?.trim() || null,
           location: formData.location?.trim() || null,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           publishedAt,
           sortOrder: 0,
           isPublished: true,
         },
       };
     }
+    
     if (activeSection === "Events") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة للفعالية");
+      }
       const locRaw = formData.location?.trim();
       if (!locRaw) {
         throw new Error("يرجى إدخال مكان الفعالية (Location)");
@@ -406,12 +447,16 @@ const AdminDashboard = () => {
           timeRange: tr,
           description: desc,
           accentColor: null,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           sortOrder: 0,
         },
       };
     }
+    
     if (activeSection === "Awards") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة للجائزة");
+      }
       return {
         path,
         body: {
@@ -419,45 +464,64 @@ const AdminDashboard = () => {
           subtitle: null,
           winnerName: formData.person,
           content: null,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           sortOrder: 0,
         },
       };
     }
+    
     if (activeSection === "Alumni") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة للخريج");
+      }
       return {
         path,
         body: {
           name: formData.name,
           shortDescription: formData.job,
           fullBio: formData.fullBio || null,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           sortOrder: 0,
         },
       };
     }
+    
     if (activeSection === "Hero") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة للهيرو");
+      }
       return {
         path,
         body: {
           title: formData.title || null,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           sortOrder: 0,
         },
       };
     }
+    
     if (activeSection === "Syndicates") {
+      if (!formData.media) {
+        throw new Error("يرجى رفع صورة مصغرة للبطاقة");
+      }
+      if (!formData.link) {
+        throw new Error("يرجى إدخال رابط البطاقة أو رفع ملف PDF");
+      }
+      if (!formData.buttonText) {
+        throw new Error("يرجى إدخال نص الزر");
+      }
       return {
         path,
         body: {
           title: formData.title,
-          imageUrl: mediaUrl,
+          imageUrl: formData.media,
           link: formData.link,
           buttonText: formData.buttonText,
           sortOrder: 0,
         },
       };
     }
+    
     if (activeSection === "Gallery") {
       const year = parseInt(formData.galleryYear, 10);
       if (Number.isNaN(year) || year < 1900 || year > 3000) {
@@ -465,16 +529,27 @@ const AdminDashboard = () => {
       }
       const sortParsed = parseInt(formData.gallerySort, 10);
       const sortOrder = Number.isNaN(sortParsed) ? 0 : sortParsed;
+      
+      // التحقق من وجود فيديو أو صورة
+      if (formData.mediaType === "video" && !formData.videoLink) {
+        throw new Error("يرجى إدخال رابط الفيديو (YouTube, Vimeo, إلخ)");
+      }
+      if (formData.mediaType === "image" && !formData.media) {
+        throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
+      }
+      
       return {
         path,
         body: {
           year,
-          imageUrl: mediaUrl,
+          imageUrl: formData.mediaType === "image" ? formData.media : null,
+          videoUrl: formData.mediaType === "video" ? formData.videoLink : null,
           mediaType: formData.mediaType,
           sortOrder,
         },
       };
     }
+    
     throw new Error("قسم غير معروف");
   };
 
@@ -537,6 +612,7 @@ const AdminDashboard = () => {
                         ? {
                             year: body.year,
                             imageUrl: body.imageUrl,
+                            videoUrl: body.videoUrl,
                             mediaType: body.mediaType,
                             sortOrder: body.sortOrder,
                           }
@@ -843,6 +919,103 @@ const AdminDashboard = () => {
                 placeholder="0"
               />
             </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                نوع الوسائط
+              </label>
+              <div className="flex gap-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => handleMediaTypeToggle("image")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
+                    formData.mediaType === "image"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <ImageIcon size={18} />
+                  صورة
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMediaTypeToggle("video")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
+                    formData.mediaType === "video"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <Youtube size={18} />
+                  فيديو (رابط)
+                </button>
+              </div>
+            </div>
+            {formData.mediaType === "image" ? (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  صورة المعرض
+                </label>
+                <div
+                  className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleMediaChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  {mediaPreview ? (
+                    <div className="relative group">
+                      <img
+                        src={mediaPreview}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded-xl shadow-md"
+                      />
+                      <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                        <UploadCloud size={20} />
+                        تغيير الصورة
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                      <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                      <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                      <p className="text-xs mt-1">
+                        {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  رابط الفيديو
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={formData.videoLink}
+                  onChange={handleVideoLinkChange}
+                  className="form-input"
+                  placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  ✅ يدعم: YouTube, Vimeo, Dailymotion, وأي رابط فيديو مباشر
+                </p>
+                {formData.videoLink && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-2">معاينة الرابط:</p>
+                    <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
+                      <Youtube size={16} />
+                      <span>{formData.videoLink}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         );
       case "Syndicates":
@@ -921,17 +1094,33 @@ const AdminDashboard = () => {
     }
   };
 
-  const renderGalleryMediaPreview = (mediaUrl, mediaType) => {
-    if (!mediaUrl) return null;
-    if (mediaType === "video") {
+  const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl) => {
+    if (!mediaUrl && !videoUrl) return null;
+    
+    if (mediaType === "video" && videoUrl) {
+      // استخراج رابط embed من YouTube
+      let embedUrl = videoUrl;
+      if (videoUrl.includes("youtube.com/watch?v=")) {
+        embedUrl = videoUrl.replace("watch?v=", "embed/");
+      } else if (videoUrl.includes("youtu.be/")) {
+        const videoId = videoUrl.split("youtu.be/")[1]?.split("?")[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      } else if (videoUrl.includes("vimeo.com/")) {
+        const videoId = videoUrl.split("vimeo.com/")[1]?.split("?")[0];
+        embedUrl = `https://player.vimeo.com/video/${videoId}`;
+      }
+      
       return (
-        <video
-          src={mediaUrl}
-          className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
-          controls
+        <iframe
+          src={embedUrl}
+          className="w-20 h-16 rounded-lg shadow-sm border border-gray-100"
+          title="video preview"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
         />
       );
     }
+    
     return (
       <img
         src={mediaUrl}
@@ -1042,7 +1231,7 @@ const AdminDashboard = () => {
                   <th className="p-4 text-slate-600 font-bold">الهاتف</th>
                   <th className="p-4 text-slate-600 font-bold">الرسالة</th>
                   <th className="p-4 text-slate-600 font-bold text-center w-36">إجراءات</th>
-                 </tr>
+                </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {contactMessages.map((item) => (
@@ -1052,7 +1241,7 @@ const AdminDashboard = () => {
                         {item.createdAt
                           ? String(item.createdAt).replace("T", " ").slice(0, 19)
                           : "—"}
-                       </td>
+                      </td>
                       <td className="p-4 font-medium text-slate-800">{item.name}</td>
                       <td className="p-4 text-sm text-blue-700 break-all">{item.email}</td>
                       <td className="p-4 text-sm text-slate-600">{item.phone || "—"}</td>
@@ -1143,48 +1332,42 @@ const AdminDashboard = () => {
               {renderFormFields()}
             </div>
 
-            <div
-              className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleMediaChange}
-                accept="image/*,video/*"
-                className="hidden"
-              />
+            {activeSection !== "Gallery" && (
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
 
-              {mediaPreview ? (
-                <div className="relative group">
-                  {formData.mediaType === "video" ? (
-                    <video
-                      src={mediaPreview}
-                      className="w-full h-32 object-cover rounded-xl shadow-md"
-                      controls
-                    />
-                  ) : (
+                {mediaPreview ? (
+                  <div className="relative group">
                     <img
                       src={mediaPreview}
                       alt="Preview"
                       className="w-full h-32 object-cover rounded-xl shadow-md"
                     />
-                  )}
-                  <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
-                    {formData.mediaType === "video" ? <Video size={20} /> : <UploadCloud size={20} />}
-                    تغيير الملف
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="py-6 text-gray-400 group-hover:text-blue-500">
-                  <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
-                  <span className="font-medium text-sm">اضغط لرفع صورة أو فيديو</span>
-                  <p className="text-xs mt-1">
-                    {uploading ? "جاري الرفع…" : "PNG, JPG, MP4, WebM (حتى 50MB)"}
-                  </p>
-                </div>
-              )}
-            </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="md:col-span-3 flex justify-end mt-4">
               <button
@@ -1246,7 +1429,7 @@ const AdminDashboard = () => {
                 >
                   <td className="p-5">
                     {activeSection === "Gallery" ? (
-                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType)
+                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl)
                     ) : (
                       <img
                         src={item.image}
@@ -1321,8 +1504,13 @@ const AdminDashboard = () => {
                           {item.year}
                         </div>
                         <div className="text-xs text-slate-500">
-                          sort: {item.sortOrder} • {item.mediaType === "video" ? "فيديو" : "صورة"}
+                          sort: {item.sortOrder} • {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
                         </div>
+                        {item.mediaType === "video" && item.videoUrl && (
+                          <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
+                            {item.videoUrl}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div>
