@@ -257,7 +257,7 @@ const App = () => {
       onLogout={handleLogout}
     >
       {/* Social Sidebar */}
-      <div className="fixed right-5 top-[300px] -translate-y-1/2 flex flex-col gap-4 z-40">
+      <div className="fixed right-5 top-[800px] -translate-y-1/2 flex flex-col gap-4 z-40">
         {/* Search */}
         <a
           href="/search"
