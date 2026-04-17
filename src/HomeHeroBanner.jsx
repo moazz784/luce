@@ -125,45 +125,7 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
         </div>
       </div>
 
-      <div className="fixed right-5 top-1/2 translate-y-[calc(-50%+24px)] flex flex-col gap-4 z-40">
-        <a
-          href="/search"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 bg-green-500 rounded-full text-white shadow-lg hover:scale-110 hover:rotate-6 transition-all duration-300"
-        >
-          <Search size={20} />
-        </a>
-
-        {[
-          {
-            Icon: Facebook,
-            url: "https://www.facebook.com/groups/766796172340576/",
-          },
-          {
-            Icon: Instagram,
-            url: "https://www.instagram.com/accounts/login/",
-          },
-          {
-            Icon: Twitter,
-            url: "https://x.com/must_university",
-          },
-          {
-            Icon: Linkedin,
-            url: "https://www.linkedin.com/school/misr-university-for-science-and-technology/",
-          },
-        ].map((item, idx) => (
-          <a
-            key={idx}
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-xl hover:-translate-x-2 hover:scale-110 transition-all duration-300 flex items-center justify-center"
-          >
-            <item.Icon size={20} className="text-[#1a2b56] dark:text-white" />
-          </a>
-        ))}
-      </div>
+    
     </section>
   );
 }
