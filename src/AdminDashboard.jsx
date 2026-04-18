@@ -25,6 +25,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api, uploadMedia } from "./Api";
 import { logout } from "./authService";
+import { resolveGalleryCardVisual, VimeoPosterImage } from "./galleryVideoMedia";
 
 const sectionApiPath = {
   News: "/api/admin/news",
@@ -1096,37 +1097,51 @@ const AdminDashboard = () => {
 
   const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl) => {
     if (!mediaUrl && !videoUrl) return null;
-    
-    if (mediaType === "video" && videoUrl) {
-      // استخراج رابط embed من YouTube
-      let embedUrl = videoUrl;
-      if (videoUrl.includes("youtube.com/watch?v=")) {
-        embedUrl = videoUrl.replace("watch?v=", "embed/");
-      } else if (videoUrl.includes("youtu.be/")) {
-        const videoId = videoUrl.split("youtu.be/")[1]?.split("?")[0];
-        embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      } else if (videoUrl.includes("vimeo.com/")) {
-        const videoId = videoUrl.split("vimeo.com/")[1]?.split("?")[0];
-        embedUrl = `https://player.vimeo.com/video/${videoId}`;
-      }
-      
+
+    const thumbCls =
+      "w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100";
+    const visual = resolveGalleryCardVisual({
+      imageUrl: mediaUrl,
+      videoUrl,
+      mediaType,
+    });
+
+    if (visual.kind === "image" || visual.kind === "poster") {
       return (
-        <iframe
-          src={embedUrl}
-          className="w-20 h-16 rounded-lg shadow-sm border border-gray-100"
-          title="video preview"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
+        <img src={visual.src} alt="Gallery media" className={thumbCls} />
+      );
+    }
+
+    if (visual.kind === "video") {
+      return (
+        <video
+          src={visual.videoSrc}
+          muted
+          playsInline
+          preload="metadata"
+          className={thumbCls}
+          aria-label="Video preview"
         />
       );
     }
-    
+
+    if (visual.kind === "vimeo") {
+      return (
+        <VimeoPosterImage
+          videoUrl={visual.videoUrl}
+          alt="Gallery media"
+          className={thumbCls}
+          loadingClassName="bg-slate-200 flex items-center justify-center rounded-lg shadow-sm border border-gray-100"
+        />
+      );
+    }
+
     return (
-      <img
-        src={mediaUrl}
-        alt="Gallery media"
-        className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
-      />
+      <div
+        className={`${thumbCls} bg-slate-200 flex items-center justify-center object-cover`}
+      >
+        <Video className="w-6 h-6 text-slate-500" aria-hidden />
+      </div>
     );
   };
 

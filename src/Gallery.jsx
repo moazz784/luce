@@ -4,13 +4,59 @@ import { X, Play, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-r
 import { api } from "./Api";
 import SiteChrome from "./SiteChrome";
 import { useSiteAuth } from "./useSiteAuth";
+import {
+  galleryItemIsVideo,
+  resolveGalleryCardVisual,
+  getVideoEmbedUrl,
+  VimeoPosterImage,
+} from "./galleryVideoMedia";
 
-function galleryItemIsVideo(item) {
-  const mt = item.mediaType ?? item.MediaType ?? item.type ?? item.Type;
-  if (mt === "video") return true;
-  if (item.videoUrl || item.VideoUrl) return true;
-  const u = item.url;
-  return !!(u && (u.includes("youtube") || u.includes("vimeo")));
+function GalleryCardMedia({ visual, title, isMediaVideo }) {
+  const mediaClass =
+    "w-full h-full object-cover transform group-hover:scale-110 transition duration-500";
+
+  if (visual.kind === "image" || visual.kind === "poster") {
+    return (
+      <img
+        src={visual.src}
+        alt={title || "Gallery item"}
+        className={mediaClass}
+      />
+    );
+  }
+
+  if (visual.kind === "video") {
+    return (
+      <video
+        src={visual.videoSrc}
+        muted
+        playsInline
+        preload="metadata"
+        className={mediaClass}
+        aria-label={title || "Gallery video preview"}
+      />
+    );
+  }
+
+  if (visual.kind === "vimeo") {
+    return (
+      <VimeoPosterImage
+        videoUrl={visual.videoUrl}
+        alt={title || "Gallery item"}
+        className={mediaClass}
+      />
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+      {isMediaVideo ? (
+        <Play className="text-white/45 w-14 h-14" strokeWidth={1.25} />
+      ) : (
+        <ImageIcon className="text-white/35 w-12 h-12" strokeWidth={1.25} />
+      )}
+    </div>
+  );
 }
 
 export default function Gallery() {
@@ -66,13 +112,13 @@ export default function Gallery() {
   const filteredItems = useMemo(() => {
     if (activeYear == null) return [];
     let filtered = items.filter((x) => (x.year ?? x.Year) === activeYear);
-    
+
     if (mediaType === "images") {
       filtered = filtered.filter((x) => !galleryItemIsVideo(x));
     } else if (mediaType === "videos") {
       filtered = filtered.filter((x) => galleryItemIsVideo(x));
     }
-    
+
     return filtered.sort(
       (a, b) =>
         (a.sortOrder ?? a.SortOrder ?? 0) - (b.sortOrder ?? b.SortOrder ?? 0),
@@ -92,7 +138,7 @@ export default function Gallery() {
   const nextMedia = () => {
     if (!selectedMedia) return;
     const currentIndex = filteredItems.findIndex(
-      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id)
+      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id),
     );
     const nextIndex = (currentIndex + 1) % filteredItems.length;
     setSelectedMedia(filteredItems[nextIndex]);
@@ -101,9 +147,10 @@ export default function Gallery() {
   const prevMedia = () => {
     if (!selectedMedia) return;
     const currentIndex = filteredItems.findIndex(
-      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id)
+      (item) => (item.id ?? item.Id) === (selectedMedia.id ?? selectedMedia.Id),
     );
-    const prevIndex = (currentIndex - 1 + filteredItems.length) % filteredItems.length;
+    const prevIndex =
+      (currentIndex - 1 + filteredItems.length) % filteredItems.length;
     setSelectedMedia(filteredItems[prevIndex]);
   };
 
@@ -118,32 +165,6 @@ export default function Gallery() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedMedia, filteredItems]);
-
-  const getThumbnail = (item) => {
-    if (item.thumbnailUrl) return item.thumbnailUrl;
-    if (item.imageUrl) return item.imageUrl;
-    if (item.ImageUrl) return item.ImageUrl;
-    return "/api/placeholder/400/300";
-  };
-
-  const getVideoEmbedUrl = (url) => {
-    if (!url) return null;
-    // YouTube
-    if (url.includes("youtube.com/watch")) {
-      const videoId = url.split("v=")[1]?.split("&")[0];
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    if (url.includes("youtu.be")) {
-      const videoId = url.split("/").pop();
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    // Vimeo
-    if (url.includes("vimeo.com")) {
-      const videoId = url.split("/").pop();
-      return `https://player.vimeo.com/video/${videoId}`;
-    }
-    return url;
-  };
 
   return (
     <SiteChrome
@@ -244,13 +265,11 @@ export default function Gallery() {
                 className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
               >
                 {filteredItems.map((row) => {
-                  const url = row.imageUrl ?? row.ImageUrl ?? "";
-                  const videoUrl = row.videoUrl ?? row.VideoUrl ?? "";
                   const id = row.id ?? row.Id;
                   const title = row.title ?? row.Title ?? "";
                   const isMediaVideo = galleryItemIsVideo(row);
-                  const thumbnail = getThumbnail(row);
-                  
+                  const visual = resolveGalleryCardVisual(row);
+
                   return (
                     <motion.div
                       key={id}
@@ -262,24 +281,27 @@ export default function Gallery() {
                       onClick={() => openModal(row)}
                       className="overflow-hidden rounded-2xl shadow-lg group cursor-pointer relative bg-white dark:bg-gray-800"
                     >
-                      <div className="relative overflow-hidden aspect-video">
-                        <img
-                          src={thumbnail}
-                          alt={title || "Gallery item"}
-                          className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
+                      <div className="relative overflow-hidden aspect-video bg-slate-800">
+                        <GalleryCardMedia
+                          visual={visual}
+                          title={title}
+                          isMediaVideo={isMediaVideo}
                         />
                         {isMediaVideo && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="bg-green-600 rounded-full p-4">
-                              <Play size={32} className="text-white fill-white" />
+                          <>
+                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                              <div className="rounded-full bg-black/45 p-3 opacity-45 transition-opacity duration-300 group-hover:opacity-80">
+                                <Play
+                                  size={28}
+                                  className="text-white fill-white"
+                                />
+                              </div>
                             </div>
-                          </div>
-                        )}
-                        {isMediaVideo && (
-                          <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                            <Play size={12} />
-                            Video
-                          </div>
+                            <div className="pointer-events-none absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                              <Play size={12} />
+                              Video
+                            </div>
+                          </>
                         )}
                       </div>
                       {title && (
@@ -297,7 +319,13 @@ export default function Gallery() {
 
             {filteredItems.length === 0 && !loading && (
               <p className="text-center text-gray-500 dark:text-gray-400 py-10">
-                No {mediaType === "images" ? "images" : mediaType === "videos" ? "videos" : "items"} found for this year.
+                No{" "}
+                {mediaType === "images"
+                  ? "images"
+                  : mediaType === "videos"
+                    ? "videos"
+                    : "items"}{" "}
+                found for this year.
               </p>
             )}
           </>
@@ -356,22 +384,36 @@ export default function Gallery() {
 
               {/* Media counter */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-black/50 rounded-full text-white text-sm">
-                {filteredItems.findIndex(i => (i.id ?? i.Id) === (selectedMedia.id ?? selectedMedia.Id)) + 1} / {filteredItems.length}
+                {filteredItems.findIndex(
+                  (i) =>
+                    (i.id ?? i.Id) === (selectedMedia.id ?? selectedMedia.Id),
+                ) + 1}{" "}
+                / {filteredItems.length}
               </div>
 
               {/* Content */}
               <div className="flex items-center justify-center min-h-[50vh] max-h-[90vh]">
                 {galleryItemIsVideo(selectedMedia) ? (
                   <iframe
-                    src={getVideoEmbedUrl(selectedMedia.videoUrl ?? selectedMedia.VideoUrl ?? selectedMedia.url)}
+                    src={getVideoEmbedUrl(
+                      selectedMedia.videoUrl ??
+                        selectedMedia.VideoUrl ??
+                        selectedMedia.url,
+                    )}
                     className="w-full h-[70vh]"
                     allowFullScreen
                     title="Video player"
                   />
                 ) : (
                   <img
-                    src={selectedMedia.imageUrl ?? selectedMedia.ImageUrl}
-                    alt={selectedMedia.title ?? selectedMedia.Title ?? "Gallery item"}
+                    src={
+                      selectedMedia.imageUrl ?? selectedMedia.ImageUrl ?? ""
+                    }
+                    alt={
+                      selectedMedia.title ??
+                      selectedMedia.Title ??
+                      "Gallery item"
+                    }
                     className="max-w-full max-h-[85vh] object-contain"
                   />
                 )}
