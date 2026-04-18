@@ -85,45 +85,45 @@ export default function HomeHeroBanner({ slides: slidesProp }) {
         ))}
       </Swiper>
 
-<div className="absolute inset-0 flex flex-col justify-end items-center text-center z-20 px-4 pb-4 md:pb-8 pt-8 pointer-events-none">
-  <div className="w-full max-w-[min(100%,1200px)] pointer-events-auto">
-    <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-8 md:mb-12">
-      Alumni Society
-    </h2>
+      <div className="absolute inset-0 flex flex-col justify-end items-center text-center z-20 px-4 pb-14 md:pb-20 pt-8 pointer-events-none">
+        <div className="w-full max-w-[min(100%,1200px)] pointer-events-auto">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl mb-8 md:mb-12">
+            Alumni Society
+          </h2>
 
-    <div
-      className="
-        w-full overflow-x-auto overflow-y-hidden
-        [scrollbar-width:none] [-ms-overflow-style:none]
-        [&::-webkit-scrollbar]:hidden
-        pb-1
-      "
-    >
-      <div className="flex flex-nowrap justify-center gap-2 sm:gap-2.5 md:gap-3 text-xs sm:text-sm md:text-base font-medium min-w-min mx-auto">
-        {QUICK_LINKS.map((item, i) => (
-          <a
-            key={i}
-            href={item.href ?? `/#${item.target}`}
+          <div
             className="
-              shrink-0 whitespace-nowrap
-              px-3 py-2 sm:px-4 md:px-5
-              rounded-full
-              bg-white/10
-              backdrop-blur-md
-              border border-white/20
-              text-white
-              hover:bg-green-500
-              hover:scale-105
-              transition-all duration-300
+              w-full overflow-x-auto overflow-y-hidden
+              [scrollbar-width:none] [-ms-overflow-style:none]
+              [&::-webkit-scrollbar]:hidden
+              pb-1
             "
           >
-            {item.name}
-          </a>
-        ))}
+            <div className="flex flex-nowrap justify-center gap-2 sm:gap-2.5 md:gap-3 text-xs sm:text-sm md:text-base font-medium min-w-min mx-auto">
+              {QUICK_LINKS.map((item, i) => (
+                <a
+                  key={i}
+                  href={item.href ?? `/#${item.target}`}
+                  className="
+                    shrink-0 whitespace-nowrap
+                    px-3 py-2 sm:px-4 md:px-5
+                    rounded-full
+                    bg-white/10
+                    backdrop-blur-md
+                    border border-white/20
+                    text-white
+                    hover:bg-green-500
+                    hover:scale-105
+                    transition-all duration-300
+                  "
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
     
     </section>
