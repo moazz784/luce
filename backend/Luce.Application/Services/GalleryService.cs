@@ -43,11 +43,15 @@ public class GalleryService : IGalleryService
 
     public async Task<GalleryAdminDto> CreateAsync(GalleryCreateDto dto, CancellationToken cancellationToken = default)
     {
+        NormalizeGalleryPayload(dto.ImageUrl, dto.VideoUrl, dto.MediaType, out var imageUrl, out var videoUrl, out var mediaType);
+
         var now = DateTimeOffset.UtcNow;
         var entity = new GalleryItem
         {
             Year = dto.Year,
-            ImageUrl = dto.ImageUrl,
+            ImageUrl = imageUrl,
+            VideoUrl = videoUrl,
+            MediaType = mediaType,
             SortOrder = dto.SortOrder,
             CreatedAt = now
         };
@@ -61,8 +65,12 @@ public class GalleryService : IGalleryService
         var entity = await _db.GalleryItems.FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
         if (entity is null) return null;
 
+        NormalizeGalleryPayload(dto.ImageUrl, dto.VideoUrl, dto.MediaType, out var imageUrl, out var videoUrl, out var mediaType);
+
         entity.Year = dto.Year;
-        entity.ImageUrl = dto.ImageUrl;
+        entity.ImageUrl = imageUrl;
+        entity.VideoUrl = videoUrl;
+        entity.MediaType = mediaType;
         entity.SortOrder = dto.SortOrder;
         entity.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -77,5 +85,38 @@ public class GalleryService : IGalleryService
         _db.GalleryItems.Remove(entity);
         await _db.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private static void NormalizeGalleryPayload(
+        string? imageUrlRaw,
+        string? videoUrlRaw,
+        string? mediaTypeRaw,
+        out string imageUrl,
+        out string? videoUrl,
+        out string mediaType)
+    {
+        var mode = (mediaTypeRaw ?? "image").Trim().ToLowerInvariant();
+        if (mode != "image" && mode != "video")
+            throw new ArgumentException("نوع الوسائط غير صالح.");
+
+        var img = imageUrlRaw?.Trim() ?? "";
+        var vid = string.IsNullOrWhiteSpace(videoUrlRaw) ? null : videoUrlRaw.Trim();
+
+        if (mode == "image")
+        {
+            if (string.IsNullOrEmpty(img))
+                throw new ArgumentException("يرجى رفع صورة أو إدخال رابط صورة.");
+            imageUrl = img;
+            videoUrl = null;
+            mediaType = "image";
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(vid))
+                throw new ArgumentException("يرجى إدخال رابط الفيديو.");
+            imageUrl = "";
+            videoUrl = vid;
+            mediaType = "video";
+        }
     }
 }

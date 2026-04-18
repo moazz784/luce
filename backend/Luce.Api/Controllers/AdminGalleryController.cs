@@ -33,17 +33,31 @@ public class AdminGalleryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<GalleryAdminDto>> Create([FromBody] GalleryCreateDto dto, CancellationToken cancellationToken)
     {
-        var created = await _gallery.CreateAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+        try
+        {
+            var created = await _gallery.CreateAsync(dto, cancellationToken);
+            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { title = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
     public async Task<ActionResult<GalleryAdminDto>> Update(int id, [FromBody] GalleryUpdateDto dto, CancellationToken cancellationToken)
     {
-        var updated = await _gallery.UpdateAsync(id, dto, cancellationToken);
-        if (updated is null)
-            return NotFound();
-        return Ok(updated);
+        try
+        {
+            var updated = await _gallery.UpdateAsync(id, dto, cancellationToken);
+            if (updated is null)
+                return NotFound();
+            return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { title = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]

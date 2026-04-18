@@ -5,6 +5,14 @@ import { api } from "./Api";
 import SiteChrome from "./SiteChrome";
 import { useSiteAuth } from "./useSiteAuth";
 
+function galleryItemIsVideo(item) {
+  const mt = item.mediaType ?? item.MediaType ?? item.type ?? item.Type;
+  if (mt === "video") return true;
+  if (item.videoUrl || item.VideoUrl) return true;
+  const u = item.url;
+  return !!(u && (u.includes("youtube") || u.includes("vimeo")));
+}
+
 export default function Gallery() {
   const { isLoggedIn, isAdmin, accountLabel, handleLogout } = useSiteAuth();
   const [items, setItems] = useState([]);
@@ -60,9 +68,9 @@ export default function Gallery() {
     let filtered = items.filter((x) => (x.year ?? x.Year) === activeYear);
     
     if (mediaType === "images") {
-      filtered = filtered.filter((x) => x.type !== "video");
+      filtered = filtered.filter((x) => !galleryItemIsVideo(x));
     } else if (mediaType === "videos") {
-      filtered = filtered.filter((x) => x.type === "video");
+      filtered = filtered.filter((x) => galleryItemIsVideo(x));
     }
     
     return filtered.sort(
@@ -110,12 +118,6 @@ export default function Gallery() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedMedia, filteredItems]);
-
-  const isVideo = (item) => {
-    return item.type === "video" || 
-           (item.videoUrl) || 
-           (item.url && (item.url.includes("youtube") || item.url.includes("vimeo")));
-  };
 
   const getThumbnail = (item) => {
     if (item.thumbnailUrl) return item.thumbnailUrl;
@@ -246,7 +248,7 @@ export default function Gallery() {
                   const videoUrl = row.videoUrl ?? row.VideoUrl ?? "";
                   const id = row.id ?? row.Id;
                   const title = row.title ?? row.Title ?? "";
-                  const isMediaVideo = isVideo(row);
+                  const isMediaVideo = galleryItemIsVideo(row);
                   const thumbnail = getThumbnail(row);
                   
                   return (
@@ -359,7 +361,7 @@ export default function Gallery() {
 
               {/* Content */}
               <div className="flex items-center justify-center min-h-[50vh] max-h-[90vh]">
-                {isVideo(selectedMedia) ? (
+                {galleryItemIsVideo(selectedMedia) ? (
                   <iframe
                     src={getVideoEmbedUrl(selectedMedia.videoUrl ?? selectedMedia.VideoUrl ?? selectedMedia.url)}
                     className="w-full h-[70vh]"

@@ -90,6 +90,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
         builder.Entity<GalleryItem>(e =>
         {
             e.Property(x => x.ImageUrl).HasMaxLength(2000);
+            e.Property(x => x.VideoUrl).HasMaxLength(2000);
+            e.Property(x => x.MediaType).HasMaxLength(32);
         });
     }
 }
