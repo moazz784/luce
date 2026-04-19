@@ -115,7 +115,7 @@ export default function SiteChrome({
           </ul>
         </div>
 
-        {/* 3. الجزء الأيمن: التحكم والأزرار (مُزاح لليمين) */}
+        {/* 3. الجزء الأيمن: التحكم والأزرار */}
         <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 md:pl-6 h-full shrink-0">
           <button
             type="button"
@@ -156,8 +156,22 @@ export default function SiteChrome({
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <button onClick={() => navigate("/login")} className="px-4 py-2 rounded-full font-bold text-[12px] bg-white/10 hover:bg-white/20 transition-all">Login</button>
-              <button onClick={() => navigate("/register")} className="px-4 py-2 rounded-full font-bold text-[12px] bg-green-500 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20">Register</button>
+              {/* أزرار Login و Register مع الأيقونات */}
+              <button 
+                onClick={() => navigate("/login")} 
+                className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-[12px] bg-white/10 hover:bg-white/20 transition-all"
+              >
+                <LogIn size={16} />
+                Login
+              </button>
+              
+              <button 
+                onClick={() => navigate("/register")} 
+                className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-[12px] bg-green-500 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20"
+              >
+                <UserPlus size={16} />
+                Register
+              </button>
             </div>
           )}
         </div>
