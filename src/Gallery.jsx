@@ -66,7 +66,7 @@ export default function Gallery() {
   const [error, setError] = useState("");
   const [activeYear, setActiveYear] = useState(null);
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [mediaType, setMediaType] = useState("all"); // "all", "images", "videos"
+  const [mediaType, setMediaType] = useState("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -77,6 +77,10 @@ export default function Gallery() {
         const data = await api("/api/public/gallery", { method: "GET" });
         if (cancelled) return;
         const list = Array.isArray(data) ? data : [];
+        
+        // Log the data to see what's coming from the API
+        console.log("Gallery data from API:", list);
+        
         setItems(list);
         const years = [
           ...new Set(list.map((x) => x.year ?? x.Year).filter((y) => y != null)),
@@ -108,7 +112,6 @@ export default function Gallery() {
     }
   }, [yearsSorted, activeYear]);
 
-  // Filter items by media type
   const filteredItems = useMemo(() => {
     if (activeYear == null) return [];
     let filtered = items.filter((x) => (x.year ?? x.Year) === activeYear);
@@ -154,7 +157,6 @@ export default function Gallery() {
     setSelectedMedia(filteredItems[prevIndex]);
   };
 
-  // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!selectedMedia) return;
@@ -178,7 +180,6 @@ export default function Gallery() {
           Gallery
         </h1>
 
-        {/* Media Type Tabs */}
         <div className="flex justify-center gap-4 flex-wrap mb-6">
           <button
             type="button"
@@ -271,8 +272,13 @@ export default function Gallery() {
                   const isMediaVideo = galleryItemIsVideo(row);
                   const visual = resolveGalleryCardVisual(row);
                   
-                  // Use videoTitle for videos, otherwise use regular title
-                  const displayTitle = isMediaVideo && videoTitle ? videoTitle : title;
+                  // Log each item to see if videoTitle is present
+                  if (isMediaVideo) {
+                    console.log("Video item:", { id, videoTitle, title, fullRow: row });
+                  }
+                  
+                  // For videos, show videoTitle; for images, show regular title
+                  const displayTitle = isMediaVideo ? (videoTitle || title) : title;
 
                   return (
                     <motion.div
@@ -308,7 +314,7 @@ export default function Gallery() {
                           </>
                         )}
                       </div>
-                      {/* Title section - shows video title or regular title */}
+                      {/* Title section - shows video title below the video */}
                       <div className="p-3 min-h-[60px] flex items-center justify-center">
                         {displayTitle ? (
                           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center line-clamp-2">
@@ -341,7 +347,6 @@ export default function Gallery() {
         )}
       </section>
 
-      {/* Modal */}
       <AnimatePresence>
         {selectedMedia && (
           <motion.div
@@ -359,7 +364,6 @@ export default function Gallery() {
               className="relative max-w-5xl w-[90%] max-h-[90vh] bg-black rounded-xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close button */}
               <button
                 onClick={closeModal}
                 className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-all duration-200"
@@ -367,7 +371,6 @@ export default function Gallery() {
                 <X size={24} />
               </button>
 
-              {/* Navigation buttons */}
               {filteredItems.length > 1 && (
                 <>
                   <button
@@ -391,7 +394,6 @@ export default function Gallery() {
                 </>
               )}
 
-              {/* Media counter */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-black/50 rounded-full text-white text-sm">
                 {filteredItems.findIndex(
                   (i) =>
@@ -400,7 +402,6 @@ export default function Gallery() {
                 / {filteredItems.length}
               </div>
 
-              {/* Content */}
               <div className="flex items-center justify-center min-h-[50vh] max-h-[90vh]">
                 {galleryItemIsVideo(selectedMedia) ? (
                   <iframe
@@ -428,7 +429,6 @@ export default function Gallery() {
                 )}
               </div>
 
-              {/* Caption */}
               {(selectedMedia.title || selectedMedia.description) && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                   {selectedMedia.title && (
