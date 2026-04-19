@@ -30,9 +30,10 @@ export default function SiteChrome({
     <div className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
       {topSlot}
 
-      <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300">
+      {/* التعديل: إضافة flex-nowrap ومنع الـ overflow-hidden لضمان استقامة الشريط */}
+      <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300 flex-nowrap overflow-hidden">
         <div
-          className="flex items-center gap-3 h-full cursor-pointer"
+          className="flex items-center gap-3 h-full cursor-pointer shrink-0"
           onClick={() => navigate("/")}
         >
           <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center p-1 ">
@@ -53,18 +54,19 @@ export default function SiteChrome({
           </div>
         </div>
 
-        <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full">
+        {/* التعديل: اللينكات أصبحت shrink قابلة للتقلص قليلاً لمنع التداخل */}
+        <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full min-w-0">
           {navLinks.map((item) => (
-            <li key={item.id ?? item.name} className="relative group flex items-center h-full">
+            <li key={item.id ?? item.name} className="relative group flex items-center h-full shrink">
               <a
                 href={item.link ? item.link : `#${item.id}`}
-                className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6"
+                className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6 whitespace-nowrap"
               >
                 {item.name}
                 {item.subItems && (
                   <ChevronDown
                     size={14}
-                    className="opacity-60 group-hover:rotate-180 transition"
+                    className="opacity-60 group-hover:rotate-180 transition shrink-0"
                   />
                 )}
               </a>
@@ -106,11 +108,11 @@ export default function SiteChrome({
           ))}
         </ul>
 
-        <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full">
+        <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full shrink-0 min-w-0">
           <button
             type="button"
             onClick={() => setIsDark(!isDark)}
-            className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full"
+            className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full shrink-0"
           >
             {isDark ? (
               <Sun size={19} className="text-yellow-400" />
@@ -119,7 +121,7 @@ export default function SiteChrome({
             )}
           </button>
 
-          <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">
+          <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors shrink-0">
             ع
           </span>
 
@@ -135,24 +137,25 @@ export default function SiteChrome({
           )}
 
           {isLoggedIn ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 min-w-0">
               {accountLabel && (
-                <div className="hidden xl:flex flex-col items-end">
-                  <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 uppercase tracking-tighter">
+                <div className="hidden xl:flex flex-col items-end min-w-0">
+                  <span className="text-[9px] font-bold text-green-500/80 leading-none mb-1 uppercase tracking-tighter shrink-0">
                     {isAdmin ? "System Admin" : "Student"}
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold truncate max-w-[120px]">
+                  <div className="flex items-center gap-1.5 max-w-full">
+                    {/* التعديل: تحديد عرض أقصى لاسم الأدمن لمنعه من زق اللينكات */}
+                    <span className="text-xs font-semibold truncate max-w-[100px] block">
                       {accountLabel}
                     </span>
-                    <User size={14} className="opacity-50" />
+                    <User size={14} className="opacity-50 shrink-0" />
                   </div>
                 </div>
               )}
               <button
                 type="button"
                 onClick={onLogout}
-                className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group"
+                className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group shrink-0"
               >
                 <LogOut
                   size={16}
@@ -164,7 +167,7 @@ export default function SiteChrome({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => navigate("/login")}
