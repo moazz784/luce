@@ -264,10 +264,8 @@ const AdminDashboard = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Determine media type
     const isVideo = file.type.startsWith("video/");
     
-    // إذا كان فيديو محلي، نعطي تحذير ونطلب استخدام رابط
     if (isVideo) {
       alert("⚠️ يرجى استخدام رابط فيديو خارجي (YouTube, Vimeo, إلخ) بدلاً من رفع ملف فيديو.\nيمكنك إدخال الرابط في حقل 'رابط الفيديو' أدناه.");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -549,7 +547,6 @@ const AdminDashboard = () => {
       const sortParsed = parseInt(formData.gallerySort, 10);
       const sortOrder = Number.isNaN(sortParsed) ? 0 : sortParsed;
       
-      // التحقق من وجود فيديو أو صورة
       if (formData.mediaType === "video" && !formData.videoLink) {
         throw new Error("يرجى إدخال رابط الفيديو (YouTube, Vimeo, إلخ)");
       }
@@ -557,7 +554,6 @@ const AdminDashboard = () => {
         throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
       }
       
-      // حفظ videoTitle في localStorage
       if (formData.mediaType === "video" && formData.videoLink) {
         saveVideoTitleToLocalStorage(formData.videoLink, formData.videoTitle);
       }
@@ -1044,10 +1040,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    اسم الفيديو (اختياري)
+                    اسم الفيديو <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
                     value={formData.videoTitle}
                     onChange={(e) =>
                       setFormData({ ...formData, videoTitle: e.target.value })
@@ -1152,10 +1149,12 @@ const AdminDashboard = () => {
 
     if (visual.kind === "image" || visual.kind === "poster") {
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2 items-center">
           <img src={visual.src} alt="Gallery media" className={thumbCls} />
           {videoTitle && mediaType === "video" && (
-            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+            <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
+              {videoTitle}
+            </span>
           )}
         </div>
       );
@@ -1163,7 +1162,7 @@ const AdminDashboard = () => {
 
     if (visual.kind === "video") {
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2 items-center">
           <video
             src={visual.videoSrc}
             muted
@@ -1173,7 +1172,9 @@ const AdminDashboard = () => {
             aria-label="Video preview"
           />
           {videoTitle && (
-            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+            <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
+              {videoTitle}
+            </span>
           )}
         </div>
       );
@@ -1181,7 +1182,7 @@ const AdminDashboard = () => {
 
     if (visual.kind === "vimeo") {
       return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2 items-center">
           <VimeoPosterImage
             videoUrl={visual.videoUrl}
             alt="Gallery media"
@@ -1189,21 +1190,25 @@ const AdminDashboard = () => {
             loadingClassName="bg-slate-200 flex items-center justify-center rounded-lg shadow-sm border border-gray-100"
           />
           {videoTitle && (
-            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+            <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
+              {videoTitle}
+            </span>
           )}
         </div>
       );
     }
 
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2 items-center">
         <div
           className={`${thumbCls} bg-slate-200 flex items-center justify-center object-cover`}
         >
           <Video className="w-6 h-6 text-slate-500" aria-hidden />
         </div>
         {videoTitle && (
-          <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+          <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
+            {videoTitle}
+          </span>
         )}
       </div>
     );
@@ -1490,147 +1495,149 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <table className="w-full text-right border-collapse">
-            <thead>
-              <tr className="bg-slate-100/50 border-b border-slate-100">
-                <th className="p-5 text-slate-600 font-bold w-24">الملف</th>
-                <th className="p-5 text-slate-600 font-bold">التفاصيل</th>
-                <th className="p-5 text-slate-600 font-bold text-center w-40">
-                  الإجراءات
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {database[activeSection].map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-blue-50/50 transition duration-100"
-                >
-                  <td className="p-5">
-                    {activeSection === "Gallery" ? (
-                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl, item.videoTitle)
-                    ) : (
-                      <img
-                        src={item.image}
-                        alt="Thumb"
-                        className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
-                      />
-                    )}
-                  </td>
-                  <td className="p-5">
-                    {activeSection === "Alumni" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.name}
-                        </div>
-                        <div className="text-sm text-emerald-600 font-medium">
-                          {item.job}
-                        </div>
-                      </div>
-                    ) : activeSection === "Awards" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.title}
-                        </div>
-                        <div className="text-sm text-orange-600 font-medium">
-                          الفائز: {item.person}
-                        </div>
-                      </div>
-                    ) : activeSection === "Syndicates" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.title}
-                        </div>
-                        <div className="text-sm text-cyan-600 truncate max-w-md">
-                          {item.link}
-                        </div>
-                        <div className="text-xs text-slate-500">{item.buttonText}</div>
-                      </div>
-                    ) : activeSection === "Events" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.title}
-                        </div>
-                        {item.date && (
-                          <div className="text-sm text-slate-400">{item.date}</div>
-                        )}
-                        {item.location ? (
-                          <div className="text-sm text-purple-600 font-medium">
-                            {item.location}
-                          </div>
-                        ) : null}
-                        {item.timeRange ? (
-                          <div className="text-xs text-slate-500">{item.timeRange}</div>
-                        ) : null}
-                      </div>
-                    ) : activeSection === "News" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.title}
-                        </div>
-                        {item.date && (
-                          <div className="text-sm text-slate-400">{item.date}</div>
-                        )}
-                        {item.location ? (
-                          <div className="text-sm text-blue-600 font-medium">
-                            {item.location}
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : activeSection === "Gallery" ? (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          السنة: {item.year}
-                        </div>
-                        {item.videoTitle && (
-                          <div className="text-sm text-blue-600 font-medium mt-1">
-                            {item.videoTitle}
-                          </div>
-                        )}
-                        <div className="text-xs text-slate-500 mt-1">
-                          الترتيب: {item.sortOrder} • النوع: {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
-                        </div>
-                        {item.mediaType === "video" && item.videoUrl && (
-                          <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
-                            {item.videoUrl}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="font-semibold text-slate-800 text-lg">
-                          {item.title}
-                        </div>
-                        {item.date && (
-                          <div className="text-sm text-slate-400">{item.date}</div>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-5 text-center">
-                    <div className="flex justify-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(item)}
-                        className="p-3 text-blue-600 hover:bg-blue-100 rounded-full transition"
-                        title="تعديل"
-                      >
-                        <Edit size={20} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item.id)}
-                        className="p-3 text-red-500 hover:bg-red-100 rounded-full transition"
-                        title="حذف"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-right border-collapse">
+              <thead>
+                <tr className="bg-slate-100/50 border-b border-slate-100">
+                  <th className="p-5 text-slate-600 font-bold w-32">الملف</th>
+                  <th className="p-5 text-slate-600 font-bold">التفاصيل</th>
+                  <th className="p-5 text-slate-600 font-bold text-center w-40">
+                    الإجراءات
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {database[activeSection].map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-blue-50/50 transition duration-100"
+                  >
+                    <td className="p-5 align-top">
+                      {activeSection === "Gallery" ? (
+                        renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl, item.videoTitle)
+                      ) : (
+                        <img
+                          src={item.image}
+                          alt="Thumb"
+                          className="w-20 h-16 object-cover rounded-lg shadow-sm border border-gray-100"
+                        />
+                      )}
+                    </td>
+                    <td className="p-5 align-top">
+                      {activeSection === "Alumni" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.name}
+                          </div>
+                          <div className="text-sm text-emerald-600 font-medium">
+                            {item.job}
+                          </div>
+                        </div>
+                      ) : activeSection === "Awards" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.title}
+                          </div>
+                          <div className="text-sm text-orange-600 font-medium">
+                            الفائز: {item.person}
+                          </div>
+                        </div>
+                      ) : activeSection === "Syndicates" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.title}
+                          </div>
+                          <div className="text-sm text-cyan-600 truncate max-w-md">
+                            {item.link}
+                          </div>
+                          <div className="text-xs text-slate-500">{item.buttonText}</div>
+                        </div>
+                      ) : activeSection === "Events" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.title}
+                          </div>
+                          {item.date && (
+                            <div className="text-sm text-slate-400">{item.date}</div>
+                          )}
+                          {item.location ? (
+                            <div className="text-sm text-purple-600 font-medium">
+                              {item.location}
+                            </div>
+                          ) : null}
+                          {item.timeRange ? (
+                            <div className="text-xs text-slate-500">{item.timeRange}</div>
+                          ) : null}
+                        </div>
+                      ) : activeSection === "News" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.title}
+                          </div>
+                          {item.date && (
+                            <div className="text-sm text-slate-400">{item.date}</div>
+                          )}
+                          {item.location ? (
+                            <div className="text-sm text-blue-600 font-medium">
+                              {item.location}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : activeSection === "Gallery" ? (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            السنة: {item.year}
+                          </div>
+                          {item.videoTitle && (
+                            <div className="text-base font-bold text-blue-700 mt-2 mb-1">
+                              {item.videoTitle}
+                            </div>
+                          )}
+                          <div className="text-xs text-slate-500 mt-1">
+                            الترتيب: {item.sortOrder} • النوع: {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
+                          </div>
+                          {item.mediaType === "video" && item.videoUrl && (
+                            <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
+                              {item.videoUrl}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-semibold text-slate-800 text-lg">
+                            {item.title}
+                          </div>
+                          {item.date && (
+                            <div className="text-sm text-slate-400">{item.date}</div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-5 text-center align-top">
+                      <div className="flex justify-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(item)}
+                          className="p-3 text-blue-600 hover:bg-blue-100 rounded-full transition"
+                          title="تعديل"
+                        >
+                          <Edit size={20} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item.id)}
+                          className="p-3 text-red-500 hover:bg-red-100 rounded-full transition"
+                          title="حذف"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {database[activeSection].length === 0 && (
             <div className="p-16 text-center text-gray-400 flex flex-col items-center gap-4">
