@@ -32,7 +32,7 @@ export default function SiteChrome({
 
       <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300 flex-nowrap">
         
-        {/* 1. الجزء الأيسر: اللوجو والاسم */}
+        {/* 1. الجزء الأيسر: اللوجو واسم الجامعة */}
         <div
           className="flex items-center gap-3 h-full cursor-pointer shrink-0"
           onClick={() => navigate("/")}
@@ -55,7 +55,7 @@ export default function SiteChrome({
           </div>
         </div>
 
-        {/* 2. الجزء الأوسط: اللينكات - أضفنا flex-1 و justify-center عشان تاخد النص بالضبط */}
+        {/* 2. الجزء الأوسط: اللينكات (توسيط كامل) */}
         <div className="hidden lg:flex flex-1 justify-center h-full mx-4 min-w-0">
           <ul className="flex items-center gap-6 text-[13px] font-bold h-full">
             {navLinks.map((item) => (
@@ -73,7 +73,7 @@ export default function SiteChrome({
                   )}
                 </a>
 
-                {/* الدروب داون الأساسية */}
+                {/* القائمة المنسدلة الأساسية */}
                 {item.subItems && (
                   <div className="absolute top-full left-0 bg-[#1a2b56] text-white min-w-[260px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                     {item.subItems.map((sub, idx) => (
@@ -88,7 +88,7 @@ export default function SiteChrome({
                           {sub.nestedItems && <ChevronRight size={14} />}
                         </a>
 
-                        {/* الدروب داون المتداخلة */}
+                        {/* القائمة المنسدلة المتداخلة */}
                         {sub.nestedItems && (
                           <div className="absolute top-0 left-full bg-[#1a2b56] text-white min-w-[250px] shadow-xl rounded-lg border border-white/10 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300">
                             {sub.nestedItems.map((nested, i) => (
@@ -113,7 +113,7 @@ export default function SiteChrome({
           </ul>
         </div>
 
-        {/* 3. الجزء الأيمن: الخط الفاصل والأزرار/الأدمن */}
+        {/* 3. الجزء الأيمن: الخط الفاصل وأزرار التحكم (مُزاح لليمين) */}
         <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-6 h-full shrink-0">
           <button
             type="button"
@@ -162,13 +162,8 @@ export default function SiteChrome({
                 onClick={onLogout}
                 className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/50 text-red-500 hover:text-white px-4 py-2 rounded-lg transition-all duration-300 group shrink-0"
               >
-                <LogOut
-                  size={16}
-                  className="group-hover:-translate-x-1 transition-transform"
-                />
-                <span className="text-[11px] font-bold uppercase hidden sm:inline">
-                  Logout
-                </span>
+                <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-[11px] font-bold uppercase hidden sm:inline">Logout</span>
               </button>
             </div>
           ) : (
@@ -178,8 +173,7 @@ export default function SiteChrome({
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px] bg-white/10 hover:bg-white/20 text-white transition-all hover:scale-105 shadow-lg"
               >
-                <LogIn size={16} />
-                Login
+                <LogIn size={16} /> Login
               </button>
 
               <button
@@ -187,8 +181,7 @@ export default function SiteChrome({
                 onClick={() => navigate("/register")}
                 className="flex items-center gap-2 px-5 py-2 rounded-full font-bold text-[13px] bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 shadow-lg shadow-green-500/20"
               >
-                <UserPlus size={16} />
-                Register
+                <UserPlus size={16} /> Register
               </button>
             </div>
           )}
