@@ -47,6 +47,20 @@ function isoToDatetimeLocalValue(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+// Helper functions for localStorage
+const saveVideoTitleToLocalStorage = (videoUrl, title) => {
+  if (!videoUrl) return;
+  const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
+  storedTitles[videoUrl] = title;
+  localStorage.setItem('galleryVideoTitles', JSON.stringify(storedTitles));
+};
+
+const getVideoTitleFromLocalStorage = (videoUrl) => {
+  if (!videoUrl) return '';
+  const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
+  return storedTitles[videoUrl] || '';
+};
+
 function normalizeRows(section, rows) {
   if (!Array.isArray(rows)) return [];
   switch (section) {
@@ -108,6 +122,7 @@ function normalizeRows(section, rows) {
         sortOrder: r.sortOrder ?? 0,
         mediaUrl: r.imageUrl,
         videoUrl: r.videoUrl || null,
+        videoTitle: r.videoTitle || getVideoTitleFromLocalStorage(r.videoUrl) || "",
         mediaType: r.mediaType || (r.videoUrl ? "video" : "image"),
       }));
     default:
@@ -153,6 +168,7 @@ const AdminDashboard = () => {
     media: null,
     mediaType: "image",
     videoLink: "",
+    videoTitle: "",
   });
   const [mediaPreview, setMediaPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -344,6 +360,7 @@ const AdminDashboard = () => {
       media: item.mediaUrl ?? null,
       mediaType: item.mediaType ?? (item.videoUrl ? "video" : "image"),
       videoLink: item.videoUrl ?? "",
+      videoTitle: item.videoTitle ?? "",
     });
     setMediaPreview(item.mediaUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -371,6 +388,7 @@ const AdminDashboard = () => {
       media: null,
       mediaType: "image",
       videoLink: "",
+      videoTitle: "",
     });
     setMediaPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -539,12 +557,18 @@ const AdminDashboard = () => {
         throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
       }
       
+      // حفظ videoTitle في localStorage
+      if (formData.mediaType === "video" && formData.videoLink) {
+        saveVideoTitleToLocalStorage(formData.videoLink, formData.videoTitle);
+      }
+      
       return {
         path,
         body: {
           year,
           imageUrl: formData.mediaType === "image" ? formData.media : null,
           videoUrl: formData.mediaType === "video" ? formData.videoLink : null,
+          videoTitle: formData.mediaType === "video" ? formData.videoTitle : null,
           mediaType: formData.mediaType,
           sortOrder,
         },
@@ -614,6 +638,7 @@ const AdminDashboard = () => {
                             year: body.year,
                             imageUrl: body.imageUrl,
                             videoUrl: body.videoUrl,
+                            videoTitle: body.videoTitle,
                             mediaType: body.mediaType,
                             sortOrder: body.sortOrder,
                           }
@@ -991,31 +1016,50 @@ const AdminDashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  رابط الفيديو
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={formData.videoLink}
-                  onChange={handleVideoLinkChange}
-                  className="form-input"
-                  placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  ✅ يدعم: YouTube, Vimeo, Dailymotion, وأي رابط فيديو مباشر
-                </p>
-                {formData.videoLink && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-600 mb-2">معاينة الرابط:</p>
-                    <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
-                      <Youtube size={16} />
-                      <span>{formData.videoLink}</span>
+              <>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    رابط الفيديو
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={formData.videoLink}
+                    onChange={handleVideoLinkChange}
+                    className="form-input"
+                    placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    ✅ يدعم: YouTube, Vimeo, Dailymotion, وأي رابط فيديو مباشر
+                  </p>
+                  {formData.videoLink && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-600 mb-2">معاينة الرابط:</p>
+                      <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
+                        <Youtube size={16} />
+                        <span>{formData.videoLink}</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    اسم الفيديو (اختياري)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.videoTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, videoTitle: e.target.value })
+                    }
+                    className="form-input"
+                    placeholder="مثال: محاضرة الذكاء الاصطناعي 2024"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    سيظهر هذا الاسم تحت الفيديو في المعرض
+                  </p>
+                </div>
+              </>
             )}
           </>
         );
@@ -1095,7 +1139,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl) => {
+  const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl, videoTitle) => {
     if (!mediaUrl && !videoUrl) return null;
 
     const thumbCls =
@@ -1108,39 +1152,59 @@ const AdminDashboard = () => {
 
     if (visual.kind === "image" || visual.kind === "poster") {
       return (
-        <img src={visual.src} alt="Gallery media" className={thumbCls} />
+        <div className="flex flex-col gap-1">
+          <img src={visual.src} alt="Gallery media" className={thumbCls} />
+          {videoTitle && mediaType === "video" && (
+            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+          )}
+        </div>
       );
     }
 
     if (visual.kind === "video") {
       return (
-        <video
-          src={visual.videoSrc}
-          muted
-          playsInline
-          preload="metadata"
-          className={thumbCls}
-          aria-label="Video preview"
-        />
+        <div className="flex flex-col gap-1">
+          <video
+            src={visual.videoSrc}
+            muted
+            playsInline
+            preload="metadata"
+            className={thumbCls}
+            aria-label="Video preview"
+          />
+          {videoTitle && (
+            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+          )}
+        </div>
       );
     }
 
     if (visual.kind === "vimeo") {
       return (
-        <VimeoPosterImage
-          videoUrl={visual.videoUrl}
-          alt="Gallery media"
-          className={thumbCls}
-          loadingClassName="bg-slate-200 flex items-center justify-center rounded-lg shadow-sm border border-gray-100"
-        />
+        <div className="flex flex-col gap-1">
+          <VimeoPosterImage
+            videoUrl={visual.videoUrl}
+            alt="Gallery media"
+            className={thumbCls}
+            loadingClassName="bg-slate-200 flex items-center justify-center rounded-lg shadow-sm border border-gray-100"
+          />
+          {videoTitle && (
+            <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+          )}
+        </div>
       );
     }
 
     return (
-      <div
-        className={`${thumbCls} bg-slate-200 flex items-center justify-center object-cover`}
-      >
-        <Video className="w-6 h-6 text-slate-500" aria-hidden />
+      <div className="flex flex-col gap-1">
+        <div
+          className={`${thumbCls} bg-slate-200 flex items-center justify-center object-cover`}
+        >
+          <Video className="w-6 h-6 text-slate-500" aria-hidden />
+        </div>
+        {videoTitle && (
+          <span className="text-xs text-gray-600 max-w-[80px] truncate">{videoTitle}</span>
+        )}
       </div>
     );
   };
@@ -1444,7 +1508,7 @@ const AdminDashboard = () => {
                 >
                   <td className="p-5">
                     {activeSection === "Gallery" ? (
-                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl)
+                      renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl, item.videoTitle)
                     ) : (
                       <img
                         src={item.image}
@@ -1516,10 +1580,15 @@ const AdminDashboard = () => {
                     ) : activeSection === "Gallery" ? (
                       <div>
                         <div className="font-semibold text-slate-800 text-lg">
-                          {item.year}
+                          السنة: {item.year}
                         </div>
-                        <div className="text-xs text-slate-500">
-                          sort: {item.sortOrder} • {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
+                        {item.videoTitle && (
+                          <div className="text-sm text-blue-600 font-medium mt-1">
+                            {item.videoTitle}
+                          </div>
+                        )}
+                        <div className="text-xs text-slate-500 mt-1">
+                          الترتيب: {item.sortOrder} • النوع: {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
                         </div>
                         {item.mediaType === "video" && item.videoUrl && (
                           <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
