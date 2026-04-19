@@ -271,7 +271,7 @@ export default function Gallery() {
                   const isMediaVideo = galleryItemIsVideo(row);
                   const visual = resolveGalleryCardVisual(row);
                   
-                  // Use videoTitle if available, otherwise use title
+                  // Use videoTitle for videos, otherwise use regular title
                   const displayTitle = isMediaVideo && videoTitle ? videoTitle : title;
 
                   return (
@@ -308,7 +308,7 @@ export default function Gallery() {
                           </>
                         )}
                       </div>
-                      {/* Title section - always visible */}
+                      {/* Title section - shows video title or regular title */}
                       <div className="p-3 min-h-[60px] flex items-center justify-center">
                         {displayTitle ? (
                           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center line-clamp-2">
