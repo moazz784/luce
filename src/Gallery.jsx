@@ -267,8 +267,12 @@ export default function Gallery() {
                 {filteredItems.map((row) => {
                   const id = row.id ?? row.Id;
                   const title = row.title ?? row.Title ?? "";
+                  const videoTitle = row.videoTitle ?? row.VideoTitle ?? "";
                   const isMediaVideo = galleryItemIsVideo(row);
                   const visual = resolveGalleryCardVisual(row);
+                  
+                  // Use videoTitle if available, otherwise use title
+                  const displayTitle = isMediaVideo && videoTitle ? videoTitle : title;
 
                   return (
                     <motion.div
@@ -279,12 +283,12 @@ export default function Gallery() {
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.3 }}
                       onClick={() => openModal(row)}
-                      className="overflow-hidden rounded-2xl shadow-lg group cursor-pointer relative bg-white dark:bg-gray-800"
+                      className="overflow-hidden rounded-2xl shadow-lg group cursor-pointer relative bg-white dark:bg-gray-800 flex flex-col"
                     >
                       <div className="relative overflow-hidden aspect-video bg-slate-800">
                         <GalleryCardMedia
                           visual={visual}
-                          title={title}
+                          title={displayTitle}
                           isMediaVideo={isMediaVideo}
                         />
                         {isMediaVideo && (
@@ -304,13 +308,18 @@ export default function Gallery() {
                           </>
                         )}
                       </div>
-                      {title && (
-                        <div className="p-3">
-                          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
-                            {title}
+                      {/* Title section - always visible */}
+                      <div className="p-3 min-h-[60px] flex items-center justify-center">
+                        {displayTitle ? (
+                          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center line-clamp-2">
+                            {displayTitle}
                           </h3>
-                        </div>
-                      )}
+                        ) : isMediaVideo ? (
+                          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 text-center">
+                            Untitled Video
+                          </h3>
+                        ) : null}
+                      </div>
                     </motion.div>
                   );
                 })}
