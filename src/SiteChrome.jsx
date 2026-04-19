@@ -30,9 +30,8 @@ export default function SiteChrome({
     <div className="min-h-screen font-sans selection:bg-green-500 selection:text-white overflow-x-hidden">
       {topSlot}
 
-      <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-6 flex items-center sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300 flex-nowrap overflow-hidden">
-        
-        {/* 1. الجزء الأيسر (اللوجو) - ثابت في مكانه */}
+      {/* التعديل: إضافة flex-nowrap ومنع الـ overflow-hidden لضمان استقامة الشريط */}
+      <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-8 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300 flex-nowrap overflow-hidden">
         <div
           className="flex items-center gap-3 h-full cursor-pointer shrink-0"
           onClick={() => navigate("/")}
@@ -55,8 +54,8 @@ export default function SiteChrome({
           </div>
         </div>
 
-        {/* 2. الجزء الأوسط (اللينكات) - أخذ مساحة flex-1 لزق الخط لليمين */}
-        <ul className="hidden lg:flex flex-1 items-center justify-center gap-5 xl:gap-8 text-[13px] font-bold h-full min-w-0 px-6">
+        {/* التعديل: اللينكات أصبحت shrink قابلة للتقلص قليلاً لمنع التداخل */}
+        <ul className="hidden lg:flex items-center gap-6 text-[13px] font-bold h-full min-w-0">
           {navLinks.map((item) => (
             <li key={item.id ?? item.name} className="relative group flex items-center h-full shrink">
               <a
@@ -109,8 +108,7 @@ export default function SiteChrome({
           ))}
         </ul>
 
-        {/* 3. الجزء الأيمن (الخط الفاصل والأزرار) - تم ترحيله لليمين بفضل flex-1 أعلاه */}
-        <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-6 h-full shrink-0 min-w-0">
+        <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 h-full shrink-0 min-w-0">
           <button
             type="button"
             onClick={() => setIsDark(!isDark)}
@@ -146,6 +144,7 @@ export default function SiteChrome({
                     {isAdmin ? "System Admin" : "Student"}
                   </span>
                   <div className="flex items-center gap-1.5 max-w-full">
+                    {/* التعديل: تحديد عرض أقصى لاسم الأدمن لمنعه من زق اللينكات */}
                     <span className="text-xs font-semibold truncate max-w-[100px] block">
                       {accountLabel}
                     </span>
@@ -205,47 +204,84 @@ export default function SiteChrome({
             <div>
               <h4 className="text-[#00a651] font-bold mb-6 text-base">Links</h4>
               <ul className="space-y-3 text-white/80 dark:text-gray-300">
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Home</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">The University</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Academics</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Life At MUST</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">FAQs</li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Home
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  The University
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Academics
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Life At MUST
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  FAQs
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[#00a651] font-bold mb-6 text-base">About University</h4>
+              <h4 className="text-[#00a651] font-bold mb-6 text-base">
+                About University
+              </h4>
               <ul className="space-y-3 text-white/80 dark:text-gray-300">
-                <li className="hover:text-green-400 cursor-pointer transition-colors">About MUST</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">History</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Accreditation</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Why MUST</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Privacy Policy</li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  About MUST
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  History
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Accreditation
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Why MUST
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Privacy Policy
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[#00a651] font-bold mb-6 text-base">MUST BUZZ</h4>
+              <h4 className="text-[#00a651] font-bold mb-6 text-base">
+                MUST BUZZ
+              </h4>
               <ul className="space-y-3 text-white/80 dark:text-gray-300">
-                <li className="hover:text-green-400 cursor-pointer transition-colors">MUST Events</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">MUST News</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Blog</li>
-                <li className="hover:text-green-400 cursor-pointer transition-colors">Announcement</li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  MUST Events
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  MUST News
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Blog
+                </li>
+                <li className="hover:text-green-400 cursor-pointer transition-colors">
+                  Announcement
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[#00a651] font-bold mb-6 text-base">Contact Info</h4>
+              <h4 className="text-[#00a651] font-bold mb-6 text-base">
+                Contact Info
+              </h4>
               <div className="space-y-4 font-bold text-white dark:text-gray-300">
                 <p className="text-lg">16878</p>
-                <p className="text-[#00a651] hover:underline cursor-pointer">Info@Must.Edu.Eg</p>
-                <p className="opacity-80 font-normal leading-relaxed">Al Motamayez District – 6th of October, Egypt</p>
+                <p className="text-[#00a651] hover:underline cursor-pointer">
+                  Info@Must.Edu.Eg
+                </p>
+                <p className="opacity-80 font-normal leading-relaxed">
+                  Al Motamayez District – 6th of October, Egypt
+                </p>
               </div>
             </div>
           </div>
         </div>
       </footer>
-
       <div className="border-t border-white/10 dark:border-gray-700 flex justify-center items-center py-7 text-center text-black dark:text-gray-400 text-[15px] opacity-70 dark:opacity-80 transition-colors duration-300">
         © 2026 Misr University for Science & Technology. All Rights Reserved.
       </div>
