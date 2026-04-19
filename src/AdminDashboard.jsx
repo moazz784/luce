@@ -48,18 +48,20 @@ function isoToDatetimeLocalValue(iso) {
 }
 
 // Helper functions for localStorage
-const saveVideoTitleToLocalStorage = (videoUrl, title) => {
-  if (!videoUrl) return;
-  const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
-  storedTitles[videoUrl] = title;
-  localStorage.setItem('galleryVideoTitles', JSON.stringify(storedTitles));
-  console.log("Saved to localStorage:", videoUrl, title);
+const saveMediaTitleToLocalStorage = (mediaUrl, title, mediaType) => {
+  if (!mediaUrl) return;
+  const key = `${mediaType}_${mediaUrl}`;
+  const storedTitles = JSON.parse(localStorage.getItem('galleryMediaTitles') || '{}');
+  storedTitles[key] = title;
+  localStorage.setItem('galleryMediaTitles', JSON.stringify(storedTitles));
+  console.log("Saved to localStorage:", key, title);
 };
 
-const getVideoTitleFromLocalStorage = (videoUrl) => {
-  if (!videoUrl) return '';
-  const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
-  return storedTitles[videoUrl] || '';
+const getMediaTitleFromLocalStorage = (mediaUrl, mediaType) => {
+  if (!mediaUrl) return '';
+  const key = `${mediaType}_${mediaUrl}`;
+  const storedTitles = JSON.parse(localStorage.getItem('galleryMediaTitles') || '{}');
+  return storedTitles[key] || '';
 };
 
 function normalizeRows(section, rows) {
@@ -117,15 +119,19 @@ function normalizeRows(section, rows) {
         buttonText: r.buttonText || "",
       }));
     case "Gallery":
-      return rows.map((r) => ({
-        id: r.id,
-        year: r.year,
-        sortOrder: r.sortOrder ?? 0,
-        mediaUrl: r.imageUrl,
-        videoUrl: r.videoUrl || null,
-        videoTitle: getVideoTitleFromLocalStorage(r.videoUrl) || r.videoTitle || "",
-        mediaType: r.mediaType || (r.videoUrl ? "video" : "image"),
-      }));
+      return rows.map((r) => {
+        const mediaType = r.mediaType || (r.videoUrl ? "video" : "image");
+        const mediaUrl = mediaType === "video" ? r.videoUrl : r.imageUrl;
+        return {
+          id: r.id,
+          year: r.year,
+          sortOrder: r.sortOrder ?? 0,
+          mediaUrl: r.imageUrl,
+          videoUrl: r.videoUrl || null,
+          mediaTitle: getMediaTitleFromLocalStorage(mediaUrl, mediaType) || r.mediaTitle || r.title || "",
+          mediaType: mediaType,
+        };
+      });
     default:
       return [];
   }
@@ -169,7 +175,7 @@ const AdminDashboard = () => {
     media: null,
     mediaType: "image",
     videoLink: "",
-    videoTitle: "",
+    mediaTitle: "",
   });
   const [mediaPreview, setMediaPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -359,7 +365,7 @@ const AdminDashboard = () => {
       media: item.mediaUrl ?? null,
       mediaType: item.mediaType ?? (item.videoUrl ? "video" : "image"),
       videoLink: item.videoUrl ?? "",
-      videoTitle: item.videoTitle ?? "",
+      mediaTitle: item.mediaTitle ?? "",
     });
     setMediaPreview(item.mediaUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -387,7 +393,7 @@ const AdminDashboard = () => {
       media: null,
       mediaType: "image",
       videoLink: "",
-      videoTitle: "",
+      mediaTitle: "",
     });
     setMediaPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -555,9 +561,11 @@ const AdminDashboard = () => {
         throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
       }
       
-      // حفظ اسم الفيديو في localStorage
+      // حفظ اسم الوسائط في localStorage
       if (formData.mediaType === "video" && formData.videoLink) {
-        saveVideoTitleToLocalStorage(formData.videoLink, formData.videoTitle);
+        saveMediaTitleToLocalStorage(formData.videoLink, formData.mediaTitle, "video");
+      } else if (formData.mediaType === "image" && formData.media) {
+        saveMediaTitleToLocalStorage(formData.media, formData.mediaTitle, "image");
       }
       
       return {
@@ -566,7 +574,7 @@ const AdminDashboard = () => {
           year,
           imageUrl: formData.mediaType === "image" ? formData.media : null,
           videoUrl: formData.mediaType === "video" ? formData.videoLink : null,
-          videoTitle: null,
+          mediaTitle: null,
           mediaType: formData.mediaType,
           sortOrder,
         },
@@ -636,7 +644,7 @@ const AdminDashboard = () => {
                             year: body.year,
                             imageUrl: body.imageUrl,
                             videoUrl: body.videoUrl,
-                            videoTitle: body.videoTitle,
+                            mediaTitle: body.mediaTitle,
                             mediaType: body.mediaType,
                             sortOrder: body.sortOrder,
                           }
@@ -974,6 +982,24 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                اسم الوسائط <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.mediaTitle}
+                onChange={(e) =>
+                  setFormData({ ...formData, mediaTitle: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثال: محاضرة الذكاء الاصطناعي 2024"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                سيظهر هذا الاسم تحت الصورة/الفيديو في المعرض
+              </p>
+            </div>
             {formData.mediaType === "image" ? (
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -1014,51 +1040,31 @@ const AdminDashboard = () => {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
-                    رابط الفيديو
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={formData.videoLink}
-                    onChange={handleVideoLinkChange}
-                    className="form-input"
-                    placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    ✅ يدعم: YouTube, Vimeo, Dailymotion, وأي رابط فيديو مباشر
-                  </p>
-                  {formData.videoLink && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-2">معاينة الرابط:</p>
-                      <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
-                        <Youtube size={16} />
-                        <span>{formData.videoLink}</span>
-                      </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  رابط الفيديو
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={formData.videoLink}
+                  onChange={handleVideoLinkChange}
+                  className="form-input"
+                  placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  ✅ يدعم: YouTube, Vimeo, Dailymotion, وأي رابط فيديو مباشر
+                </p>
+                {formData.videoLink && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-2">معاينة الرابط:</p>
+                    <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
+                      <Youtube size={16} />
+                      <span>{formData.videoLink}</span>
                     </div>
-                  )}
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
-                    اسم الفيديو <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.videoTitle}
-                    onChange={(e) =>
-                      setFormData({ ...formData, videoTitle: e.target.value })
-                    }
-                    className="form-input"
-                    placeholder="مثال: محاضرة الذكاء الاصطناعي 2024"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    سيظهر هذا الاسم تحت الفيديو في المعرض
-                  </p>
-                </div>
-              </>
+                  </div>
+                )}
+              </div>
             )}
           </>
         );
@@ -1138,7 +1144,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl, videoTitle) => {
+  const renderGalleryMediaPreview = (mediaUrl, mediaType, videoUrl, mediaTitle) => {
     if (!mediaUrl && !videoUrl) return null;
 
     const thumbCls =
@@ -1153,9 +1159,9 @@ const AdminDashboard = () => {
       return (
         <div className="flex flex-col gap-2 items-center">
           <img src={visual.src} alt="Gallery media" className={thumbCls} />
-          {videoTitle && mediaType === "video" && (
+          {mediaTitle && (
             <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
-              {videoTitle}
+              {mediaTitle}
             </span>
           )}
         </div>
@@ -1173,9 +1179,9 @@ const AdminDashboard = () => {
             className={thumbCls}
             aria-label="Video preview"
           />
-          {videoTitle && (
+          {mediaTitle && (
             <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
-              {videoTitle}
+              {mediaTitle}
             </span>
           )}
         </div>
@@ -1191,9 +1197,9 @@ const AdminDashboard = () => {
             className={thumbCls}
             loadingClassName="bg-slate-200 flex items-center justify-center rounded-lg shadow-sm border border-gray-100"
           />
-          {videoTitle && (
+          {mediaTitle && (
             <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
-              {videoTitle}
+              {mediaTitle}
             </span>
           )}
         </div>
@@ -1207,9 +1213,9 @@ const AdminDashboard = () => {
         >
           <Video className="w-6 h-6 text-slate-500" aria-hidden />
         </div>
-        {videoTitle && (
+        {mediaTitle && (
           <span className="text-xs font-medium text-gray-700 text-center max-w-[80px] break-words">
-            {videoTitle}
+            {mediaTitle}
           </span>
         )}
       </div>
@@ -1418,43 +1424,6 @@ const AdminDashboard = () => {
               {renderFormFields()}
             </div>
 
-            {activeSection !== "Gallery" && (
-              <div
-                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleMediaChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-
-                {mediaPreview ? (
-                  <div className="relative group">
-                    <img
-                      src={mediaPreview}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-xl shadow-md"
-                    />
-                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
-                      <UploadCloud size={20} />
-                      تغيير الصورة
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
-                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
-                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
-                    <p className="text-xs mt-1">
-                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="md:col-span-3 flex justify-end mt-4">
               <button
                 type="submit"
@@ -1516,7 +1485,7 @@ const AdminDashboard = () => {
                   >
                     <td className="p-5 align-top">
                       {activeSection === "Gallery" ? (
-                        renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl, item.videoTitle)
+                        renderGalleryMediaPreview(item.mediaUrl, item.mediaType, item.videoUrl, item.mediaTitle)
                       ) : (
                         <img
                           src={item.image}
@@ -1590,17 +1559,22 @@ const AdminDashboard = () => {
                           <div className="font-semibold text-slate-800 text-lg">
                             السنة: {item.year}
                           </div>
-                          {item.videoTitle && (
+                          {item.mediaTitle && (
                             <div className="text-base font-bold text-blue-700 mt-2 mb-1">
-                              {item.videoTitle}
+                              {item.mediaTitle}
                             </div>
                           )}
                           <div className="text-xs text-slate-500 mt-1">
                             الترتيب: {item.sortOrder} • النوع: {item.mediaType === "video" ? "فيديو (رابط)" : "صورة"}
                           </div>
-                          {item.mediaType === "video" && item.videoUrl && (
+                          {(item.mediaType === "video" && item.videoUrl) && (
                             <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
                               {item.videoUrl}
+                            </div>
+                          )}
+                          {(item.mediaType === "image" && item.mediaUrl) && (
+                            <div className="text-xs text-blue-600 truncate max-w-xs mt-1">
+                              {item.mediaUrl}
                             </div>
                           )}
                         </div>

@@ -59,13 +59,15 @@ function GalleryCardMedia({ visual, title, isMediaVideo }) {
   );
 }
 
-// دالة لجلب اسم الفيديو من localStorage
-const getVideoTitleFromLocalStorage = (videoUrl) => {
-  if (!videoUrl) return '';
+// دالة لجلب اسم الوسائط من localStorage
+const getMediaTitleFromLocalStorage = (mediaUrl, mediaType) => {
+  if (!mediaUrl) return '';
   try {
-    const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
-    return storedTitles[videoUrl] || '';
+    const key = `${mediaType}_${mediaUrl}`;
+    const storedTitles = JSON.parse(localStorage.getItem('galleryMediaTitles') || '{}');
+    return storedTitles[key] || '';
   } catch (e) {
+    console.error("Error reading from localStorage:", e);
     return '';
   }
 };
@@ -89,17 +91,30 @@ export default function Gallery() {
         if (cancelled) return;
         const list = Array.isArray(data) ? data : [];
         
-        // إضافة اسم الفيديو من localStorage لكل فيديو
+        console.log("Raw data from API:", list);
+        
+        // إضافة اسم الوسائط من localStorage لكل عنصر
         const listWithTitles = list.map(item => {
-          if (item.videoUrl || item.VideoUrl) {
-            const videoUrl = item.videoUrl || item.VideoUrl;
-            const savedTitle = getVideoTitleFromLocalStorage(videoUrl);
+          const mediaTypeItem = item.mediaType || (item.videoUrl ? "video" : "image");
+          let mediaUrl = null;
+          
+          if (mediaTypeItem === "video") {
+            mediaUrl = item.videoUrl || item.VideoUrl;
+          } else {
+            mediaUrl = item.imageUrl || item.ImageUrl;
+          }
+          
+          if (mediaUrl) {
+            const savedTitle = getMediaTitleFromLocalStorage(mediaUrl, mediaTypeItem);
             return {
               ...item,
-              videoTitle: savedTitle || item.videoTitle || item.VideoTitle || ""
+              mediaTitle: savedTitle || item.mediaTitle || item.title || ""
             };
           }
-          return item;
+          return {
+            ...item,
+            mediaTitle: item.mediaTitle || item.title || ""
+          };
         });
         
         console.log("Gallery data with titles:", listWithTitles);
@@ -290,13 +305,12 @@ export default function Gallery() {
               >
                 {filteredItems.map((row) => {
                   const id = row.id ?? row.Id;
-                  const title = row.title ?? row.Title ?? "";
-                  const videoTitle = row.videoTitle ?? "";
+                  const mediaTitle = row.mediaTitle ?? "";
                   const isMediaVideo = galleryItemIsVideo(row);
                   const visual = resolveGalleryCardVisual(row);
                   
-                  // للفيديو نعرض الاسم من localStorage، للصورة نعرض العنوان العادي
-                  const displayTitle = isMediaVideo ? (videoTitle || title) : title;
+                  // عرض اسم الوسائط (للصور والفيديوهات)
+                  const displayTitle = mediaTitle;
 
                   return (
                     <motion.div
@@ -332,17 +346,17 @@ export default function Gallery() {
                           </>
                         )}
                       </div>
-                      {/* اسم الفيديو تحت الفيديو */}
+                      {/* اسم الصورة/الفيديو تحت الوسائط */}
                       <div className="p-3 min-h-[60px] flex items-center justify-center">
                         {displayTitle ? (
                           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center line-clamp-2">
                             {displayTitle}
                           </h3>
-                        ) : isMediaVideo ? (
+                        ) : (
                           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 text-center">
-                            Untitled Video
+                            Untitled
                           </h3>
-                        ) : null}
+                        )}
                       </div>
                     </motion.div>
                   );
@@ -438,8 +452,8 @@ export default function Gallery() {
                       selectedMedia.imageUrl ?? selectedMedia.ImageUrl ?? ""
                     }
                     alt={
+                      selectedMedia.mediaTitle ??
                       selectedMedia.title ??
-                      selectedMedia.Title ??
                       "Gallery item"
                     }
                     className="max-w-full max-h-[85vh] object-contain"
@@ -447,11 +461,11 @@ export default function Gallery() {
                 )}
               </div>
 
-              {(selectedMedia.title || selectedMedia.description) && (
+              {(selectedMedia.mediaTitle || selectedMedia.title || selectedMedia.description) && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                  {selectedMedia.title && (
+                  {(selectedMedia.mediaTitle || selectedMedia.title) && (
                     <h3 className="text-white text-xl font-bold">
-                      {selectedMedia.title}
+                      {selectedMedia.mediaTitle || selectedMedia.title}
                     </h3>
                   )}
                   {selectedMedia.description && (
