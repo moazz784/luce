@@ -53,6 +53,7 @@ const saveVideoTitleToLocalStorage = (videoUrl, title) => {
   const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
   storedTitles[videoUrl] = title;
   localStorage.setItem('galleryVideoTitles', JSON.stringify(storedTitles));
+  console.log("Saved to localStorage:", videoUrl, title);
 };
 
 const getVideoTitleFromLocalStorage = (videoUrl) => {
@@ -122,7 +123,7 @@ function normalizeRows(section, rows) {
         sortOrder: r.sortOrder ?? 0,
         mediaUrl: r.imageUrl,
         videoUrl: r.videoUrl || null,
-        videoTitle: r.videoTitle || getVideoTitleFromLocalStorage(r.videoUrl) || "",
+        videoTitle: getVideoTitleFromLocalStorage(r.videoUrl) || r.videoTitle || "",
         mediaType: r.mediaType || (r.videoUrl ? "video" : "image"),
       }));
     default:
@@ -554,6 +555,7 @@ const AdminDashboard = () => {
         throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
       }
       
+      // حفظ اسم الفيديو في localStorage
       if (formData.mediaType === "video" && formData.videoLink) {
         saveVideoTitleToLocalStorage(formData.videoLink, formData.videoTitle);
       }
@@ -564,7 +566,7 @@ const AdminDashboard = () => {
           year,
           imageUrl: formData.mediaType === "image" ? formData.media : null,
           videoUrl: formData.mediaType === "video" ? formData.videoLink : null,
-          videoTitle: formData.mediaType === "video" ? formData.videoTitle : null,
+          videoTitle: null,
           mediaType: formData.mediaType,
           sortOrder,
         },

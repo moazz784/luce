@@ -59,6 +59,17 @@ function GalleryCardMedia({ visual, title, isMediaVideo }) {
   );
 }
 
+// دالة لجلب اسم الفيديو من localStorage
+const getVideoTitleFromLocalStorage = (videoUrl) => {
+  if (!videoUrl) return '';
+  try {
+    const storedTitles = JSON.parse(localStorage.getItem('galleryVideoTitles') || '{}');
+    return storedTitles[videoUrl] || '';
+  } catch (e) {
+    return '';
+  }
+};
+
 export default function Gallery() {
   const { isLoggedIn, isAdmin, accountLabel, handleLogout } = useSiteAuth();
   const [items, setItems] = useState([]);
@@ -78,12 +89,24 @@ export default function Gallery() {
         if (cancelled) return;
         const list = Array.isArray(data) ? data : [];
         
-        // Log the data to see what's coming from the API
-        console.log("Gallery data from API:", list);
+        // إضافة اسم الفيديو من localStorage لكل فيديو
+        const listWithTitles = list.map(item => {
+          if (item.videoUrl || item.VideoUrl) {
+            const videoUrl = item.videoUrl || item.VideoUrl;
+            const savedTitle = getVideoTitleFromLocalStorage(videoUrl);
+            return {
+              ...item,
+              videoTitle: savedTitle || item.videoTitle || item.VideoTitle || ""
+            };
+          }
+          return item;
+        });
         
-        setItems(list);
+        console.log("Gallery data with titles:", listWithTitles);
+        setItems(listWithTitles);
+        
         const years = [
-          ...new Set(list.map((x) => x.year ?? x.Year).filter((y) => y != null)),
+          ...new Set(listWithTitles.map((x) => x.year ?? x.Year).filter((y) => y != null)),
         ].sort((a, b) => b - a);
         if (years.length && activeYear == null) {
           setActiveYear(years[0]);
@@ -268,16 +291,11 @@ export default function Gallery() {
                 {filteredItems.map((row) => {
                   const id = row.id ?? row.Id;
                   const title = row.title ?? row.Title ?? "";
-                  const videoTitle = row.videoTitle ?? row.VideoTitle ?? "";
+                  const videoTitle = row.videoTitle ?? "";
                   const isMediaVideo = galleryItemIsVideo(row);
                   const visual = resolveGalleryCardVisual(row);
                   
-                  // Log each item to see if videoTitle is present
-                  if (isMediaVideo) {
-                    console.log("Video item:", { id, videoTitle, title, fullRow: row });
-                  }
-                  
-                  // For videos, show videoTitle; for images, show regular title
+                  // للفيديو نعرض الاسم من localStorage، للصورة نعرض العنوان العادي
                   const displayTitle = isMediaVideo ? (videoTitle || title) : title;
 
                   return (
@@ -314,7 +332,7 @@ export default function Gallery() {
                           </>
                         )}
                       </div>
-                      {/* Title section - shows video title below the video */}
+                      {/* اسم الفيديو تحت الفيديو */}
                       <div className="p-3 min-h-[60px] flex items-center justify-center">
                         {displayTitle ? (
                           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center line-clamp-2">
