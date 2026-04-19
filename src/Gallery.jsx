@@ -91,33 +91,28 @@ export default function Gallery() {
         if (cancelled) return;
         const list = Array.isArray(data) ? data : [];
         
-        console.log("Raw data from API:", list);
-        
-        // إضافة اسم الوسائط من localStorage لكل عنصر
-        const listWithTitles = list.map(item => {
-          const mediaTypeItem = item.mediaType || (item.videoUrl ? "video" : "image");
+        const listWithTitles = list.map((item) => {
+          const mediaTypeItem =
+            item.mediaType || (item.videoUrl ? "video" : "image");
           let mediaUrl = null;
-          
+
           if (mediaTypeItem === "video") {
             mediaUrl = item.videoUrl || item.VideoUrl;
           } else {
             mediaUrl = item.imageUrl || item.ImageUrl;
           }
-          
-          if (mediaUrl) {
-            const savedTitle = getMediaTitleFromLocalStorage(mediaUrl, mediaTypeItem);
-            return {
-              ...item,
-              mediaTitle: savedTitle || item.mediaTitle || item.title || ""
-            };
-          }
+
+          const apiTitle = (item.mediaTitle ?? item.MediaTitle ?? "").trim();
+          const savedTitle = mediaUrl
+            ? getMediaTitleFromLocalStorage(mediaUrl, mediaTypeItem)
+            : "";
+
           return {
             ...item,
-            mediaTitle: item.mediaTitle || item.title || ""
+            mediaTitle:
+              apiTitle || savedTitle || (item.title ?? item.Title ?? "") || "",
           };
         });
-        
-        console.log("Gallery data with titles:", listWithTitles);
         setItems(listWithTitles);
         
         const years = [

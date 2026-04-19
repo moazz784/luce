@@ -47,16 +47,6 @@ function isoToDatetimeLocalValue(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-// Helper functions for localStorage
-const saveMediaTitleToLocalStorage = (mediaUrl, title, mediaType) => {
-  if (!mediaUrl) return;
-  const key = `${mediaType}_${mediaUrl}`;
-  const storedTitles = JSON.parse(localStorage.getItem('galleryMediaTitles') || '{}');
-  storedTitles[key] = title;
-  localStorage.setItem('galleryMediaTitles', JSON.stringify(storedTitles));
-  console.log("Saved to localStorage:", key, title);
-};
-
 const getMediaTitleFromLocalStorage = (mediaUrl, mediaType) => {
   if (!mediaUrl) return '';
   const key = `${mediaType}_${mediaUrl}`;
@@ -122,13 +112,18 @@ function normalizeRows(section, rows) {
       return rows.map((r) => {
         const mediaType = r.mediaType || (r.videoUrl ? "video" : "image");
         const mediaUrl = mediaType === "video" ? r.videoUrl : r.imageUrl;
+        const apiTitle = (r.mediaTitle ?? r.MediaTitle ?? "").trim();
         return {
           id: r.id,
           year: r.year,
           sortOrder: r.sortOrder ?? 0,
           mediaUrl: r.imageUrl,
           videoUrl: r.videoUrl || null,
-          mediaTitle: getMediaTitleFromLocalStorage(mediaUrl, mediaType) || r.mediaTitle || r.title || "",
+          mediaTitle:
+            apiTitle ||
+            getMediaTitleFromLocalStorage(mediaUrl, mediaType) ||
+            r.title ||
+            "",
           mediaType: mediaType,
         };
       });
@@ -561,20 +556,13 @@ const AdminDashboard = () => {
         throw new Error("يرجى رفع صورة أو اختيار فيديو عبر الرابط");
       }
       
-      // حفظ اسم الوسائط في localStorage
-      if (formData.mediaType === "video" && formData.videoLink) {
-        saveMediaTitleToLocalStorage(formData.videoLink, formData.mediaTitle, "video");
-      } else if (formData.mediaType === "image" && formData.media) {
-        saveMediaTitleToLocalStorage(formData.media, formData.mediaTitle, "image");
-      }
-      
       return {
         path,
         body: {
           year,
           imageUrl: formData.mediaType === "image" ? formData.media : null,
           videoUrl: formData.mediaType === "video" ? formData.videoLink : null,
-          mediaTitle: null,
+          mediaTitle: (formData.mediaTitle ?? "").trim(),
           mediaType: formData.mediaType,
           sortOrder,
         },

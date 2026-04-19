@@ -52,6 +52,7 @@ public class GalleryService : IGalleryService
             ImageUrl = imageUrl,
             VideoUrl = videoUrl,
             MediaType = mediaType,
+            MediaTitle = NormalizeMediaTitle(dto.MediaTitle),
             SortOrder = dto.SortOrder,
             CreatedAt = now
         };
@@ -71,6 +72,7 @@ public class GalleryService : IGalleryService
         entity.ImageUrl = imageUrl;
         entity.VideoUrl = videoUrl;
         entity.MediaType = mediaType;
+        entity.MediaTitle = NormalizeMediaTitle(dto.MediaTitle);
         entity.SortOrder = dto.SortOrder;
         entity.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -119,4 +121,6 @@ public class GalleryService : IGalleryService
             mediaType = "video";
         }
     }
+
+    private static string NormalizeMediaTitle(string? raw) => raw?.Trim() ?? string.Empty;
 }

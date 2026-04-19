@@ -9,6 +9,8 @@ public class GalleryPublicDto
     public string ImageUrl { get; set; } = string.Empty;
     public string? VideoUrl { get; set; }
     public string MediaType { get; set; } = "image";
+    [MaxLength(500)]
+    public string MediaTitle { get; set; } = string.Empty;
     public int SortOrder { get; set; }
 }
 
@@ -19,6 +21,8 @@ public class GalleryAdminDto
     public string ImageUrl { get; set; } = string.Empty;
     public string? VideoUrl { get; set; }
     public string MediaType { get; set; } = "image";
+    [MaxLength(500)]
+    public string MediaTitle { get; set; } = string.Empty;
     public int SortOrder { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
@@ -38,6 +42,9 @@ public class GalleryCreateDto
     [MaxLength(32)]
     public string MediaType { get; set; } = "image";
 
+    [MaxLength(500)]
+    public string? MediaTitle { get; set; }
+
     public int SortOrder { get; set; }
 }
 
@@ -54,6 +61,9 @@ public class GalleryUpdateDto
 
     [MaxLength(32)]
     public string MediaType { get; set; } = "image";
+
+    [MaxLength(500)]
+    public string? MediaTitle { get; set; }
 
     public int SortOrder { get; set; }
 }

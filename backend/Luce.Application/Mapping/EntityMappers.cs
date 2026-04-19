@@ -157,6 +157,7 @@ public static class EntityMappers
         ImageUrl = e.ImageUrl,
         VideoUrl = e.VideoUrl,
         MediaType = e.MediaType,
+        MediaTitle = e.MediaTitle,
         SortOrder = e.SortOrder
     };
 
@@ -167,6 +168,7 @@ public static class EntityMappers
         ImageUrl = e.ImageUrl,
         VideoUrl = e.VideoUrl,
         MediaType = e.MediaType,
+        MediaTitle = e.MediaTitle,
         SortOrder = e.SortOrder,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt
