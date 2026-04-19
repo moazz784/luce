@@ -24,6 +24,8 @@ export default function SiteChrome({
 }) {
   const navigate = useNavigate();
   const { isDark, setIsDark } = useTheme();
+  
+  // تفعيل الماب من ملف siteNavLinks
   const navLinks = siteNavLinks;
 
   return (
@@ -32,7 +34,7 @@ export default function SiteChrome({
 
       <nav className="bg-[#1a2b56] dark:bg-gray-950 text-white px-4 md:px-6 flex items-center justify-between sticky top-0 z-[100] shadow-xl h-[80px] transition-colors duration-300">
         
-        {/* 1. الجزء الأيسر: اللوجو واسم الجامعة (ثابت العرض) */}
+        {/* 1. الجزء الأيسر: اللوجو واسم الجامعة */}
         <div
           className="flex items-center gap-3 h-full cursor-pointer shrink-0"
           onClick={() => navigate("/")}
@@ -55,11 +57,11 @@ export default function SiteChrome({
           </div>
         </div>
 
-        {/* 2. الجزء الأوسط: اللينكات (توسيط كامل مع حماية الأطراف) */}
-        <div className="hidden lg:flex items-center justify-center flex-1 h-full px-4 overflow-hidden">
-          <ul className="flex items-center gap-4 xl:gap-6 text-[12px] xl:text-[13px] font-bold h-full">
+        {/* 2. الجزء الأوسط: اللينكات (توسيط كامل مع Map) */}
+        <div className="hidden lg:flex items-center justify-center flex-1 h-full px-4">
+          <ul className="flex items-center gap-3 xl:gap-5 text-[12px] xl:text-[13px] font-bold h-full">
             {navLinks.map((item) => (
-              <li key={item.id ?? item.name} className="relative group flex items-center h-full shrink-0">
+              <li key={item.id ?? item.name} className="relative group flex items-center h-full">
                 <a
                   href={item.link ? item.link : `#${item.id}`}
                   className="flex items-center gap-1 uppercase hover:text-green-400 transition py-6 whitespace-nowrap"
@@ -73,7 +75,7 @@ export default function SiteChrome({
                   )}
                 </a>
 
-                {/* القائمة المنسدلة - Dropdown */}
+                {/* القوائم المنسدلة (Dropdowns) */}
                 {item.subItems && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 bg-[#1a2b56] text-white min-w-[240px] shadow-2xl rounded-b-lg border-x border-b border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                     {item.subItems.map((sub, idx) => (
@@ -88,7 +90,7 @@ export default function SiteChrome({
                           {sub.nestedItems && <ChevronRight size={14} />}
                         </a>
 
-                        {/* القوائم المتداخلة */}
+                        {/* القوائم المتداخلة (Nested) */}
                         {sub.nestedItems && (
                           <div className="absolute top-0 left-full bg-[#1a2b56] text-white min-w-[240px] shadow-xl border border-white/10 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300">
                             {sub.nestedItems.map((nested, i) => (
@@ -113,55 +115,38 @@ export default function SiteChrome({
           </ul>
         </div>
 
-        {/* 3. الجزء الأيمن: الخط الفاصل والأزرار (ثابت العرض لمنع التداخل) */}
+        {/* 3. الجزء الأيمن: التحكم والأزرار (مُزاح لليمين) */}
         <div className="flex items-center gap-3 md:gap-5 border-l border-white/20 pl-4 md:pl-6 h-full shrink-0">
-          {/* Theme Toggle */}
           <button
             type="button"
             onClick={() => setIsDark(!isDark)}
-            className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full shrink-0"
+            className="hover:text-green-400 transition-all p-1.5 hover:bg-white/5 rounded-full"
           >
-            {isDark ? (
-              <Sun size={19} className="text-yellow-400" />
-            ) : (
-              <Moon size={19} />
-            )}
+            {isDark ? <Sun size={19} className="text-yellow-400" /> : <Moon size={19} />}
           </button>
 
-          <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors shrink-0">
-            ع
-          </span>
+          <span className="cursor-pointer font-bold text-sm hover:text-green-400 transition-colors">ع</span>
 
-          {/* Admin Dashboard Button */}
           {isLoggedIn && isAdmin && (
             <button
-              type="button"
               onClick={() => navigate("/AdminDashboard")}
-              className="flex items-center gap-1.5 text-green-400 border border-green-500/30 px-3 py-1.5 rounded-lg bg-green-500/5 hover:bg-green-500 hover:text-white transition-all duration-300 uppercase text-[10px] font-bold shadow-sm shrink-0"
+              className="flex items-center gap-1.5 text-green-400 border border-green-500/30 px-3 py-1.5 rounded-lg bg-green-500/5 hover:bg-green-500 hover:text-white transition-all text-[11px] font-bold"
             >
               <LayoutDashboard size={14} />
-              <span className="hidden xl:inline">Dashboard</span>
+              <span className="hidden xl:inline">DASHBOARD</span>
             </button>
           )}
 
-          {/* User Account or Auth Buttons */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-4 shrink-0">
-              {accountLabel && (
-                <div className="hidden xl:flex flex-col items-end min-w-0">
-                  <span className="text-[9px] font-bold text-green-500 leading-none mb-1 uppercase tracking-tighter">
-                    {isAdmin ? "System Admin" : "Student"}
-                  </span>
-                  <div className="flex items-center gap-1.5 max-w-full">
-                    <span className="text-[11px] font-semibold truncate max-w-[120px] block">
-                      {accountLabel}
-                    </span>
-                    <User size={14} className="opacity-50" />
-                  </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden xl:flex flex-col items-end min-w-0">
+                <span className="text-[9px] font-bold text-green-500 leading-none mb-1 uppercase tracking-tighter">System Admin</span>
+                <div className="flex items-center gap-1.5 max-w-full">
+                  <span className="text-[11px] font-semibold truncate max-w-[120px] block">{accountLabel}</span>
+                  <User size={14} className="opacity-50" />
                 </div>
-              )}
+              </div>
               <button
-                type="button"
                 onClick={onLogout}
                 className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500 border border-red-500/40 text-red-500 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-300 group font-bold text-[11px]"
               >
@@ -170,34 +155,21 @@ export default function SiteChrome({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => navigate("/login")}
-                className="px-4 py-2 rounded-full font-bold text-[12px] bg-white/10 hover:bg-white/20 transition-all"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => navigate("/register")}
-                className="px-4 py-2 rounded-full font-bold text-[12px] bg-green-500 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20"
-              >
-                Register
-              </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => navigate("/login")} className="px-4 py-2 rounded-full font-bold text-[12px] bg-white/10 hover:bg-white/20 transition-all">Login</button>
+              <button onClick={() => navigate("/register")} className="px-4 py-2 rounded-full font-bold text-[12px] bg-green-500 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20">Register</button>
             </div>
           )}
         </div>
       </nav>
 
-      {/* Main Content */}
       <main>{children}</main>
 
-      {/* Footer */}
       <footer className="bg-[#1a2b56] dark:bg-black text-white pt-20 pb-10 border-t-4 border-white/10 dark:border-gray-700 transition-colors duration-300 mt-auto">
         <div className="container mx-auto px-6">
           <div className="flex justify-center mb-16">
             <img src={lo} alt="MUST Logo" className="w-44" />
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-sm text-center md:text-left">
             <div>
               <h4 className="text-[#00a651] font-bold mb-6 text-base">Links</h4>
@@ -209,7 +181,6 @@ export default function SiteChrome({
                 <li className="hover:text-green-400 cursor-pointer">FAQs</li>
               </ul>
             </div>
-
             <div>
               <h4 className="text-[#00a651] font-bold mb-6 text-base">About University</h4>
               <ul className="space-y-3 opacity-80">
@@ -220,7 +191,6 @@ export default function SiteChrome({
                 <li className="hover:text-green-400 cursor-pointer">Privacy Policy</li>
               </ul>
             </div>
-
             <div>
               <h4 className="text-[#00a651] font-bold mb-6 text-base">MUST BUZZ</h4>
               <ul className="space-y-3 opacity-80">
@@ -230,7 +200,6 @@ export default function SiteChrome({
                 <li className="hover:text-green-400 cursor-pointer">Announcement</li>
               </ul>
             </div>
-
             <div>
               <h4 className="text-[#00a651] font-bold mb-6 text-base">Contact Info</h4>
               <div className="space-y-4 font-bold">
