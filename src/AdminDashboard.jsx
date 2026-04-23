@@ -719,6 +719,44 @@ const AdminDashboard = () => {
                 placeholder="المحتوى الكامل للخبر..."
               />
             </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                صورة الخبر <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         );
       case "Events":
@@ -796,6 +834,44 @@ const AdminDashboard = () => {
                 placeholder="وصف مختصر للفعالية..."
               />
             </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                صورة الفعالية <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         );
       case "Awards":
@@ -836,6 +912,44 @@ const AdminDashboard = () => {
                 className="form-input"
                 placeholder="اسم الشخص..."
               />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                صورة الجائزة <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         );
@@ -886,24 +1000,211 @@ const AdminDashboard = () => {
                 placeholder="نص طويل..."
               />
             </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                صورة الخريج <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         );
       case "Hero":
         return (
-          <div className="md:col-span-3">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              النص الرئيسي للبانر (اختياري)
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              className="form-input"
-              placeholder="اكتب النص الذي يظهر فوق الصورة..."
-            />
-          </div>
+          <>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                النص الرئيسي للبانر (اختياري)
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="form-input"
+                placeholder="اكتب النص الذي يظهر فوق الصورة..."
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                صورة الهيرو <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        );
+      case "Syndicates":
+        return (
+          <>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                العنوان
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="form-input"
+                placeholder="عنوان ..."
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                رابط البطاقة (يفتح عند الضغط على الصورة أو الزر)
+              </label>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                اكتب رابطاً يدوياً (مثل https://…) أو ارفع ملف PDF ليصبح الرابط نفسه ملفاً
+                على الخادم. لا يزال مطلوباً رفع صورة مصغّرة في المربع على اليسار منفصلة.
+              </p>
+              <input
+                type="text"
+                required
+                value={formData.link}
+                onChange={(e) =>
+                  setFormData({ ...formData, link: e.target.value })
+                }
+                className="form-input"
+                placeholder="https://… أو مسار بعد رفع PDF"
+                spellCheck={false}
+              />
+              <input
+                type="file"
+                ref={syndicatePdfInputRef}
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={handleSyndicatePdfForLink}
+              />
+              <button
+                type="button"
+                disabled={uploadingSyndicatePdf}
+                onClick={() => syndicatePdfInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-600/40 bg-cyan-50 text-cyan-800 text-sm font-semibold hover:bg-cyan-100 disabled:opacity-60"
+              >
+                <FileText size={18} />
+                {uploadingSyndicatePdf ? "جاري رفع PDF…" : "رفع PDF كرابط"}
+              </button>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                نص الزر
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.buttonText}
+                onChange={(e) =>
+                  setFormData({ ...formData, buttonText: e.target.value })
+                }
+                className="form-input"
+                placeholder="مثلاً: زيارة الموقع"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                الصورة المصغرة للبطاقة <span className="text-red-500">*</span>
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:border-blue-300 transition-all cursor-pointer group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleMediaChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                {mediaPreview ? (
+                  <div className="relative group">
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-xl shadow-md"
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs gap-2">
+                      <UploadCloud size={20} />
+                      تغيير الصورة
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-gray-400 group-hover:text-blue-500">
+                    <UploadCloud size={40} className="mx-auto mb-2 opacity-70" />
+                    <span className="font-medium text-sm">اضغط لرفع صورة</span>
+                    <p className="text-xs mt-1">
+                      {uploading ? "جاري الرفع…" : "PNG, JPG, WebP (حتى 10MB)"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         );
       case "Gallery":
         return (
@@ -1054,77 +1355,6 @@ const AdminDashboard = () => {
                 )}
               </div>
             )}
-          </>
-        );
-      case "Syndicates":
-        return (
-          <>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                العنوان
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="form-input"
-                placeholder="عنوان ..."
-              />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                رابط البطاقة (يفتح عند الضغط على الصورة أو الزر)
-              </label>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                اكتب رابطاً يدوياً (مثل https://…) أو ارفع ملف PDF ليصبح الرابط نفسه ملفاً
-                على الخادم. لا يزال مطلوباً رفع صورة مصغّرة في المربع على اليسار منفصلة.
-              </p>
-              <input
-                type="text"
-                required
-                value={formData.link}
-                onChange={(e) =>
-                  setFormData({ ...formData, link: e.target.value })
-                }
-                className="form-input"
-                placeholder="https://… أو مسار بعد رفع PDF"
-                spellCheck={false}
-              />
-              <input
-                type="file"
-                ref={syndicatePdfInputRef}
-                accept="application/pdf,.pdf"
-                className="hidden"
-                onChange={handleSyndicatePdfForLink}
-              />
-              <button
-                type="button"
-                disabled={uploadingSyndicatePdf}
-                onClick={() => syndicatePdfInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-600/40 bg-cyan-50 text-cyan-800 text-sm font-semibold hover:bg-cyan-100 disabled:opacity-60"
-              >
-                <FileText size={18} />
-                {uploadingSyndicatePdf ? "جاري رفع PDF…" : "رفع PDF كرابط"}
-              </button>
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                نص الزر
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.buttonText}
-                onChange={(e) =>
-                  setFormData({ ...formData, buttonText: e.target.value })
-                }
-                className="form-input"
-                placeholder="مثلاً: زيارة الموقع"
-              />
-            </div>
           </>
         );
       default:
@@ -1311,7 +1541,7 @@ const AdminDashboard = () => {
                   <th className="p-4 text-slate-600 font-bold">الهاتف</th>
                   <th className="p-4 text-slate-600 font-bold">الرسالة</th>
                   <th className="p-4 text-slate-600 font-bold text-center w-36">إجراءات</th>
-                </tr>
+                </table>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {contactMessages.map((item) => (
@@ -1321,7 +1551,7 @@ const AdminDashboard = () => {
                         {item.createdAt
                           ? String(item.createdAt).replace("T", " ").slice(0, 19)
                           : "—"}
-                      </td>
+                       </td>
                       <td className="p-4 font-medium text-slate-800">{item.name}</td>
                       <td className="p-4 text-sm text-blue-700 break-all">{item.email}</td>
                       <td className="p-4 text-sm text-slate-600">{item.phone || "—"}</td>
@@ -1329,7 +1559,7 @@ const AdminDashboard = () => {
                         <p className="line-clamp-3 whitespace-pre-wrap break-words">
                           {item.message}
                         </p>
-                      </td>
+                       </td>
                       <td className="p-4 text-center">
                         <div className="flex flex-col sm:flex-row justify-center gap-2">
                           <button
@@ -1352,7 +1582,7 @@ const AdminDashboard = () => {
                             <Trash2 size={18} />
                           </button>
                         </div>
-                      </td>
+                       </td>
                     </tr>
                     {expandedContactId === item.id && (
                       <tr className="bg-slate-50/80">
@@ -1361,7 +1591,7 @@ const AdminDashboard = () => {
                           <pre className="whitespace-pre-wrap text-sm text-slate-800 font-sans text-right">
                             {item.message}
                           </pre>
-                        </td>
+                         </td>
                       </tr>
                     )}
                   </React.Fragment>
